@@ -1,4 +1,4 @@
-# sparrowhawk <img src='sparrowhawk_logo.png' align="right" height="500" />
+# sparrowhawk-web <img src='sparrowhawk_logo.png' align="right" height="500" />
 DBG building and traversal using CUDA, with a web interface
 
 ### sparrowhawk?
