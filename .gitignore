@@ -1,0 +1,22 @@
+www/node_modules
+www/dist
+
+
+# local env files
+www/.env.local
+www/.env.*.local
+
+# Log files
+www/npm-debug.log*
+www/yarn-debug.log*
+www/yarn-error.log*
+www/pnpm-debug.log*
+
+# Editor directories and files
+www/.idea
+www/.vscode
+www/*.suo
+www/*.ntvs*
+www/*.njsproj
+www/*.sln
+www/*.sw?
