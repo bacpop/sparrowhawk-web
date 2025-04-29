@@ -1,0 +1,37 @@
+[build]
+base = "www/"
+publish = "dist/"
+command = "npm run build"
+
+ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF ./ ../rust/sparrowhawk"
+
+# Production context: all deploys from the Production branch
+# set in your site’s Branches settings in the UI will inherit
+# these settings. You can define environment variables
+# here but we recommend using the Netlify UI for sensitive
+# values to keep them out of your source repository.
+[context.production.environment]
+NODE_VERSION = "18"
+#NODE_ENV = "development"
+
+# Deploy Preview context: all deploys generated from
+# a pull/merge request will inherit these settings.
+#[context.deploy-preview.environment]
+#NODE_ENV = "development"
+
+# Dev context: environment variables set here
+# are available for local development environments
+# run using Netlify Dev. These values can be
+# overwritten on branches that have a more specific
+# branch context configured.
+#[context.dev.environment]
+#NODE_ENV = "development"
+
+
+# The following redirect is intended for use with most SPAs
+# that handle routing internally.
+#[[redirects]]
+#from = "/*"
+#to = "/index.html"
+#status = 200
+
