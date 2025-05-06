@@ -6,6 +6,9 @@ www/package-lock.json
 www/.env.local
 www/.env.*.local
 
+# Compilation folder
+www/src/pkg
+
 # Log files
 www/npm-debug.log*
 www/yarn-debug.log*
