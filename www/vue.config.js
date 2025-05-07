@@ -22,8 +22,9 @@ module.exports = defineConfig({
                 (Plugin) =>
                     new Plugin({
                         crateDirectory: path.resolve(__dirname, "../rust/sparrowhawk"),
-                        // args: '-t wasm32-unknown-unknown',
+                        // args: '-t wasm64-unknown-unknown',
                         extraArgs: "--features wasm",
+//                        extraArgs: "--features wasm --target wasm64-unknown-unknown",
                         outDir: path.resolve(__dirname, "./src/pkg"),
                         // forceMode: "development",
                         // forceMode: "production",

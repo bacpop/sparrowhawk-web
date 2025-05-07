@@ -4,11 +4,11 @@ import { RootState } from "@/store/state";
 export default {
     async processReads(context: ActionContext<RootState, RootState>, payload: { acceptFiles: Array<File>, k: number, min_count : number, min_qual : number }) {
         const { commit, state } = context;
-        console.log("Reads uploaded! k = " + payload.k + " min_count = " + payload.min_count + " min_qual = " + payload.min_qual)
+        console.log("Going to upload reads and assemble with k = " + payload.k + " min_count = " + payload.min_count + " min_qual = " + payload.min_qual)
 
         if (state.workerState.worker) {
             if (payload.acceptFiles.length == 2) {
-                console.log("Loading reads...");
+                console.log("Assemblying...");
                 state.workerState.worker.postMessage({assemble : true,
                                                      file1     : payload.acceptFiles[0],
                                                      file2     : payload.acceptFiles[1],
@@ -19,10 +19,9 @@ export default {
                 });
 
 
-                // state.workerState.worker.onmessage = (messageData) => {
-                //     console.log(messageData.data.ref.name + " assembled");
-                //     // commit("addRef", {name: messageData.data.ref.name, sequences:messageData.data.sequences});
-                // };
+                state.workerState.worker.onmessage = (messageData) => {
+                    commit("setAssembly", {contigs : messageData.data.contigs});
+                };
             }
         }
     },

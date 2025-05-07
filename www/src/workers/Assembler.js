@@ -28,7 +28,9 @@ export class Assembler {
             this.helper = this.wasm.AssemblyHelper.new(file1, file2, k, verbose, min_count, min_qual);
         }
 
-        // this.worker.postMessage({ ref: file, sequences: this.helper.get_reference().split('\n') });
+        let resultsjson = JSON.parse(this.helper.get_assembly());
+
+        this.worker.postMessage({ contigs: resultsjson["outfasta"] });
     }
 
     resetAll() {

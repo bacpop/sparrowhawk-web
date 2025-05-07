@@ -45,7 +45,7 @@
 
         <div v-if="param">
 
-            <!-- Mapping tab -->
+            <!-- Assembly tab -->
             <div v-if="tabName=='Assembly'">
 
                 <div v-if="!readsProcessed" v-bind='getRootPropsReads()' class="dropzone dropzone-reads">
@@ -70,6 +70,7 @@ import { useDropzone } from "vue3-dropzone";
 import { useActions, useState } from "vuex-composition-helpers";
 import VueSlider from 'vue-3-slider-component'
 import { ref } from "vue";
+import "@fontsource/ibm-plex-mono";
 
 export default {
     name: "DropZone",
@@ -172,7 +173,8 @@ export default {
 }
 
 .monospace {
-    font-family: 'Courier New', monospace;
+/*     font-family: 'Courier New', monospace; */
+    font-family: "IBM Plex mono";
 }
 
 #parameters {

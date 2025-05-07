@@ -19,6 +19,7 @@
 import DropZone from './components/DropZone.vue';
 import ResultsDisplayAssembly from './components/ResultsDisplayAssembly.vue';
 import WorkerMapper from '@/workers/Assembler.worker.js';
+import "@fontsource/ibm-plex-sans";
 
 export default {
     name: 'App',
@@ -55,7 +56,8 @@ export default {
 
 <style>
 #app {
-    font-family: Avenir, Helvetica, Arial, sans-serif;
+/*     font-family: Avenir, Helvetica, Arial, sans-serif; */
+    font-family: "IBM Plex Sans";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;

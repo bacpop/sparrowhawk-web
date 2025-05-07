@@ -1,6 +1,6 @@
 <template>
     <div>
-        <button @click="downloadALN" id="Download">Download .aln</button>
+        <button @click="downloadFASTA" id="Download">Download assembly as .fasta</button>
     </div>
 </template>
 
@@ -17,7 +17,7 @@ export default {
         }
     },
     methods: {
-        downloadALN() {
+        downloadFASTA() {
 
             console.log(this.allResults.assemblyResults);
 

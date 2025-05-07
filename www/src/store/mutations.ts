@@ -5,12 +5,12 @@ export default {
         state.workerState.worker = worker;
     },
 
-    assemble(state: RootState, input: { name: string, sequences: string[] }) {
-        console.log("vuex: Assemblying thing" + input.name);
+    setAssembly(state: RootState, input: { contigs : string }) {
+        console.log("Assembly finished! Saving contigs as fasta in the state");
 
         // This seems to be for nothing, so let's do exactly that for now
 
-        // state.allResults.assemblyResults = ; //akfjsdklfjskldajfklsdajfkl
+        state.allResults.assemblyResults = input.contigs; //akfjsdklfjskldajfklsdajfkl
 
     },
 
