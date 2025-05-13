@@ -1,10 +1,12 @@
 import {
     AllResults,
+    ReadsPreprocessing,
     WorkerState,
 } from "@/types";
 
 export interface RootState {
-    readsSet   : string | null,
-    allResults : AllResults,
-    workerState: WorkerState,
+    workerState         : WorkerState,
+    readsFileNames      : string | null,
+    readsPreprocessing  : ReadsPreprocessing,
+    allResults          : AllResults,
 }

@@ -12,6 +12,13 @@ module.exports = defineConfig({
         experiments: {
             asyncWebAssembly: true,
         },
+
+        // To fix fallback madness issue
+        resolve:{
+            fallback: {
+                stream: require.resolve('stream-browserify'),
+            }
+        }
     },
     chainWebpack: (config) => {
         // rust wasm bindgen https://github.com/rustwasm/wasm-bindgen

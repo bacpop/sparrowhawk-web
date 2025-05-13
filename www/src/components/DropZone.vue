@@ -13,7 +13,7 @@
                 >
             </VueSlider>
             <h5 class="parameters_legends" v-bind="min_count">Minimum counts for k-mer filtering: {{ min_count }}</h5>
-            <VueSlider 
+            <VueSlider
                 v-model="min_count"
                 :lazy="true" 
                 :min="0"
@@ -48,142 +48,180 @@
             <!-- Assembly tab -->
             <div v-if="tabName=='Assembly'">
 
-                <div v-if="!readsProcessed" v-bind='getRootPropsReads()' class="dropzone dropzone-reads">
+                <div v-if="!readsProcessed && !readsProcessing" v-bind='getRootPropsReads()' class="dropzone dropzone-reads">
                     <input v-bind='getInputPropsReads()' />
                     <p v-if='isDragActiveReads' class="dropzone-text">Drop the files here ...</p>
                     <p v-else class="dropzone-text">Drag and drop your <b>paired end fastq read files</b> here,
                         or click to select them</p>
                 </div>
-                <div v-if="readsProcessed" class="dropzone dropzone-reads">
-                    <p class="dropzone-text">✅ Reads assembled!</p>
+
+                <div v-else-if="!readsProcessed && readsProcessing" class="dropzone dropzone-reads">
+                    <p v-if="readsPreprocessing" class="dropzone-text">Preprocessing reads...</p>
+                    <p v-else-if="!assemblying" class="dropzone-text">Reads {{ readsName }} preprocessed.</p>
+                    <p v-else class="dropzone-text">Assemblying...</p>
                 </div>
 
+                <div v-else class="dropzone dropzone-reads">
+                    <p class="dropzone-text">✅ Reads assembled!</p>
+                </div>
             </div>
-
         </div>
     </div>
+    <button @click="doAss" v-if='readsPreprocessed && !readsProcessed' style="float: center; margin-top: 10px;"><b>Start assembly</b></button>
 </template>
 
 
 <script>
-import { useDropzone } from "vue3-dropzone";
-import { useActions, useState } from "vuex-composition-helpers";
-import VueSlider from 'vue-3-slider-component'
-import { ref } from "vue";
-import "@fontsource/ibm-plex-mono";
+    import { useDropzone } from "vue3-dropzone";
+    import { useActions, useState } from "vuex-composition-helpers";
+    import VueSlider from 'vue-3-slider-component'
+    import { ref } from "vue";
+    import "@fontsource/ibm-plex-mono";
 
-export default {
-    name: "DropZone",
-    props:["tabName"],
-    components: {
-        VueSlider
-    },
-    setup() {
-        let k = ref(31);
-        let min_count = ref(5);
-        let min_qual = ref(20);
-        let param = ref(false);
 
-        const { processReads, resetAllResults } = useActions(["processReads", "resetAllResults"]);
-        const { allResults } = useState(["allResults"]);
-
-        function onDropReads(acceptFiles) {
-            processReads({acceptFiles : acceptFiles,
-                         k            : k.value,
-                         min_count    : min_count.value,
-                         min_qual     : min_qual.value});
-        }
-
-        function resetAll() {
-            param.value = false;
-            resetAllResults();
-        }
-
-        const {
-            getRootProps: getRootPropsReads,
-            getInputProps: getInputPropsReads,
-            isDragActive: isDragActiveReads,
-            ...restReads
-        } = useDropzone({
-            onDrop: onDropReads,
-            accept: [".gz", ".fastq", ".fq"],
-            multiple: true
-        });
-
-        return {
-            k,
-            min_count,
-            min_qual,
-            param,
-            resetAll,
-            getRootPropsReads,
-            getInputPropsReads,
-            isDragActiveReads,
-            onDropReads,
-            allResults,
-            ...restReads,
-        };
-    },
-
-    computed: {
-        readsProcessed() {
-            return this.$store.getters.readsProcessed;
+    export default {
+        name: "DropZone",
+        props:["tabName"],
+        components: {
+            VueSlider
         },
-        readsName() {
-            return this.$store.getters.readsName;
-        }
-    },
+        setup() {
+            let k = ref(31);
+            let min_count = ref(5);
+            let min_qual = ref(20);
+            let param = ref(false);
+            let assemblying = ref(false);
 
-    methods: {
-        clear() {
-            resetAll()
-        }
-    },
+            const { processReads, doTheAssembly, resetAllResults } = useActions(["processReads", "doTheAssembly", "resetAllResults"]);
+            const { allResults } = useState(["allResults"]);
 
-};
+
+            function onDropReads(acceptFiles) {
+                processReads({acceptFiles : acceptFiles,
+                             k            : k.value,
+                             min_count    : min_count.value,
+                             min_qual     : min_qual.value});
+            }
+
+            function doAss () {
+                assemblying.value = true;
+                doTheAssembly();
+            }
+
+            function resetAll() {
+                param.value = false;
+                assemblying.value = false;
+                resetAllResults();
+            }
+
+            const {
+                getRootProps: getRootPropsReads,
+                getInputProps: getInputPropsReads,
+                isDragActive: isDragActiveReads,
+                ...restReads
+            } = useDropzone({
+                onDrop: onDropReads,
+                accept: [".gz", ".fastq", ".fq"],
+                multiple: true
+            });
+
+            return {
+                k,
+                min_count,
+                min_qual,
+                param,
+                assemblying,
+                resetAll,
+                doAss,
+                getRootPropsReads,
+                getInputPropsReads,
+                isDragActiveReads,
+                onDropReads,
+                allResults,
+                ...restReads,
+            };
+        },
+
+        computed: {
+            readsProcessed() {
+                return this.$store.getters.queryAssembled;
+            },
+            readsProcessing() {
+                return this.$store.getters.readsProcessing;
+            },
+            readsPreprocessed() {
+                return this.$store.getters.readsPreprocessed;
+            },
+            readsPreprocessing() {
+                return this.$store.getters.readsPreprocessing;
+            },
+            readsName() {
+                return this.$store.getters.readsName;
+            }
+        },
+
+        methods: {
+            clear() {
+                resetAll()
+            },
+
+            doAssembly() {
+                doAss()
+            }
+        },
+
+        watch: {
+        },
+
+    };
 </script>
 
 
 <style>
-.dropzone {
-    border: 2px dotted rgb(56, 55, 55);
-    margin: 10%;
-    text-align: center;
-    vertical-align: middle;
-    display: flex;
-    align-items: center;
-    border-radius: 4px;
-    margin-bottom: 5px;
-}
+    .dropzone {
+        border: 2px dotted rgb(56, 55, 55);
+        margin: 10%;
+        text-align: center;
+        vertical-align: middle;
+        display: flex;
+        align-items: center;
+        border-radius: 4px;
+        margin-bottom: 5px;
+    }
 
-.dropzone-reads {
-    height: 75px;
-    margin-top: 20px;
-    background-color: rgb(159, 176, 190);
-}
+    .dropzone-reads {
+        height: 75px;
+        margin-top: 20px;
+        background-color: rgb(159, 176, 190);
+    }
 
-.dropzone-query {
-    height: 75px;
-    margin-top: 10px;
-    background-color: rgb(221, 249, 226);
-}
+    .dropzone-query {
+        height: 75px;
+        margin-top: 10px;
+        background-color: rgb(221, 249, 226);
+    }
 
-.dropzone-text {
-    padding: 30px;
-}
+    .dropzone-text {
+        padding: 30px;
+    }
 
-.monospace {
-/*     font-family: 'Courier New', monospace; */
-    font-family: "IBM Plex mono";
-}
+    .monospace {
+    /*     font-family: 'Courier New', monospace; */
+        font-family: "IBM Plex mono";
+    }
 
-#parameters {
-    margin: 1% 10%;
-}
+    #parameters {
+        margin: 1% 10%;
+    }
 
-.parameters_legends {
-    text-align: left; 
-    margin: 0px;
-    width: 70%;
-}
+    .parameters_legends {
+        text-align: left;
+        margin: 0px;
+        width: 70%;
+    }
+
+    button {
+      font-family: 'IBM Plex sans';
+    }
+
 </style>

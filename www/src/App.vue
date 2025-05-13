@@ -12,45 +12,61 @@
         <div class="Display" v-if="tabName === 'Assembly'">
             <ResultsDisplayAssembly />
         </div>
+        <div class="Display" v-if="tabName === 'Assembly'" style="margin-top: 100px;">
+            <KmerHistogram />
+        </div>
     </div>
 </template>
 
 <script>
-import DropZone from './components/DropZone.vue';
-import ResultsDisplayAssembly from './components/ResultsDisplayAssembly.vue';
-import WorkerMapper from '@/workers/Assembler.worker.js';
-import "@fontsource/ibm-plex-sans";
+    import DropZone from './components/DropZone.vue';
+    import ResultsDisplayAssembly from './components/ResultsDisplayAssembly.vue';
+    import KmerHistogram from './components/KmerHistogram.vue';
+    import WorkerMapper from '@/workers/Assembler.worker.js';
+    import "@fontsource/ibm-plex-sans";
 
-export default {
-    name: 'App',
-    components: {
-        DropZone,
-        ResultsDisplayAssembly,
-    },
-    data() {
-        return {
-            tabName: 'Assembly'
-        }
-    },
-    mounted: function () {
-        console.log("Loading wasm module in a worker thread")
-        return import("@/pkg")
-            .then(() => {
-                if (window.Worker) {
-                    const worker = new WorkerMapper();
-                    this.$store.commit('SET_WORKER', worker);
-                } else {
-                    throw "WebWorkers are not supported by this web browser.";
-                }
-            });
-    },
+    export default {
+        name: 'App',
 
-    methods: {
-        changeTab: function (tab) {
-            this.tabName = tab;
+        components: {
+            DropZone,
+            ResultsDisplayAssembly,
+            KmerHistogram
+        },
+
+        data() {
+            return {
+                tabName: 'Assembly',
+                // chartData: [{
+                //     x    : [1, 2, 3, 4, 5],
+                //     y    : [10, 15, 13, 17, 22],
+                //     type : 'scatter'
+                // }],
+                // chartLayout: {
+                //   title: 'Sample Chart'
+                // }
+            }
+        },
+
+        mounted: function () {
+            console.log("Loading wasm module in a worker thread")
+            return import("@/pkg")
+                .then(() => {
+                    if (window.Worker) {
+                        const worker = new WorkerMapper();
+                        this.$store.commit('SET_WORKER', worker);
+                    } else {
+                        throw "WebWorkers are not supported by this web browser.";
+                    }
+                });
+        },
+
+        methods: {
+            changeTab: function (tab) {
+                this.tabName = tab;
+            }
         }
     }
-}
 
 </script>
 
@@ -61,16 +77,17 @@ export default {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
-    color: #2c3e50;
+/*     color: #2c3e50; */
+    color: black;
 }
 
 .app-logo {
     float: left;
-    height: 75px;
+    height: 100px;
 }
 
 #Header {
-    height: 75px;
+    height: 100px;
     margin-top: 0px;
 }
 

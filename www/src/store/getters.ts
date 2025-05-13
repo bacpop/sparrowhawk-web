@@ -2,13 +2,19 @@ import { RootState } from "@/store/state";
 import { GetterTree } from "vuex";
 
 export const getters: GetterTree<RootState, RootState> = {
-    readsProcessed(state: RootState) {
-        return state.readsSet == null ? false : true;
+    readsProcessing(state: RootState) {
+        return (state.readsFileNames != null && state.allResults.nContigs == null) ? true : false;
     },
-    readsName(state: RootState) {
-        return state.readsSet == null ? "" : state.readsSet;
+    readsPreprocessing(state: RootState) {
+        return (state.readsFileNames != null && state.allResults.nContigs == null && state.readsPreprocessing.nKmers == null) ? true : false;
+    },
+    readsPreprocessed(state: RootState) {
+        return (state.readsPreprocessing.nKmers != null) ? true : false;
     },
     queryAssembled(state: RootState) {
-        return state.allResults.assemblyResults == "" ? false : true;
+        return state.allResults.fastaOutput == "" ? false : true;
+    },
+    readsName(state: RootState) {
+        return state.readsFileNames;
     },
 }

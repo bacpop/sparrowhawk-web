@@ -1,10 +1,18 @@
 import { RootState } from "@/store/state";
 
 export const emptyState = (): RootState => ({
-    readsSet: null,
-    allResults: {
-        assemblyResults : "",
+    readsFileNames : null,
+
+    readsPreprocessing: {
+        nKmers : null,
+        histo  : [],
     },
+
+    allResults: {
+        nContigs    : null,
+        fastaOutput : "",
+    },
+
     workerState: {
         worker: null,
     },

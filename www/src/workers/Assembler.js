@@ -21,16 +21,28 @@ export class Assembler {
         return this.wasm ? Promise.resolve(this.wasm) : this.wasmPromise;
     }
 
-    async assemble(file1, file2, k, verbose, min_count, min_qual) {
+    async preprocess(file1, file2, k, verbose, min_count, min_qual) {
         await this.waitForWasm();
 
         if (this.helper === null) {
             this.helper = this.wasm.AssemblyHelper.new(file1, file2, k, verbose, min_count, min_qual);
         }
 
+        let resultsjson = JSON.parse(this.helper.get_preprocessing_info());
+
+        this.worker.postMessage({ nKmers : resultsjson["nkmers"], histo : resultsjson["histo"] });
+    }
+
+    async assemble() {
+        // await this.waitForWasm();
+        console.log("Initiating assembly from worker");
+        this.helper.assemble();
+
+        console.log("Assembly finished");
         let resultsjson = JSON.parse(this.helper.get_assembly());
 
-        this.worker.postMessage({ contigs: resultsjson["outfasta"] });
+        console.log("Posting output as message");
+        this.worker.postMessage({ outfasta: resultsjson["outfasta"], ncontigs : resultsjson["ncontigs"] });
     }
 
     resetAll() {

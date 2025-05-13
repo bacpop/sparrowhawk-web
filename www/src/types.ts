@@ -5,6 +5,11 @@ export interface WorkerState {
 }
 
 export interface AllResults {
-    assemblyResults: string
+    nContigs    : number | null;
+    fastaOutput : string;
 }
 
+export interface ReadsPreprocessing {
+    nKmers : number | null;
+    histo  : [];
+}

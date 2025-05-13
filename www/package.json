@@ -18,7 +18,8 @@
     "vue3-dropzone": "^2.2.1",
     "vue3-popper": "^1.5.0",
     "vuex": "^4.1.0",
-    "vuex-composition-helpers": "^2.0.3"
+    "vuex-composition-helpers": "^2.0.3",
+    "plotly.js" : "^3.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
