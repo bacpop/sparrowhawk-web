@@ -38,7 +38,7 @@ Current **main features** (see the [sparrowhawk](https://github.com/bacpop/sparr
 - Allows to drag-and-drop (or select from a file browser) the Illumina paired-end reads from your computer.
 - Download of the assembled contigs in FASTA format, as well as the de Bruijn graph before collapse as DOT, GFAv1.1, and GFAv2 formats.
 - Customised parameter setting.
-- Due to the current 32bit memory addresses restriction, there is a total 4GB RAM limit. This implies that reads with a lot of coverage won't be able to be assembled using the standard preprocessing. Some additional options have been implemented to circumvent this restriction, such as
+- Due to the current 32bit memory addresses restriction, there is a **total 4GB RAM limit**. This implies that some reads won't be able to be assembled using the standard preprocessing, due to their size. Some additional options have been implemented to try to circumvent this restriction, such as
     - Chunking of the preprocessing.
     - Alternative preprocessing using a Bloom filter.
 
