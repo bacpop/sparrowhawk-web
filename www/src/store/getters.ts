@@ -14,6 +14,9 @@ export const getters: GetterTree<RootState, RootState> = {
     queryAssembled(state: RootState) {
         return state.allResults.fastaOutput == "" ? false : true;
     },
+    getErrors(state: RootState) {
+        return (state.errors == "") ? false : true;
+    },
     readsName(state: RootState) {
         return state.readsFileNames;
     },

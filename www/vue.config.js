@@ -18,7 +18,18 @@ module.exports = defineConfig({
             fallback: {
                 stream: require.resolve('stream-browserify'),
             }
-        }
+        },
+
+        devServer : {
+            // watchOptions : {
+            //     ignored : ["/node_modules/", "/../rust"],
+            // },
+            hot : false,
+            liveReload : false,
+            watchFiles : {
+                paths : [],
+            }
+        },
     },
     chainWebpack: (config) => {
         // rust wasm bindgen https://github.com/rustwasm/wasm-bindgen
@@ -30,11 +41,12 @@ module.exports = defineConfig({
                     new Plugin({
                         crateDirectory: path.resolve(__dirname, "../rust/sparrowhawk"),
                         // args: '-t wasm64-unknown-unknown',
+                        // extraArgs: "--features wasm --release",
                         extraArgs: "--features wasm",
 //                        extraArgs: "--features wasm --target wasm64-unknown-unknown",
                         outDir: path.resolve(__dirname, "./src/pkg"),
                         // forceMode: "development",
-                        // forceMode: "production",
+                        forceMode: "production",
                     })
             )
             .end()

@@ -30,6 +30,12 @@
                 :interval="1"
                 >
             </VueSlider>
+            <h5 class="parameters_legends" v-if="!do_bloom" v-bind="csize" style="margin-top: 3px;">Chunk processing size (set zero for no chunking): {{ csize }}</h5>
+            <input type="text" v-if="!do_bloom" v-model.number.trim="csize" style="float: right; margin-top: -18px;">
+            <h5 class="parameters_legends" v-bind="do_bloom" style="margin-top: 3px;">Use Bloom filter for preprocessing (recommended for non-small reads; chunking will be disabled): {{ do_bloom }}</h5>
+
+            <input type="checkbox" id="checkbox" v-model="do_bloom" style="float: right; margin-top: -8px;"/>
+
             <button @click="param=true" style="float: left; margin-top: 7px;">Validate parameter choice</button>
         </div>
 
@@ -38,10 +44,14 @@
             <h5 class="parameters_legends" v-bind="k">k: {{ k }}</h5>
             <h5 class="parameters_legends" v-bind="min_count">Minimum count for k-mers: {{ min_count }}</h5>
             <h5 class="parameters_legends" v-bind="min_qual">Minimum Illumina quality: {{ min_qual }}</h5>
+            <h5 class="parameters_legends" v-bind="csize" v-if="!do_bloom">Chunk processing size: {{ csize }}</h5>
+            <h5 class="parameters_legends" v-bind="do_bloom">Use Bloom filter: {{ do_bloom }}</h5>
             <div style="display: flex; justify-content: flex-start;">
                 <button @click="resetAll" style="margin-top: 7px;">Reset parameters</button>
             </div>
         </div>
+
+        <h5 class="memory_error_message" v-if="errorInProcessing">Error found while processing! It is most surely a memory issue: try increasing the chunking, or using a Bloom filter</h5>
 
         <div v-if="param">
 
@@ -89,10 +99,12 @@
             let k = ref(31);
             let min_count = ref(5);
             let min_qual = ref(20);
+            let csize = ref(150000);
+            let do_bloom = ref(false);
             let param = ref(false);
             let assemblying = ref(false);
 
-            const { processReads, doTheAssembly, resetAllResults } = useActions(["processReads", "doTheAssembly", "resetAllResults"]);
+            const { processReads, doTheAssembly, resetAllResults, removeErrors } = useActions(["processReads", "doTheAssembly", "resetAllResults", "removeErrors"]);
             const { allResults } = useState(["allResults"]);
 
 
@@ -100,7 +112,10 @@
                 processReads({acceptFiles : acceptFiles,
                              k            : k.value,
                              min_count    : min_count.value,
-                             min_qual     : min_qual.value});
+                             min_qual     : min_qual.value,
+                             csize        : csize.value,
+                             do_bloom     : do_bloom.value,
+                });
             }
 
             function doAss () {
@@ -111,7 +126,13 @@
             function resetAll() {
                 param.value = false;
                 assemblying.value = false;
+                do_bloom.value = false;
+                k.value = 31;
+                min_count.value = 5;
+                min_qual.value = 20;
+                csize.value = 0;
                 resetAllResults();
+                removeErrors();
             }
 
             const {
@@ -129,6 +150,8 @@
                 k,
                 min_count,
                 min_qual,
+                csize,
+                do_bloom,
                 param,
                 assemblying,
                 resetAll,
@@ -155,6 +178,9 @@
             readsPreprocessing() {
                 return this.$store.getters.readsPreprocessing;
             },
+            errorInProcessing() {
+                return this.$store.getters.getErrors;
+            },
             readsName() {
                 return this.$store.getters.readsName;
             }
@@ -167,13 +193,16 @@
 
             doAssembly() {
                 doAss()
-            }
+            },
+
+
         },
 
         watch: {
         },
 
     };
+
 </script>
 
 
@@ -218,6 +247,11 @@
         text-align: left;
         margin: 0px;
         width: 70%;
+    }
+
+    .memory_error_message {
+        text-align : center;
+        color      : #D41645;
     }
 
     button {

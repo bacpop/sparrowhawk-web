@@ -14,11 +14,14 @@ export default {
 
     },
 
-    setAssembly(state: RootState, input: { ncontigs : number, outfasta : string }) {
+    setAssembly(state: RootState, input: { ncontigs : number, outfasta : string, outdot : string, outgfa : string, outgfav2 : string }) {
         console.log("Assembly finished! Saving contigs as fasta in the state");
 
         state.allResults.nContigs    = input.ncontigs;
         state.allResults.fastaOutput = input.outfasta;
+        state.allResults.dotOutput   = input.outdot;
+        state.allResults.gfaOutput   = input.outgfa;
+        state.allResults.gfav2Output = input.outgfav2;
 
     },
 
@@ -29,8 +32,23 @@ export default {
 
     },
 
+    removeErrors(state: RootState) {
+        console.log("Removing errors");
+
+        state.errors = "";
+
+    },
+
+    setMemoryError(state: RootState) {
+        console.log("Setting memory error in state");
+
+        state.errors = "memory";
+
+    },
+
     resetAllResults(state: RootState) {
         state.readsFileNames = null;
+        state.min_count = 0;
         state.readsPreprocessing = {
             nKmers : null,
             histo  : [],
@@ -38,6 +56,9 @@ export default {
         state.allResults = {
             nContigs    : null,
             fastaOutput : "",
+            dotOutput   : "",
+            gfaOutput   : "",
+            gfav2Output : "",
         };
 
         if (state.workerState.worker) {

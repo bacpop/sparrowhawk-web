@@ -7,7 +7,7 @@ import { Assembler } from './Assembler.js';
         if (evt.data instanceof Object) {
             if (evt.data.preprocess) {
                 console.log("Trying to preprocess!");
-                assembler.preprocess(evt.data.file1, evt.data.file2, evt.data.k, evt.data.verbose, evt.data.min_count, evt.data.min_qual);
+                assembler.preprocess(evt.data.file1, evt.data.file2, evt.data.k, evt.data.verbose, evt.data.min_count, evt.data.min_qual, evt.data.csize, evt.data.do_bloom);
 
             } else if (evt.data.assemble) {
                 console.log("Trying to assemble!");

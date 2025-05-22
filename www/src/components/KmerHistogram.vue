@@ -1,6 +1,5 @@
 <template>
     <div v-bind:class="queryPreprocessed ? 'isVisible' : 'notVisible'">
-<!--     <div> -->
         <div id="plotElement"></div>
     </div>
 </template>
@@ -15,16 +14,20 @@
 
         setup() {
 
-            const { readsPreprocessing } = useState(["readsPreprocessing"]);
+            const { readsPreprocessing, min_count } = useState(["readsPreprocessing", "min_count"]);
             const skip = ref(true);
-            const chartLayout = {
-                title : "k-mer spectrum"
-            }
             return {
                 readsPreprocessing,
-                chartLayout,
+                min_count,
                 skip,
             }
+        },
+
+        data() {
+            return {
+                windowWidth: window.innerWidth,
+                windowHeight: window.innerHeight,
+            };
         },
 
         // props: {
@@ -39,30 +42,64 @@
         methods: {
             renderChart() {
                 console.log("Drawing!");
-                // var inputdata;
-                // if (this.readsPreprocessing.histo == []) {
-                //     inputdata = {
-                //         x: this.readsPreprocessing.histo,
-                //         type: "histogram",
-                //     };
-                // } else {
-                //     inputdata = {
-                //         x: this.readsPreprocessing.histo,
-                //         type: "histogram",
-                //     };
-                // }
-                // console.log(this.readsPreprocessing.histo);
-                // this.readsPreprocessing.histo.forEach(element => console.log(element));
                 var inputdata = [{
-                    x      : this.readsPreprocessing.histo,
-                    type   : "histogram",
+                    x      : Array.from({length: 500}, (_, i) => i + 1),
+                    y      : this.readsPreprocessing.histo,
+                    type   : "bar",
                     marker : {
                         color : "#18974C",
                     },
                 }];
-                // Plotly.newPlot(this.$refs.plotElement, inputdata, this.chartLayout);
-                Plotly.newPlot("plotElement", inputdata, this.chartLayout);
-            }
+                var chartLayout = {
+                    title : {text : "k-mer spectrum"},
+                    font  : {
+                        family : "IBM Plex Sans",
+                    },
+                    autosize : true,
+                    xaxis: {title: {text : "k-mer frequency",
+                        },
+                        rangemode: 'nonnegative',
+                    },
+                    yaxis: {title: {text : "Counts",
+                        },
+                        rangemode: 'nonnegative',
+                    },
+                    width: .8 * this.windowWidth,
+                    shapes: [{
+                        type: 'rect',
+                        x0: 0,
+                        y0: 0,
+                        x1: this.min_count + 0.5,
+                        y1: 1,
+                        xref: "x",
+                        yref: "paper",
+                        line: {
+                            color: '#373A36',
+                            width: 1.5,
+                            dash: 'dot'
+                        },
+                        fillcolor: "rgba(55,58,54,0.5)",
+                    }],
+                };
+
+                Plotly.newPlot("plotElement", inputdata, chartLayout);
+            },
+
+            handleWindowSizeChange() {
+                // Update data properties with
+                // new window dimensions
+                this.windowWidth  = window.innerWidth;
+                this.windowHeight = window.innerHeight;
+
+                // Additional logic based on
+                // window size changes
+                console.log('Window dimensions changed:',
+                            this.windowWidth,
+                            this.windowHeight);
+
+                console.log("Replotting...");
+                this.renderChart();
+            },
         },
 
         computed: {
@@ -71,14 +108,19 @@
             },
         },
 
+        mounted() {
+            // Add a global event listener
+            // for window resize
+            window.addEventListener('resize', this.handleWindowSizeChange);
+        },
+
+        beforeUnmount() {
+            // Remove the event listener when
+            // the component is destroyed
+            window.removeEventListener('resize', this.handleWindowSizeChange);
+        },
+
         watch: {
-            // "allResults.readsPreprocessing.nKmers" : {
-            //     handler : function() {
-            //         console.log("Trying to do something...");
-            //         this.renderChart();
-            //     },
-            //     deep : true,
-            // },
             "queryPreprocessed" : {
                 handler : function() {
                     console.log("Trying to do something...");
@@ -87,20 +129,6 @@
                 deep : true,
             }
         }
-        // watch : {
-        //     queryPreprocessed(val) {
-        //         if (val) {
-        //             console.log("Reads preprocessed, starting the drawing");
-        //             console.log(this.readsPreprocessing.histo);
-        //             var inputdata = {
-        //                 x: this.readsPreprocessing.histo,
-        //                 type: "histogram",
-        //             };
-        //             Plotly.newPlot(this.$refs.plotElement, inputdata, this.chartLayout);
-        //             // this.renderChart(inputdata);
-        //         }
-        //     }
-        // }
     }
 </script>
 

@@ -21,11 +21,19 @@ export class Assembler {
         return this.wasm ? Promise.resolve(this.wasm) : this.wasmPromise;
     }
 
-    async preprocess(file1, file2, k, verbose, min_count, min_qual) {
+    async preprocess(file1, file2, k, verbose, min_count, min_qual, csize, do_bloom) {
         await this.waitForWasm();
 
         if (this.helper === null) {
-            this.helper = this.wasm.AssemblyHelper.new(file1, file2, k, verbose, min_count, min_qual);
+            try {
+                this.helper = this.wasm.AssemblyHelper.new(file1, file2, k, verbose, min_count, min_qual, csize, do_bloom);
+            } catch (error) {
+                console.log("Webassembly error found! Most surely, memory issue.");
+                console.error(error);
+                this.worker.postMessage({reset : true});
+
+                return;
+            }
         }
 
         let resultsjson = JSON.parse(this.helper.get_preprocessing_info());
@@ -42,7 +50,7 @@ export class Assembler {
         let resultsjson = JSON.parse(this.helper.get_assembly());
 
         console.log("Posting output as message");
-        this.worker.postMessage({ outfasta: resultsjson["outfasta"], ncontigs : resultsjson["ncontigs"] });
+        this.worker.postMessage({ outfasta: resultsjson["outfasta"], ncontigs : resultsjson["ncontigs"], outdot : resultsjson["outdot"], outgfa : resultsjson["outgfa"], outgfav2 : resultsjson["outgfav2"] });
     }
 
     resetAll() {

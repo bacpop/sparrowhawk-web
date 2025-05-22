@@ -7,6 +7,9 @@ export interface WorkerState {
 export interface AllResults {
     nContigs    : number | null;
     fastaOutput : string;
+    dotOutput   : string;
+    gfaOutput   : string;
+    gfav2Output   : string;
 }
 
 export interface ReadsPreprocessing {

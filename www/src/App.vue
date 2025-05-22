@@ -12,7 +12,7 @@
         <div class="Display" v-if="tabName === 'Assembly'">
             <ResultsDisplayAssembly />
         </div>
-        <div class="Display" v-if="tabName === 'Assembly'" style="margin-top: 100px;">
+        <div class="Display" v-if="tabName === 'Assembly'" style="margin-top: 10px;">
             <KmerHistogram />
         </div>
     </div>
