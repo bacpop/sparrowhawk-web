@@ -29,7 +29,7 @@ Also, the [sparrowhawk](https://en.wikipedia.org/wiki/Eurasian_sparrowhawk) (*Ac
 
 # Description
 
-**Note:** this repository is for the web interface of the assembler. If you are looking for the assembler itself, that can be run locally, see [sparrowhawk](https://github.com/bacpop/sparrowhawk).
+**Note:** this repository is for the web interface of the assembler. If you are looking for the assembler itself (that can be run locally) see [sparrowhawk](https://github.com/bacpop/sparrowhawk).
 
 This web interface aims to offer a way of having a simple website that offers the WebAssembly compiled [sparrowhawk](https://github.com/bacpop/sparrowhawk) assembler. It has been developed taking advantage/inspiration from other WebAssembly projects from our group (such as [DATACIN](https://github.com/bacpop/DATACIN)).
 
@@ -45,6 +45,7 @@ Current **main features** (see the [sparrowhawk](https://github.com/bacpop/sparr
 :construction: In-progress future main (not all) features: :construction:
 - Incorporate 64bit memory addresses, removing the restriction on 4GB.
 - Add progress information in the assembly.
+- Add automatic parameter setting for the minimum k-mer counts.
 
 
 # Installation
