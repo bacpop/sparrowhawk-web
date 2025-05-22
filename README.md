@@ -1,5 +1,5 @@
 # sparrowhawk-web <img src='sparrowhawk_logo.png' align="right" height="250" />
-Web interface for the [sparrowhawk](https://github.com/bacpop/sparrowhawk) genome assembler using WebAssembly, Rust, Javascript, and Vue.
+Web interface for the [sparrowhawk](https://github.com/bacpop/sparrowhawk) genome assembler using WebAssembly and Rust.
 
 
 <br>
