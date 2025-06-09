@@ -76,7 +76,7 @@
             downloadGFAv2() {
                 console.log(this.allResults.gfav2Output);
 
-                let filename = 'graph.gfa';
+                let filename = 'graph.gfa2';
                 let element = document.createElement('a');
                 element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(this.allResults.gfav2Output));
                 element.setAttribute('download', filename);
