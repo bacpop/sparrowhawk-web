@@ -1,3 +1,6 @@
 [submodule "rust/sparrowhawk"]
 	path = rust/sparrowhawk
 	url  = https://github.com/bacpop/sparrowhawk.git
+#    branch = victordev
+    branch = master
+    

@@ -12,15 +12,6 @@
                 :interval="2"
                 >
             </VueSlider>
-            <h5 class="parameters_legends" v-bind="min_count">Minimum counts for k-mer filtering: {{ min_count }}</h5>
-            <VueSlider
-                v-model="min_count"
-                :lazy="true" 
-                :min="0"
-                :max="30"
-                :interval="1"
-                >
-            </VueSlider>
             <h5 class="parameters_legends" v-bind="min_qual">Minimum Illumina read quality: {{ min_qual }}</h5>
             <VueSlider
                 v-model="min_qual"
@@ -30,6 +21,19 @@
                 :interval="1"
                 >
             </VueSlider>
+            <h5 class="parameters_legends" v-if="!do_fit" v-bind="min_count">Minimum counts for k-mer filtering: {{ min_count }}</h5>
+            <VueSlider
+                v-model="min_count"
+                :lazy="true"
+                :min="0"
+                :max="30"
+                :interval="1"
+                v-if="!do_fit"
+                >
+            </VueSlider>
+            <h5 class="parameters_legends" v-bind="do_bloom" style="margin-top: 3px;">Automatically set the minimum counts for k-mer filtering (memory usage could increase): {{ do_fit }}</h5>
+            <input type="checkbox" id="checkbox" v-model="do_fit" style="float: right; margin-top: -16px;"/>
+
             <h5 class="parameters_legends" v-if="!do_bloom" v-bind="csize" style="margin-top: 3px;">Chunk processing size (set zero for no chunking): {{ csize }}</h5>
             <input type="text" v-if="!do_bloom" v-model.number.trim="csize" style="float: right; margin-top: -18px;">
             <h5 class="parameters_legends" v-bind="do_bloom" style="margin-top: 3px;">Use Bloom filter for preprocessing (recommended for non-small reads; chunking will be disabled): {{ do_bloom }}</h5>
@@ -42,7 +46,8 @@
         <div v-if="param" id="parameters">
             <h3 class="parameters_legends" style="margin-bottom: 5px;">Current parameters:</h3>
             <h5 class="parameters_legends" v-bind="k">k: {{ k }}</h5>
-            <h5 class="parameters_legends" v-bind="min_count">Minimum count for k-mers: {{ min_count }}</h5>
+            <h5 class="parameters_legends" v-bind="min_count" v-if="!do_fit">Minimum count for k-mers: {{ min_count }}</h5>
+            <h5 class="parameters_legends" v-bind="min_count" v-if="do_fit">Automatic minimum k-mer count estimation: {{ do_fit }}</h5>
             <h5 class="parameters_legends" v-bind="min_qual">Minimum Illumina quality: {{ min_qual }}</h5>
             <h5 class="parameters_legends" v-bind="csize" v-if="!do_bloom">Chunk processing size: {{ csize }}</h5>
             <h5 class="parameters_legends" v-bind="do_bloom">Use Bloom filter: {{ do_bloom }}</h5>
@@ -101,6 +106,7 @@
             let min_qual = ref(20);
             let csize = ref(150000);
             let do_bloom = ref(false);
+            let do_fit = ref(false);
             let param = ref(false);
             let assemblying = ref(false);
 
@@ -115,6 +121,7 @@
                              min_qual     : min_qual.value,
                              csize        : csize.value,
                              do_bloom     : do_bloom.value,
+                             do_fit       : do_fit.value,
                 });
             }
 
@@ -127,6 +134,7 @@
                 param.value = false;
                 assemblying.value = false;
                 do_bloom.value = false;
+                do_fit.value = false;
                 k.value = 31;
                 min_count.value = 5;
                 min_qual.value = 20;
@@ -152,6 +160,7 @@
                 min_qual,
                 csize,
                 do_bloom,
+                do_fit,
                 param,
                 assemblying,
                 resetAll,

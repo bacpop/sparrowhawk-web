@@ -15,4 +15,5 @@ export interface AllResults {
 export interface ReadsPreprocessing {
     nKmers : number | null;
     histo  : [];
+    used_min_count : number | null;
 }

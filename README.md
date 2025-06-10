@@ -49,10 +49,10 @@ Current **main features** (see the [sparrowhawk](https://github.com/bacpop/sparr
 
 
 # Installation
-Development has been done only on x86_64 GNU/Linux-based systems, and most surely will probably stay that way (i.e. no other systems have been tested). To use it you will need to have [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) installed and then download and install the required packages as follows:
+Development has been done only on x86_64 GNU/Linux-based systems, and most surely will probably stay that way (i.e. no other systems have been tested). To use it you will need to have [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) installed and then download and install the required packages as follows (for example, to get the v0.1.1 version)
 
 ```
-git clone https://github.com/bacpop/sparrowhawk-web.git
+git clone --branch v0.1.1 https://github.com/bacpop/sparrowhawk-web.git
 cd sparrowhawk-web
 npm install
 ```
