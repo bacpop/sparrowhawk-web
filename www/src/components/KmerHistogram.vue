@@ -14,11 +14,10 @@
 
         setup() {
 
-            const { readsPreprocessing, min_count } = useState(["readsPreprocessing", "min_count"]);
+            const { readsPreprocessing } = useState(["readsPreprocessing"]);
             const skip = ref(true);
             return {
                 readsPreprocessing,
-                min_count,
                 skip,
             }
         },
@@ -69,7 +68,7 @@
                         type: 'rect',
                         x0: 0,
                         y0: 0,
-                        x1: this.min_count + 0.5,
+                        x1: this.readsPreprocessing.used_min_count + 0.5,
                         y1: 1,
                         xref: "x",
                         yref: "paper",

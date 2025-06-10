@@ -8,6 +8,7 @@ export const emptyState = (): RootState => ({
     readsPreprocessing: {
         nKmers : null,
         histo  : [],
+        used_min_count : null,
     },
 
     allResults: {
@@ -15,7 +16,7 @@ export const emptyState = (): RootState => ({
         fastaOutput : "",
         dotOutput   : "",
         gfaOutput   : "",
-        gfav2Output   : "",
+        gfav2Output : "",
     },
 
     workerState: {

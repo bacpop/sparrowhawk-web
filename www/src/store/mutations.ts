@@ -5,12 +5,13 @@ export default {
         state.workerState.worker = worker;
     },
 
-    setPreprocessing(state: RootState, input: { nKmers : number, histo : [] }) {
+    setPreprocessing(state: RootState, input: { nKmers : number, histo : [], used_min_count : number }) {
         console.log("Preprocessing finished! Saving intermediate information in the state");
         console.log(input.nKmers);
 
         state.readsPreprocessing.nKmers = input.nKmers;
         state.readsPreprocessing.histo  = input.histo;
+        state.readsPreprocessing.used_min_count = input.used_min_count;
 
     },
 
@@ -52,6 +53,7 @@ export default {
         state.readsPreprocessing = {
             nKmers : null,
             histo  : [],
+            used_min_count : null,
         }
         state.allResults = {
             nContigs    : null,
