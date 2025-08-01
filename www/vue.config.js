@@ -58,9 +58,7 @@ module.exports = defineConfig({
                     new Plugin({
                         crateDirectory: path.resolve(__dirname, "../rust/ska.rust"),
                         // args: '-t wasm64-unknown-unknown',
-                        // extraArgs: "--features wasm --release",
-                        extraArgs: "--features wasm",
-//                        extraArgs: "--features wasm --target wasm64-unknown-unknown",
+//                        extraArgs: "--target wasm64-unknown-unknown",
                         outDir: path.resolve(__dirname, "./src/pkg_ska"),
                         // forceMode: "development",
                         forceMode: "production",
