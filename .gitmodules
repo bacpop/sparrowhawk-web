@@ -4,3 +4,7 @@
 #    branch = victordev
     branch = master
     
+[submodule "rust/ska.rust"]
+	path = rust/ska.rust
+	url = github:vrbouza/ska.rust.git
+    branch = victordev

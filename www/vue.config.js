@@ -34,7 +34,7 @@ module.exports = defineConfig({
     chainWebpack: (config) => {
         // rust wasm bindgen https://github.com/rustwasm/wasm-bindgen
         config
-            .plugin("wasm-pack")
+            .plugin("wasm-pack_sphk")
             .use(WasmPackPlugin)
             .init(
                 (Plugin) =>
@@ -45,6 +45,23 @@ module.exports = defineConfig({
                         extraArgs: "--features wasm",
 //                        extraArgs: "--features wasm --target wasm64-unknown-unknown",
                         outDir: path.resolve(__dirname, "./src/pkg"),
+                        // forceMode: "development",
+                        forceMode: "production",
+                    })
+            )
+            .end()
+        config
+            .plugin("wasm-pack_ska")
+            .use(WasmPackPlugin)
+            .init(
+                (Plugin) =>
+                    new Plugin({
+                        crateDirectory: path.resolve(__dirname, "../rust/ska.rust"),
+                        // args: '-t wasm64-unknown-unknown',
+                        // extraArgs: "--features wasm --release",
+                        extraArgs: "--features wasm",
+//                        extraArgs: "--features wasm --target wasm64-unknown-unknown",
+                        outDir: path.resolve(__dirname, "./src/pkg_ska"),
                         // forceMode: "development",
                         forceMode: "production",
                     })
