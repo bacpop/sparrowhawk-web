@@ -41,10 +41,10 @@ export class Assembler {
         this.worker.postMessage({ nKmers : resultsjson["nkmers"], histo : resultsjson["histo"], used_min_count : resultsjson["used_min_count"] });
     }
 
-    async assemble() {
+    async assemble(no_bubble_collapse, no_dead_end_removal) {
         // await this.waitForWasm();
         console.log("Initiating assembly from worker");
-        this.helper.assemble();
+        this.helper.assemble(no_bubble_collapse, no_dead_end_removal);
 
         console.log("Assembly finished");
         let resultsjson = JSON.parse(this.helper.get_assembly());

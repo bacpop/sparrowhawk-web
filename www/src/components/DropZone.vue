@@ -39,6 +39,13 @@
             <h5 class="parameters_legends" v-bind="do_bloom" style="margin-top: 3px;">Use Bloom filter for preprocessing (recommended for non-small reads; chunking will be disabled): {{ do_bloom }}</h5>
 
             <input type="checkbox" id="checkbox" v-model="do_bloom" style="float: right; margin-top: -8px;"/>
+            <h5 class="parameters_legends" v-bind="no_deadend" style="margin-top: 3px;">Do not remove dead-ends while correcting the assembly graph: {{ no_deadend }}</h5>
+
+            <input type="checkbox" id="checkbox" v-model="no_deadend" style="float: right; margin-top: -8px;"/>
+
+            <h5 class="parameters_legends" v-bind="no_bubble" style="margin-top: 3px;">Do not collapse bubbles while correcting the assembly graph: {{ no_bubble }}</h5>
+
+            <input type="checkbox" id="checkbox" v-model="no_bubble" style="float: right; margin-top: -8px;"/>
 
             <button @click="param=true" style="float: left; margin-top: 7px;">Validate parameter choice</button>
         </div>
@@ -51,6 +58,8 @@
             <h5 class="parameters_legends" v-bind="min_qual">Minimum Illumina quality: {{ min_qual }}</h5>
             <h5 class="parameters_legends" v-bind="csize" v-if="!do_bloom">Chunk processing size: {{ csize }}</h5>
             <h5 class="parameters_legends" v-bind="do_bloom">Use Bloom filter: {{ do_bloom }}</h5>
+            <h5 class="parameters_legends" v-bind="no_deadend">Don't remove dead-ends: {{ no_deadend }}</h5>
+            <h5 class="parameters_legends" v-bind="no_bubble">Don't collapse bubbles: {{ no_bubble }}</h5>
             <div style="display: flex; justify-content: flex-start;">
                 <button @click="resetAll" style="margin-top: 7px;">Reset parameters</button>
             </div>
@@ -109,6 +118,8 @@
             let do_fit = ref(false);
             let param = ref(false);
             let assemblying = ref(false);
+            let no_bubble = ref(false);
+            let no_deadend = ref(false);
 
             const { processReads, doTheAssembly, resetAllResults, removeErrors } = useActions(["processReads", "doTheAssembly", "resetAllResults", "removeErrors"]);
             const { allResults } = useState(["allResults"]);
@@ -127,7 +138,8 @@
 
             function doAss () {
                 assemblying.value = true;
-                doTheAssembly();
+                doTheAssembly({no_bubble_collapse  : no_bubble.value,
+                               no_dead_end_removal : no_deadend.value});
             }
 
             function resetAll() {
@@ -135,6 +147,8 @@
                 assemblying.value = false;
                 do_bloom.value = false;
                 do_fit.value = false;
+                no_bubble.value = false;
+                no_deadend.value = false;
                 k.value = 31;
                 min_count.value = 5;
                 min_qual.value = 20;
@@ -161,6 +175,8 @@
                 csize,
                 do_bloom,
                 do_fit,
+                no_bubble,
+                no_deadend,
                 param,
                 assemblying,
                 resetAll,

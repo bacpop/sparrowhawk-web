@@ -60,12 +60,19 @@ export default {
         }
     },
 
-    async doTheAssembly(context: ActionContext<RootState, RootState>) {
+    async doTheAssembly(context: ActionContext<RootState, RootState>, payload: {
+        no_bubble_collapse  : boolean,
+        no_dead_end_removal : boolean,
+    }) {
         const { commit, state } = context;
         console.log("Assemblying reads...")
         if (state.workerState.worker) {
             console.log("Assemblying...");
-            state.workerState.worker.postMessage({assemble : true});
+            state.workerState.worker.postMessage({
+                assemble : true,
+                no_bubble_collapse  : payload.no_bubble_collapse,
+                no_dead_end_removal : payload.no_dead_end_removal,
+            });
 
 
             state.workerState.worker.onmessage = (messageData) => {

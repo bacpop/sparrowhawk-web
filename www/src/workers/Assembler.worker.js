@@ -11,7 +11,7 @@ import { Assembler } from './Assembler.js';
 
             } else if (evt.data.assemble) {
                 console.log("Trying to assemble!");
-                assembler.assemble();
+                assembler.assemble(evt.data.no_bubble_collapse, evt.data.no_dead_end_removal);
 
             } else if (evt.data.reset) {
                 console.log("Trying to reset!");
