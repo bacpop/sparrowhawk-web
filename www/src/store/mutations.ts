@@ -4,6 +4,9 @@ export default {
     SET_WORKER(state: RootState, worker: Worker | null) {
         state.workerState.worker = worker;
     },
+    SET_WORKER_SKA(state: RootState, worker: Worker | null) {
+        state.workerState.worker_ska = worker;
+    },
 
     setPreprocessing(state: RootState, input: { nKmers : number, histo : [], used_min_count : number }) {
         console.log("Preprocessing finished! Saving intermediate information in the state");
@@ -66,5 +69,54 @@ export default {
         if (state.workerState.worker) {
             state.workerState.worker.postMessage({reset: true});
         }
+    },
+
+    // SKA
+
+    addRef(state: RootState, input: { name: string, sequences: string[] }) {
+        console.log("vuex: Adding ref " + input.name);
+        state.refSet = input.name;
+        state.allResults_ska.ref = input.sequences;
+    },
+
+    addQueryFileMap(state: RootState, name: string) {
+        console.log("vuex: Adding query file for mapping " + name)
+        if (!state.allResults_ska.mapResults[name]) {
+            state.allResults_ska.mapResults[name] = {
+                mapped: true,
+                nb_variants: null,
+                coverage: null,
+                mapped_sequences: [],
+            };
+        }
+    },
+
+    setMapped(state: RootState,
+              input: {name:string, nb_variants:number|null, coverage:number|null, mapped_sequences:string[]}) {
+        state.allResults_ska.mapResults[input.name].nb_variants = input.nb_variants
+        state.allResults_ska.mapResults[input.name].coverage = input.coverage
+        state.allResults_ska.mapResults[input.name].mapped_sequences = input.mapped_sequences
+    },
+
+    setAligned(state: RootState, input: {aligned:boolean, names:string[], newick:string}) {
+        state.allResults_ska.alignResults[0] = {
+            aligned: input.aligned,
+            names: input.names,
+            newick: input.newick
+        }
+    },
+
+    resetAllResults_ska(state: RootState) {
+        state.refSet = null;
+        state.allResults_ska = {
+            mapResults: {},
+            alignResults: {},
+            ref: [],
+        };
+
+        if (state.workerState.worker_ska) {
+            state.workerState.worker_ska.postMessage({reset: true});
+        }
     }
+
 };

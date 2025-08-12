@@ -89,7 +89,9 @@
                     <p class="dropzone-text">✅ Reads assembled!</p>
                 </div>
             </div>
+
         </div>
+
     </div>
     <button @click="doAss" v-if='readsPreprocessed && !readsProcessed' style="float: center; margin-top: 10px;"><b>Start assembly</b></button>
 </template>

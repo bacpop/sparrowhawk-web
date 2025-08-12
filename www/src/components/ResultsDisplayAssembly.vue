@@ -26,18 +26,6 @@ export default {
         }
     },
 
-    watch: {
-        // 'allResults.assemblyResults': {
-        //     handler() {
-        //         let last_key = Object.keys(this.allResults.mapResults)[Object.keys(this.allResults.mapResults).length-1]
-        //         if (this.allResults.mapResults[last_key]? this.allResults.mapResults[last_key].mapped_sequences.length !== 0: false){
-        //             this.reloadKey++;
-        //         }
-        //     },
-        //     deep: true,
-        // },
-    },
-
     computed: {
         queryAssembled() {
             return this.$store.getters.queryAssembled;
@@ -48,12 +36,6 @@ export default {
         use_keys(list_of_keys) {
             return list_of_keys.join('-');
         },
-    },
-
-    data() {
-        // return {
-            // reloadKey: 0
-        // }
     },
 };
 </script>

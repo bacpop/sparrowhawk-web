@@ -1,5 +1,6 @@
 import {
     AllResults,
+    AllResultsSka,
     ReadsPreprocessing,
     WorkerState,
 } from "@/types";
@@ -9,6 +10,8 @@ export interface RootState {
     readsFileNames      : string | null,
     readsPreprocessing  : ReadsPreprocessing,
     allResults          : AllResults,
+    refSet              : string | null,
+    allResults_ska      : AllResultsSka,
     errors              : string,
     min_count           : number,
 }
