@@ -22,7 +22,6 @@ export const getters: GetterTree<RootState, RootState> = {
     },
 
     // SKA
-
     refProcessed(state: RootState) {
         console.log("Ref processed (getters)")
         return state.refSet == null ? false : true;
@@ -37,5 +36,10 @@ export const getters: GetterTree<RootState, RootState> = {
     },
     alignmentProcessed(state: RootState) {
         return state.allResults_ska.alignResults[0] ? state.allResults_ska.alignResults[0].aligned : false;
+    },
+
+    // SKETCHLIB
+    sampleIdentified(state: RootState) {
+        return (state.allResults_sketchlib.idResults.length != 0) ? true : false;
     }
 }

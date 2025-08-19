@@ -6,13 +6,17 @@
                 <button class="tab" v-on:click="changeTab('Assembly')">Assembly</button>
                 <button class="tab" v-on:click="changeTab('Mapping')">Mapping</button>
                 <button class="tab" v-on:click="changeTab('Alignment')">Alignment</button>
+                <button class="tab" v-on:click="changeTab('TaxonomicID')">Taxonomic ID</button>
             </div>
         </div>
-<!--        <DropZone
-            :tabName="tabName"
-        />-->
+
         <div class="Display" v-if="tabName === 'Assembly'">
             <DropZone
+                :tabName="tabName"
+            />
+        </div>
+        <div class="Display" v-else-if="tabName === 'TaxonomicID'">
+            <DropZoneSketchlib
                 :tabName="tabName"
             />
         </div>
@@ -43,12 +47,14 @@
 <script>
     import DropZone from './components/DropZone.vue';
     import DropZoneSka from './components/DropZoneSka.vue';
+    import DropZoneSketchlib from './components/DropZoneSketchlib.vue';
     import ResultsDisplayAssembly from './components/ResultsDisplayAssembly.vue';
     import ResultsDisplayMapping from './components/ResultsDisplayMapping.vue';
     import ResultsDisplayAlignment from './components/ResultsDisplayAlignment.vue';
     import KmerHistogram from './components/KmerHistogram.vue';
     import WorkerAssembler from '@/workers/Assembler.worker.js';
     import WorkerMapper from '@/workers/Mapper.worker.js';
+    import WorkerSketcher from '@/workers/Sketcher.worker.js';
     import "@fontsource/ibm-plex-sans";
 
     export default {
@@ -57,6 +63,7 @@
         components: {
             DropZone,
             DropZoneSka,
+            DropZoneSketchlib,
             ResultsDisplayAssembly,
             KmerHistogram,
             ResultsDisplayMapping,
@@ -86,6 +93,15 @@
                     if (window.Worker) {
                         const worker = new WorkerMapper();
                         this.$store.commit('SET_WORKER_SKA', worker);
+                    } else {
+                        throw "WebWorkers are not supported by this web browser.";
+                    }
+            });
+            import("@/pkg_sketchlib")
+                .then(() => {
+                    if (window.Worker) {
+                        const worker = new WorkerSketcher();
+                        this.$store.commit('SET_WORKER_SKETCHLIB', worker);
                     } else {
                         throw "WebWorkers are not supported by this web browser.";
                     }

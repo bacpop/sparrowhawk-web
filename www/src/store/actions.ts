@@ -109,6 +109,7 @@ export default {
             }
         });
     },
+
     async processQueryMap(context: ActionContext<RootState, RootState>, payload: {acceptFiles: Array<File>, proportion_reads: number}) {
         const { commit, state } = context;
         console.log("Query files uploaded mapping")
@@ -173,5 +174,48 @@ export default {
     async resetAllResults_ska(context: ActionContext<RootState, RootState>) {
         const { commit } = context;
         commit("resetAllResults_ska");
-    }
+    },
+
+    async identifyFiles(context: ActionContext<RootState, RootState>, payload: {acceptFiles: Array<File>}) {
+        const { commit, state } = context;
+        console.log("Uploaded file(s) for taxonomic identification");
+        if (state.workerState.worker_sketchlib) {
+            if (payload.acceptFiles.length > 2) {
+                console.log("More than two files uploaded. This case is not supported.");
+                commit("resetAllResults_sketchlib");
+            } else {
+                if (payload.acceptFiles.length == 1) {
+                    console.log("One file uploaded (fasta/q). Identifying...");
+                    state.workerState.worker_sketchlib.postMessage({identify : true,
+                                                                     file1   : payload.acceptFiles[0],
+                                                                     file2   : null,
+                    });
+                } else {
+                    console.log("Two files uploaded (fastq, reads). Identifying...");
+                    state.workerState.worker_sketchlib.postMessage({identify : true,
+                                                                     file1   : payload.acceptFiles[0],
+                                                                     file2   : payload.acceptFiles[1],
+                    });
+                }
+
+                state.workerState.worker_sketchlib.onmessage = (messageData) => {
+                    if (messageData.data instanceof Object) {
+                        if ("results" in messageData.data) {
+                            commit("saveIDResults", {results : messageData.data.results});
+                        } else {
+                            // Something wrong has happened
+                            console.log("Error found during processing, resetting results.");
+                            commit("resetAllResults_sketchlib");
+                        }
+                    }
+                };
+            }
+        }
+    },
+
+    async resetAllResults_sketchlib(context: ActionContext<RootState, RootState>) {
+        const { commit } = context;
+        commit("resetAllResults_sketchlib");
+    },
+
 };

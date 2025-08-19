@@ -1,9 +1,11 @@
 import {
     AllResults,
     AllResultsSka,
+    AllResultsSketchlib,
     ReadsPreprocessing,
     WorkerState,
 } from "@/types";
+
 
 export interface RootState {
     workerState         : WorkerState,
@@ -14,4 +16,5 @@ export interface RootState {
     allResults_ska      : AllResultsSka,
     errors              : string,
     min_count           : number,
+    allResults_sketchlib: AllResultsSketchlib,
 }

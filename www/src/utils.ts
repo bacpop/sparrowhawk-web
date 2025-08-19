@@ -26,8 +26,13 @@ export const emptyState = (): RootState => ({
         ref: [],
     },
 
+    allResults_sketchlib: {
+        idResults: [],
+    },
+
     workerState: {
-        worker:     null,
+        worker: null,
         worker_ska: null,
+        worker_sketchlib: null,
     },
 });

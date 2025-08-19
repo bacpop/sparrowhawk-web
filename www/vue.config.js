@@ -65,6 +65,21 @@ module.exports = defineConfig({
                     })
             )
             .end()
+        config
+            .plugin("wasm-pack_sketchlib")
+            .use(WasmPackPlugin)
+            .init(
+                (Plugin) =>
+                    new Plugin({
+                        crateDirectory: path.resolve(__dirname, "../rust/sketchlib.rust"),
+                        // args: '-t wasm64-unknown-unknown',
+//                        extraArgs: "--target wasm64-unknown-unknown",
+                        outDir: path.resolve(__dirname, "./src/pkg_sketchlib"),
+                        // forceMode: "development",
+                        forceMode: "production",
+                    })
+            )
+            .end()
         config.module.rule("js").exclude.add(/\.worker\.js$/);
         config.module
             .rule("worker")

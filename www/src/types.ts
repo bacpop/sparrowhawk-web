@@ -1,8 +1,9 @@
 export type Dict<T> = Record<string, T>
 
 export interface WorkerState {
-    worker:     Worker | null;
-    worker_ska: Worker | null;
+    worker:           Worker | null;
+    worker_ska:       Worker | null;
+    worker_sketchlib: Worker | null;
 }
 
 export interface AllResults {
@@ -30,6 +31,10 @@ export interface AllResultsSka {
     alignResults: Dict<Alignment>
     mapResults: Dict<IsolateMapping>
     ref: string[]
+}
+
+export interface AllResultsSketchlib {
+    idResults: number[]
 }
 
 export interface ReadsPreprocessing {

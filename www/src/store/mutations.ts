@@ -7,6 +7,9 @@ export default {
     SET_WORKER_SKA(state: RootState, worker: Worker | null) {
         state.workerState.worker_ska = worker;
     },
+    SET_WORKER_SKETCHLIB(state: RootState, worker: Worker | null) {
+        state.workerState.worker_sketchlib = worker;
+    },
 
     setPreprocessing(state: RootState, input: { nKmers : number, histo : [], used_min_count : number }) {
         console.log("Preprocessing finished! Saving intermediate information in the state");
@@ -116,6 +119,22 @@ export default {
 
         if (state.workerState.worker_ska) {
             state.workerState.worker_ska.postMessage({reset: true});
+        }
+    },
+
+    // SKETCHLIB
+
+    saveIDResults(state: RootState, output : number[] ) {
+        state.allResults_sketchlib.idResults = output;
+    },
+
+    resetAllResults_sketchlib(state: RootState) {
+        state.allResults_sketchlib = {
+            idResults: [],
+        };
+
+        if (state.workerState.worker_sketchlib) {
+            state.workerState.worker_sketchlib.postMessage({reset: true});
         }
     }
 
