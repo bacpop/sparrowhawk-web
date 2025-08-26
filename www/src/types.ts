@@ -34,7 +34,9 @@ export interface AllResultsSka {
 }
 
 export interface AllResultsSketchlib {
-    idResults: number[]
+    idProbs: number[] | null
+    idSpecies: string[] | null
+    idMetadata: string[] | null
 }
 
 export interface ReadsPreprocessing {

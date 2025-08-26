@@ -27,7 +27,9 @@ export const emptyState = (): RootState => ({
     },
 
     allResults_sketchlib: {
-        idResults: [],
+        idProbs: null,
+        idSpecies: null,
+        idMetadata: null,
     },
 
     workerState: {

@@ -16,18 +16,9 @@
             <div v-if="sampleIdentified">
                 Probabilities:
                 <br>
-<!--                <h5 class="id_results" style="margin-top: 3px;">Mycobacterium tuberculosis: {{ allResults_sketchlib.idResults[0] }}</h5>
-                <h5 class="id_results" style="margin-top: 3px;">Staphylococcus aureus: {{ allResults_sketchlib.idResults[1] }}</h5>
-                <h5 class="id_results" style="margin-top: 3px;">Escherichia coli: {{ allResults_sketchlib.idResults[2] }}</h5>
-                <h5 class="id_results" style="margin-top: 3px;">Streptomyces avermitilis: {{ allResults_sketchlib.idResults[3] }}</h5>
-                <h5 class="id_results" style="margin-top: 3px;">Streptococcus pneumoniae: {{ allResults_sketchlib.idResults[4] }}</h5>
-                <h5 class="id_results" style="margin-top: 3px;">Neisseria meningitidis: {{ allResults_sketchlib.idResults[5] }}</h5>-->
-                <h5 class="id_results" style="margin-top: 3px;">Mycobacterium tuberculosis: {{ results }}</h5>
-<!--                <h5 class="id_results" style="margin-top: 3px;">Staphylococcus aureus: {{ results[1] }}</h5>
-                <h5 class="id_results" style="margin-top: 3px;">Escherichia coli: {{ results[2] }}</h5>
-                <h5 class="id_results" style="margin-top: 3px;">Streptomyces avermitilis: {{ results[3] }}</h5>
-                <h5 class="id_results" style="margin-top: 3px;">Streptococcus pneumoniae: {{ results[4] }}</h5>
-                <h5 class="id_results" style="margin-top: 3px;">Neisseria meningitidis: {{ results[5] }}</h5>-->
+                <h5 class="id_results" style="margin-top: 3px;">{{ getResultLine(0) }}</h5>
+                <h5 class="id_results" style="margin-top: 3px;">{{ getResultLine(1) }}</h5>
+                <h5 class="id_results" style="margin-top: 3px;">{{ getResultLine(2) }}</h5>
 
             </div>
         </div>
@@ -53,6 +44,13 @@ export default {
         function resetAll() {
             resetAllResults_sketchlib();
         }
+        function getResultLine(idres) {
+            if (this.allResults_sketchlib.idSpecies == null) {
+                return "";
+            } else {
+                return this.allResults_sketchlib.idSpecies[idres] + " : " + (this.allResults_sketchlib.idProbs[idres]*100).toFixed() + " % - " + this.allResults_sketchlib.idMetadata[idres];
+            }
+        }
         const {
             getRootProps: getRootPropsSample,
             getInputProps: getInputPropsSample,
@@ -70,6 +68,7 @@ export default {
             getInputPropsSample,
             isDragActiveSample,
             onDropSample,
+            getResultLine,
             allResults_sketchlib,
             ...restSample,
         };
@@ -79,7 +78,7 @@ export default {
             return this.$store.getters.sampleIdentified;
         },
         results() {
-            return this.allResults_sketchlib.idResults[0];
+            return this.allResults_sketchlib.idProbs[0];
         },
     },
 

@@ -27,12 +27,15 @@ export class Sketcher {
         if (this.SketchlibData === null) {
             const response = await fetch('/inverted.ski');
             const invertedindex = await response.blob();
-            console.log("Types: " + file1.constructor.name + " " + invertedindex.constructor.name + " " + response.constructor.name );
 
-            this.SketchlibData = this.wasm.SketchlibData.new(file1, file2, invertedindex);
+            this.SketchlibData = await this.wasm.SketchlibData.new(invertedindex);
         }
 
-        this.worker.postMessage({ results: this.SketchlibData.get_probs() });
+        await this.SketchlibData.query(file1, file2);
+
+        let results = JSON.parse(this.SketchlibData.get_probs(3));
+
+        this.worker.postMessage({ probs: results["probs"], names : results["names"], metadata : results["metadata"] });
     }
 
     resetAll() {

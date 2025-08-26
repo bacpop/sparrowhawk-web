@@ -123,14 +123,20 @@ export default {
     },
 
     // SKETCHLIB
-
-    saveIDResults(state: RootState, output : number[] ) {
-        state.allResults_sketchlib.idResults = output;
+    saveIDResults(state: RootState, input : {probs : number[], names : string[], metadata : string[]} ) {
+        console.log("Storing results in allResults_sketchlib");
+        // console.log(input.probs);
+        state.allResults_sketchlib.idProbs = input.probs;
+        state.allResults_sketchlib.idSpecies = input.names;
+        state.allResults_sketchlib.idMetadata = input.metadata;
+        // console.log(state.allResults_sketchlib.idProbs[0].toString());
     },
 
     resetAllResults_sketchlib(state: RootState) {
         state.allResults_sketchlib = {
-            idResults: [],
+            idProbs: null,
+            idSpecies: null,
+            idMetadata: null,
         };
 
         if (state.workerState.worker_sketchlib) {

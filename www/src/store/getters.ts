@@ -40,6 +40,6 @@ export const getters: GetterTree<RootState, RootState> = {
 
     // SKETCHLIB
     sampleIdentified(state: RootState) {
-        return (state.allResults_sketchlib.idResults.length != 0) ? true : false;
+        return state.allResults_sketchlib.idProbs != null;
     }
 }

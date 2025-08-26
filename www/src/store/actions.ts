@@ -200,8 +200,12 @@ export default {
 
                 state.workerState.worker_sketchlib.onmessage = (messageData) => {
                     if (messageData.data instanceof Object) {
-                        if ("results" in messageData.data) {
-                            commit("saveIDResults", {results : messageData.data.results});
+                        if ("probs" in messageData.data) {
+                            console.log("Saving results...");
+                            commit("saveIDResults", {probs : messageData.data.probs,
+                                names : messageData.data.names,
+                                metadata : messageData.data.metadata
+                            });
                         } else {
                             // Something wrong has happened
                             console.log("Error found during processing, resetting results.");
