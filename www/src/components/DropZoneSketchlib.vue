@@ -34,14 +34,11 @@
 <script>
 import { useDropzone } from "vue3-dropzone";
 import { useActions, useState } from "vuex-composition-helpers";
-import { ref } from "vue";
 
 export default {
     name: "DropZoneSketchlib",
     props:["tabName"],
     setup() {
-        
-        let do_reset = ref(false);
         const { identifyFiles, resetAllResults_sketchlib } = useActions(["identifyFiles", "resetAllResults_sketchlib"]);
         const { allResults_sketchlib } = useState(["allResults_sketchlib"]);
 
