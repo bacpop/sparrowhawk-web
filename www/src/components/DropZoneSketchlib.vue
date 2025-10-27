@@ -14,6 +14,12 @@
             </div>
 
             <div v-if="sampleIdentified">
+                <div style="display: flex; justify-content: flex-start;">
+                    <button @click="resetAll" style="margin-top: 7px;">Reset</button>
+                </div>
+            </div>
+
+            <div v-if="sampleIdentified">
                 Probabilities:
                 <br>
                 <h5 class="id_results" style="margin-top: 3px;">{{ getResultLine(0) }}</h5>
@@ -34,7 +40,8 @@ export default {
     name: "DropZoneSketchlib",
     props:["tabName"],
     setup() {
-
+        
+        let do_reset = ref(false);
         const { identifyFiles, resetAllResults_sketchlib } = useActions(["identifyFiles", "resetAllResults_sketchlib"]);
         const { allResults_sketchlib } = useState(["allResults_sketchlib"]);
 
