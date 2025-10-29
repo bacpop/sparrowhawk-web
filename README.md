@@ -45,11 +45,10 @@ Current **main features** (see the [sparrowhawk](https://github.com/bacpop/sparr
 :construction: In-progress future main (not all) features: :construction:
 - Incorporate 64bit memory addresses, removing the restriction on 4GB.
 - Add progress information in the assembly.
-- Add automatic parameter setting for the minimum k-mer counts.
 
 
 # Installation
-Development has been done only on x86_64 GNU/Linux-based systems, and most surely will probably stay that way (i.e. no other systems have been tested). To use it you will need to have [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) installed and then download and install the required packages as follows (for example, to get the v0.1.1 version)
+Development has been done only on x86_64 GNU/Linux-based systems, and most surely will probably stay that way (i.e. no other systems have been tested). To use it you will need to have [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) installed, as well as a working Rust installation (check the [official Rust website](https://rust-lang.org/tools/install/) for information on how to get it) and then download and install the required packages as follows (for example, to get the v0.1.1 version)
 
 ```
 git clone --branch v0.1.1 https://github.com/bacpop/sparrowhawk-web.git
@@ -59,7 +58,7 @@ npm install
 
 
 # Usage
-Once you have it installed, you can run the following, that will automatically compile to WebAssembly [sparrowhawk](https://github.com/bacpop/sparrowhawk) and run the development server:
+Once you have it installed, you can run the following, that will automatically compile to WebAssembly [sparrowhawk](https://github.com/bacpop/sparrowhawk) and run the development server locally:
 
 ```
 cd www
