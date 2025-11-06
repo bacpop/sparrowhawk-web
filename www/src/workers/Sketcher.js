@@ -25,7 +25,7 @@ export class Sketcher {
         await this.waitForWasm();
 
         if (this.SketchlibData === null) {
-            const response = await fetch('/inverted_simples_k_17_ss_10.ski');
+            const response = await fetch('/inverted_k_17_ss_10.ski');
             const invertedindex = await response.blob();
 
             this.SketchlibData = await this.wasm.SketchlibData.new(invertedindex);
