@@ -57,7 +57,8 @@ git clone --branch v0.1.2 --recurse-submodules https://github.com/bacpop/sparrow
 cd sparrowhawk-web/www
 npm install
 ```
-
+### Note for macOS enjoyers
+It has been found that there is an issue when compiling some crates to wasm32-unknown-unknown in macOS due to the weird clang packaging there. Following [this issue](https://github.com/gyscos/zstd-rs/issues/93), it seems that installing llvm fixes it.
 
 # Usage
 Once you have it installed, you can run the following, that will automatically compile to WebAssembly [sparrowhawk](https://github.com/bacpop/sparrowhawk) and run the development server locally (from the www folder!):
