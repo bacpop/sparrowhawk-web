@@ -24,7 +24,7 @@ export default {
     },
 
     mounted() {
-        if (this.allResults_ska.alignResults[0]? this.allResults_ska.alignResults[0].names.length > 2: false){
+        if (this.allResults_ska.alignResults[0] ? this.allResults_ska.alignResults[0].names.length > 2 : false) {
             this.createTree();
         }
     },
@@ -32,14 +32,14 @@ export default {
     watch: {
         'allResults_ska.alignResults': {
             handler: function() {
-                if (this.allResults_ska.alignResults[0]? this.allResults_ska.alignResults[0].aligned == false: false){
+                if (this.allResults_ska.alignResults[0] ? this.allResults_ska.alignResults[0].aligned == false : false) {
                     this.loading();
                     return;
                 }
-                if (this.allResults_ska.alignResults[0]? this.allResults_ska.alignResults[0].names.length > 2: false){
+
+                if (this.allResults_ska.alignResults[0] ? this.allResults_ska.alignResults[0].names.length > 2 : false) {
                     this.createTree();
-                }
-                else {
+                } else {
                     this.notEnough();
                 }
             },
@@ -65,7 +65,7 @@ export default {
         },
 
         loading() {
-            console.log("Loading tree");
+            console.log("Setting WIP message");
 
             // Clear previous tree
             d3.select("#tree_container").selectAll("*").remove();
@@ -75,7 +75,7 @@ export default {
             container.append("text")
                 .attr("x", "50%")
                 .attr("y", 40)
-                .text("Loading tree...")
+                .text("Processing files...")
                 .attr("font-size", "40px")
                 .attr("text-anchor", "middle");
         },

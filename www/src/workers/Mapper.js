@@ -46,7 +46,7 @@ export class Mapper {
     }
 
     align(files, proportion_reads, k) {
-        console.log("Aligning reads to reference with proportion_reads: " + proportion_reads + " and k: " + k);
+        console.log("Processing uploaded fastX files with proportion_reads: " + proportion_reads + " and k: " + k);
 
         if (this.AlignData === null) {
             this.AlignData = this.wasm.AlignData.new(k);

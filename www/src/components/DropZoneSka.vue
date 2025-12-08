@@ -65,7 +65,7 @@
                     <p v-else class="dropzone-text">Drag and drop read or assembly <b>files to be aligned</b> here,
                         or click to select files</p>
                 </div>
-                <p class="count"> Files received: {{ allResults_ska.alignResults[0]? allResults_ska.alignResults[0].names.length : 0 }}</p>
+                <p class="count"> Files received: {{ allResults_ska.alignResults[0] ? allResults_ska.alignResults[0].names.length : 0 }}</p>
             </div>
         </div>
     </div>

@@ -157,9 +157,10 @@ export default {
 
     async processQueryAlign(context: ActionContext<RootState, RootState>, payload: { acceptFiles: Array<File>, k: number, proportion_reads: number }) {
         const { commit, state } = context;
-        console.log("Query files uploaded alignment")
-        //Initialize the aligned state so that we can know that it is loading
-        commit("setAligned", {aligned:false, names: [], newick: ""})
+        console.log("Processing query of uploaded files for alignment...")
+
+        // Initialize the aligned state so that we can know that it is loading
+        commit("setAligned", {aligned: false, names: [], newick: ""})
 
         const messageData = { align: true, files: payload.acceptFiles, k: payload.k, proportion_reads: payload.proportion_reads};
 
