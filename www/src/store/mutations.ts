@@ -10,6 +10,9 @@ export default {
     SET_WORKER_SKETCHLIB(state: RootState, worker: Worker | null) {
         state.workerState.worker_sketchlib = worker;
     },
+    SET_WORKER_ORPHOS(state: RootState, worker: Worker | null) {
+        state.workerState.worker_orphos = worker;
+    },
 
     setPreprocessing(state: RootState, input: { nKmers : number, histo : [], used_min_count : number }) {
         console.log("Preprocessing finished! Saving intermediate information in the state");
@@ -142,6 +145,25 @@ export default {
         if (state.workerState.worker_sketchlib) {
             state.workerState.worker_sketchlib.postMessage({reset: true});
         }
-    }
+    },
 
+    // ORPHOS
+    saveGeneCallingResults(state: RootState, input : {output_file : string, gene_count : number, sequence_count : number} ) {
+        console.log("Storing results in allResults_orphos");
+        state.allResults_orphos.outputFile      = input.output_file;
+        state.allResults_orphos.geneCount       = input.gene_count;
+        state.allResults_orphos.sequenceCount   = input.sequence_count;
+    },
+
+    resetAllResults_orphos(state: RootState) {
+        state.allResults_orphos = {
+            outputFile: null,
+            geneCount: null,
+            sequenceCount: null,
+        };
+
+        if (state.workerState.worker_orphos) {
+            state.workerState.worker_orphos.postMessage({reset: true});
+        }
+    }
 };

@@ -1,0 +1,10 @@
+/home/vrbouza/Projects/assembler_development/orphos_test/sparrowhawk-web/rust/orphos-bridge/target/wasm32-unknown-unknown/release/deps/fixedbitset-f5b1e56afbed5562.d: /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/lib.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/block/mod.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/block/default.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/range.rs
+
+/home/vrbouza/Projects/assembler_development/orphos_test/sparrowhawk-web/rust/orphos-bridge/target/wasm32-unknown-unknown/release/deps/libfixedbitset-f5b1e56afbed5562.rlib: /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/lib.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/block/mod.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/block/default.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/range.rs
+
+/home/vrbouza/Projects/assembler_development/orphos_test/sparrowhawk-web/rust/orphos-bridge/target/wasm32-unknown-unknown/release/deps/libfixedbitset-f5b1e56afbed5562.rmeta: /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/lib.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/block/mod.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/block/default.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/range.rs
+
+/home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/lib.rs:
+/home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/block/mod.rs:
+/home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/block/default.rs:
+/home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fixedbitset-0.5.7/src/range.rs:

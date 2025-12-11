@@ -223,4 +223,32 @@ export default {
         commit("resetAllResults_sketchlib");
     },
 
+    // ORPHOS
+    async callGenes(context: ActionContext<RootState, RootState>, payload: { acceptFiles: Array<File>}) {
+        const { commit, state } = context;
+        console.log("Action callGenes: Uploaded file for gene calling")
+
+        if (state.workerState.worker_orphos) {
+            if (payload.acceptFiles.length == 1) {
+                state.workerState.worker_orphos.postMessage({call: true, input_file: payload.acceptFiles[0]});
+
+                state.workerState.worker_orphos.onmessage = (messageData) => {
+                    console.log(payload.acceptFiles[0].name + " genes have been called.");
+                    commit("saveGeneCallingResults", 
+                        {name:          payload.acceptFiles[0].name, 
+                        output_file:    messageData.data.output_file,
+                        gene_count:     messageData.data.gene_count,
+                        sequence_count: messageData.data.sequence_count,});
+                };
+            } else {
+                console.log("More than one file for gene calling uploaded. This case is not supported.");
+                commit("resetAllResults_orphos");
+            }
+        }
+    },
+
+    async resetAllResults_orphos(context: ActionContext<RootState, RootState>) {
+        const { commit } = context;
+        commit("resetAllResults_orphos");
+    }
 };

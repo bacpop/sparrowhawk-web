@@ -41,5 +41,10 @@ export const getters: GetterTree<RootState, RootState> = {
     // SKETCHLIB
     sampleIdentified(state: RootState) {
         return state.allResults_sketchlib.idProbs != null;
-    }
+    },
+
+    // ORPHOS
+    genesCalled(state: RootState) {
+        return state.allResults_orphos.outputFile != null;
+    },
 }

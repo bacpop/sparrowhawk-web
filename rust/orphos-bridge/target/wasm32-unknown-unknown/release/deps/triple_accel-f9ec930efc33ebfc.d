@@ -1,0 +1,10 @@
+/home/vrbouza/Projects/assembler_development/orphos_test/sparrowhawk-web/rust/orphos-bridge/target/wasm32-unknown-unknown/release/deps/triple_accel-f9ec930efc33ebfc.d: /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/lib.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/jewel.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/hamming.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/levenshtein.rs
+
+/home/vrbouza/Projects/assembler_development/orphos_test/sparrowhawk-web/rust/orphos-bridge/target/wasm32-unknown-unknown/release/deps/libtriple_accel-f9ec930efc33ebfc.rlib: /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/lib.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/jewel.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/hamming.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/levenshtein.rs
+
+/home/vrbouza/Projects/assembler_development/orphos_test/sparrowhawk-web/rust/orphos-bridge/target/wasm32-unknown-unknown/release/deps/libtriple_accel-f9ec930efc33ebfc.rmeta: /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/lib.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/jewel.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/hamming.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/levenshtein.rs
+
+/home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/lib.rs:
+/home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/jewel.rs:
+/home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/hamming.rs:
+/home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/triple_accel-0.4.0/src/levenshtein.rs:

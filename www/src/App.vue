@@ -7,6 +7,7 @@
                 <button class="tab" v-on:click="changeTab('Mapping')">Mapping</button>
                 <button class="tab" v-on:click="changeTab('Alignment')">Alignment</button>
                 <button class="tab" v-on:click="changeTab('TaxonomicID')">Taxonomic ID</button>
+                <button class="tab" v-on:click="changeTab('GeneCalling')">Gene calling</button>
             </div>
         </div>
 
@@ -17,6 +18,11 @@
         </div>
         <div class="Display" v-else-if="tabName === 'TaxonomicID'">
             <DropZoneSketchlib
+                :tabName="tabName"
+            />
+        </div>
+        <div class="Display" v-else-if="tabName === 'GeneCalling'">
+            <DropZoneOrphos
                 :tabName="tabName"
             />
         </div>
@@ -36,6 +42,9 @@
         <div class="Display" v-else-if="tabName === 'Alignment'">
             <ResultsDisplayAlignment />
         </div>
+        <div class="Display" v-else-if="tabName === 'GeneCalling'">
+            <ResultsDisplayOrphos />
+        </div>
 
         <div class="Display" v-if="tabName === 'Assembly'" style="margin-top: 10px;">
             <KmerHistogram />
@@ -48,13 +57,16 @@
     import DropZone from './components/DropZone.vue';
     import DropZoneSka from './components/DropZoneSka.vue';
     import DropZoneSketchlib from './components/DropZoneSketchlib.vue';
+    import DropZoneOrphos from './components/DropZoneOrphos.vue';
     import ResultsDisplayAssembly from './components/ResultsDisplayAssembly.vue';
     import ResultsDisplayMapping from './components/ResultsDisplayMapping.vue';
     import ResultsDisplayAlignment from './components/ResultsDisplayAlignment.vue';
+    import ResultsDisplayOrphos from './components/ResultsDisplayOrphos.vue';
     import KmerHistogram from './components/KmerHistogram.vue';
     import WorkerAssembler from '@/workers/Assembler.worker.js';
     import WorkerMapper from '@/workers/Mapper.worker.js';
     import WorkerSketcher from '@/workers/Sketcher.worker.js';
+    import WorkerCaller from '@/workers/Caller.worker.js';
     import "@fontsource/ibm-plex-sans";
 
     export default {
@@ -64,10 +76,12 @@
             DropZone,
             DropZoneSka,
             DropZoneSketchlib,
+            DropZoneOrphos,
             ResultsDisplayAssembly,
             KmerHistogram,
             ResultsDisplayMapping,
-            ResultsDisplayAlignment
+            ResultsDisplayAlignment,
+            ResultsDisplayOrphos
         },
 
         data() {
@@ -102,6 +116,15 @@
                     if (window.Worker) {
                         const worker = new WorkerSketcher();
                         this.$store.commit('SET_WORKER_SKETCHLIB', worker);
+                    } else {
+                        throw "WebWorkers are not supported by this web browser.";
+                    }
+            });
+            import("@/pkg_orphos-bridge")
+                .then(() => {
+                    if (window.Worker) {
+                        const worker = new WorkerCaller();
+                        this.$store.commit('SET_WORKER_ORPHOS', worker);
                     } else {
                         throw "WebWorkers are not supported by this web browser.";
                     }

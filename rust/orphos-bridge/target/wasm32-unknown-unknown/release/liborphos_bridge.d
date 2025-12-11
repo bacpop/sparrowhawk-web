@@ -1,0 +1,1 @@
+/home/vrbouza/Projects/assembler_development/orphos_test/sparrowhawk-web/rust/orphos-bridge/target/wasm32-unknown-unknown/release/liborphos_bridge.rlib: /home/vrbouza/Projects/assembler_development/orphos_test/sparrowhawk-web/rust/orphos-bridge/src/fastx_wasm.rs /home/vrbouza/Projects/assembler_development/orphos_test/sparrowhawk-web/rust/orphos-bridge/src/lib.rs

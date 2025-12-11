@@ -4,6 +4,7 @@ export interface WorkerState {
     worker:           Worker | null;
     worker_ska:       Worker | null;
     worker_sketchlib: Worker | null;
+    worker_orphos:    Worker | null;
 }
 
 export interface AllResults {
@@ -37,6 +38,12 @@ export interface AllResultsSketchlib {
     idProbs: number[] | null
     idSpecies: string[] | null
     idMetadata: string[] | null
+}
+
+export interface AllResultsOrphos {
+    outputFile: string | null
+    geneCount: number | null
+    sequenceCount: number | null
 }
 
 export interface ReadsPreprocessing {

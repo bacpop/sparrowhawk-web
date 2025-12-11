@@ -1,0 +1,10 @@
+/home/vrbouza/Projects/assembler_development/orphos_test/sparrowhawk-web/rust/orphos-bridge/target/wasm32-unknown-unknown/release/deps/num_complex-c870b568fa277d2d.d: /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/lib.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/cast.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/pow.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/complex_float.rs
+
+/home/vrbouza/Projects/assembler_development/orphos_test/sparrowhawk-web/rust/orphos-bridge/target/wasm32-unknown-unknown/release/deps/libnum_complex-c870b568fa277d2d.rlib: /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/lib.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/cast.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/pow.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/complex_float.rs
+
+/home/vrbouza/Projects/assembler_development/orphos_test/sparrowhawk-web/rust/orphos-bridge/target/wasm32-unknown-unknown/release/deps/libnum_complex-c870b568fa277d2d.rmeta: /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/lib.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/cast.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/pow.rs /home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/complex_float.rs
+
+/home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/lib.rs:
+/home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/cast.rs:
+/home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/pow.rs:
+/home/vrbouza/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-complex-0.4.6/src/complex_float.rs:

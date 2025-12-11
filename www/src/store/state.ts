@@ -2,6 +2,7 @@ import {
     AllResults,
     AllResultsSka,
     AllResultsSketchlib,
+    AllResultsOrphos,
     ReadsPreprocessing,
     WorkerState,
 } from "@/types";
@@ -17,4 +18,5 @@ export interface RootState {
     errors              : string,
     min_count           : number,
     allResults_sketchlib: AllResultsSketchlib,
+    allResults_orphos   : AllResultsOrphos,
 }
