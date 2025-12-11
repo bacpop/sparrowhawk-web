@@ -3,14 +3,17 @@
         <h1>{{tabName}}</h1>
         <div v-if="tabName=='GeneCalling'">
 
-            <div v-if="!genesCalled" v-bind='getRootPropsGenome()' class="dropzone dropzone-sample">
+            <div v-if="!genesCalled && !callingGenes" v-bind='getRootPropsGenome()' class="dropzone dropzone-sample">
                 <input v-bind='getInputPropsGenome()' />
                 <p v-if='isDragActiveGenome' class="dropzone-text">Drop one FASTA file here ...</p>
                 <p v-else class="dropzone-text">Drag and drop your <b>sample FASTA file</b> here,
                     or click to select a file</p>
             </div>
-            <div v-if="genesCalled" class="dropzone dropzone-sample">
-                <p class="dropzone-text">✅ Genes annotated</p>
+            <div v-else-if="genesCalled" class="dropzone dropzone-sample">
+                <p class="dropzone-text">✅ Genes called!</p>
+            </div>
+            <div v-else class="dropzone dropzone-sample">   <!-- This is while the genes are being called -->
+                <p class="dropzone-text">⌛ Calling genes...</p>
             </div>
 
             <div v-if="genesCalled">
@@ -64,6 +67,9 @@ export default {
     computed: {
         genesCalled() {
             return this.$store.getters.genesCalled;
+        },
+        callingGenes() {
+            return this.$store.getters.callingGenes;
         },
     },
 

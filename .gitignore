@@ -23,3 +23,6 @@ www/*.ntvs*
 www/*.njsproj
 www/*.sln
 www/*.sw?
+
+# Other
+rust/orphos-bridge/target/*

@@ -36,6 +36,7 @@ export const emptyState = (): RootState => ({
         outputFile: null,
         geneCount: null,
         sequenceCount: null,
+        callingGenes: false,
     },
 
     workerState: {

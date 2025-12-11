@@ -44,6 +44,7 @@ export interface AllResultsOrphos {
     outputFile: string | null
     geneCount: number | null
     sequenceCount: number | null
+    callingGenes: boolean
 }
 
 export interface ReadsPreprocessing {

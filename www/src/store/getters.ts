@@ -47,4 +47,7 @@ export const getters: GetterTree<RootState, RootState> = {
     genesCalled(state: RootState) {
         return state.allResults_orphos.outputFile != null;
     },
+    callingGenes(state: RootState) {
+        return state.allResults_orphos.callingGenes;
+    },
 }

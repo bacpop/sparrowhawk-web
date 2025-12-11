@@ -153,6 +153,11 @@ export default {
         state.allResults_orphos.outputFile      = input.output_file;
         state.allResults_orphos.geneCount       = input.gene_count;
         state.allResults_orphos.sequenceCount   = input.sequence_count;
+        state.allResults_orphos.callingGenes    = false;
+    },
+
+    setCallingGenes(state: RootState) {
+        state.allResults_orphos.callingGenes    = true;
     },
 
     resetAllResults_orphos(state: RootState) {
@@ -160,6 +165,7 @@ export default {
             outputFile: null,
             geneCount: null,
             sequenceCount: null,
+            callingGenes: false
         };
 
         if (state.workerState.worker_orphos) {

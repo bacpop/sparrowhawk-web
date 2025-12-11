@@ -230,6 +230,7 @@ export default {
 
         if (state.workerState.worker_orphos) {
             if (payload.acceptFiles.length == 1) {
+                commit("setCallingGenes");
                 state.workerState.worker_orphos.postMessage({call: true, input_file: payload.acceptFiles[0]});
 
                 state.workerState.worker_orphos.onmessage = (messageData) => {

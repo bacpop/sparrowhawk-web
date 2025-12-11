@@ -7,7 +7,6 @@ import { Caller } from './Caller.js';
         if (evt.data instanceof Object) {
             if (evt.data.call) {
                 caller.callGenes(evt.data.input_file);
-
             } else if (evt.data.reset) {
                 caller.resetAll();
             } else {

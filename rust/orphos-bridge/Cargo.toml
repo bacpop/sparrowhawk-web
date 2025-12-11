@@ -17,10 +17,8 @@ serde = { version = "1.0.219", features = ["derive"] }
 console_error_panic_hook = "0.1.7"
 getrandom = { version = "0.2", features = ["js"] }
 json = {version = "0.12.4"}
-#seq_io = {version = "0.3.2"}
-seq_io = {version = "0.3.4"}
-#flate2 = {version = "1.0" }
-flate2 = {version = "1.1.5" }
+seq_io = {version = "0.3.2"}
+flate2 = {version = "1.0" }
 
 [profile.release]
 opt-level = "z"  # Optimize for size
