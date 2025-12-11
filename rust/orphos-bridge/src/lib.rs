@@ -120,15 +120,19 @@ impl OrphosData {
 
             let tmpdesc = desc.map(|s| s.to_string());
             let tmpid = id.to_owned();
-            let tmpvec = seqrec.seq().to_vec();
+            let tmpvec = seqrec.full_seq().to_vec();
 
-            logw(format!("tmpvec: {:?}", tmpvec).as_str(), None);
-            logw(format!("tmpid: {:?}, tmpdesc: {:?}", tmpid, tmpdesc).as_str(), None);
+            // logw(format!("tmpvec: {:?}", tmpvec).as_str(), None);
+            // logw(format!("tmpvec: {:?}", tmpvec.iter().rev().take(25).collect::<Vec<_>>()).as_str(), None);
+            // logw(format!("tmpid: {:?}, tmpdesc: {:?}", tmpid, tmpdesc).as_str(), None);
+            // logw(format!("tmpvec: {:?}", tmpvec.len()).as_str(), None);
             let tmpres = analyser.analyze_sequence_bytes(
                     &tmpvec,
                     tmpid,
                     tmpdesc
                 ).expect("Error analysing FASTA record.");
+            logw(format!("after analysis").as_str(), None);
+
             all_results.push(tmpres);
         }
         logw("Analysis done. Saving results as attribute...", Some("info"));
