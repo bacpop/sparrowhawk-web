@@ -1,23 +1,23 @@
-import { RootState } from "@/store/state";
+import {RootState} from "@/store/state";
 
 export const emptyState = (): RootState => ({
-    readsFileNames : null,
-    errors         : "",
-    min_count      : 0,
-    refSet         : null,
+    readsFileNames: null,
+    errors: "",
+    min_count: 0,
+    refSet: null,
 
     readsPreprocessing: {
-        nKmers : null,
-        histo  : [],
-        used_min_count : null,
+        nKmers: null,
+        histo: [],
+        used_min_count: null,
     },
 
     allResults: {
-        nContigs    : null,
-        fastaOutput : "",
-        dotOutput   : "",
-        gfaOutput   : "",
-        gfav2Output : "",
+        nContigs: null,
+        fastaOutput: "",
+        dotOutput: "",
+        gfaOutput: "",
+        gfav2Output: "",
     },
 
     allResults_ska: {

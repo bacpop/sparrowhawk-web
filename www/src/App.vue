@@ -1,45 +1,55 @@
 <template>
-  <div id="app">
-    <div id="Header">
-      <img src="sparrowhawk_logo.png" alt="Sparrowhawk logo" class="h-[100px]">
-      <div id="tabs">
-        <VoltButton label="Assembly" class="tab" v-on:click="changeTab('Assembly')"/>
-        <VoltButton label="Mapping" class="tab" v-on:click="changeTab('Mapping')"/>
-        <VoltButton label="Alignment" class="tab" v-on:click="changeTab('Alignment')"/>
-        <VoltButton label="ID" class="tab" v-on:click="changeTab('TaxonomicID')"/>
+  <SidebarProvider>
+    <Sidebar class="my-3.5 mx-6">
+      <SidebarHeader>
+        <img src="sparrowhawk_logo.png" alt="Sparrowhawk logo" class="h-20">
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem v-for="item in tabs"
+                               :key="item.title"
+                               class="py-2.5 px-3">
+                <SidebarMenuButton @click="changeTab(item.id)">
+                  <component :is="item.icon"/>
+                  <span class="text-md">{{ item.label }}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
+
+    <!-- Main Content -->
+    <main class="bg-white mt-6 mb-6 rounded-tl-xl rounded-bl-xl border-2 border-gray-200 border-r-0 flex-1 p-8">
+      <div v-if="tabName === 'Assembly'">
+        <DropZone :tabName="tabName"/>
+        <ResultsDisplayAssembly class="mt-6"/>
+        <KmerHistogram class="mt-6"/>
       </div>
-    </div>
 
-    <div class="Display" v-if="tabName === 'Assembly'">
-      <DropZone :tabName="tabName"/>
-    </div>
-    <div class="Display" v-else-if="tabName === 'TaxonomicID'">
-      <DropZoneSketchlib :tabName="tabName"/>
-    </div>
-    <div class="Display" v-else>
-      <DropZoneSka :tabName="tabName"/>
-    </div>
+      <div v-else-if="tabName === 'TaxonomicID'">
+        <DropZoneSketchlib :tabName="tabName"/>
+      </div>
 
+      <div v-else-if="tabName === 'Mapping'">
+        <DropZoneSka :tabName="tabName"/>
+        <ResultsDisplayMapping class="mt-6"/>
+      </div>
 
-    <div class="Display" v-if="tabName === 'Assembly'">
-      <ResultsDisplayAssembly/>
-    </div>
-    <div class="Display" v-else-if="tabName === 'Mapping'">
-      <ResultsDisplayMapping/>
-    </div>
-    <div class="Display" v-else-if="tabName === 'Alignment'">
-      <ResultsDisplayAlignment/>
-    </div>
-
-    <div class="Display" v-if="tabName === 'Assembly'" style="margin-top: 10px;">
-      <KmerHistogram/>
-    </div>
-
-  </div>
+      <div v-else-if="tabName === 'Alignment'">
+        <DropZoneSka :tabName="tabName"/>
+        <ResultsDisplayAlignment class="mt-6"/>
+      </div>
+    </main>
+  </SidebarProvider>
 </template>
 
 <script>
-import VoltButton from "@/volt/VoltButton.vue";
+// eslint-disable-next-line
+import {Codesandbox, Map, ScanFace, Spline} from "lucide-vue-next";
 
 import DropZone from './components/DropZone.vue';
 import DropZoneSka from './components/DropZoneSka.vue';
@@ -52,12 +62,35 @@ import WorkerAssembler from '@/workers/Assembler.worker.js';
 import WorkerMapper from '@/workers/Mapper.worker.js';
 import WorkerSketcher from '@/workers/Sketcher.worker.js';
 import "@fontsource/ibm-plex-sans";
+import {
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger
+} from "@/components/ui/sidebar";
 
 export default {
   name: 'App',
 
   components: {
-    VoltButton,
+    SidebarHeader,
+    SidebarMenuItem,
+    SidebarMenuButton,
+    SidebarMenu,
+    SidebarGroupContent,
+    SidebarGroup,
+    SidebarContent,
+    SidebarProvider,
+    SidebarTrigger,
+    Codesandbox,
+    Map,
+    Spline,
+    ScanFace,
     DropZone,
     DropZoneSka,
     DropZoneSketchlib,
@@ -70,6 +103,12 @@ export default {
   data() {
     return {
       tabName: 'Assembly',
+      tabs: [
+        {id: 'Assembly', label: 'Assembly', icon: 'Codesandbox'},
+        {id: 'Mapping', label: 'Mapping', icon: 'Map'},
+        {id: 'Alignment', label: 'Alignment', icon: 'Spline'},
+        {id: 'TaxonomicID', label: 'Taxonomic ID', icon: 'ScanFace'}
+      ]
     }
   },
 
