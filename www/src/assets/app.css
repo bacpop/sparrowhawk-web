@@ -120,9 +120,6 @@
 
     body {
         @apply bg-background text-foreground;
+        background-color: #F5F7F9;
     }
-}
-
-body {
-    background-color: #F5F7F9;
 }
