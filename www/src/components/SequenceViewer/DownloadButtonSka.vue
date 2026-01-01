@@ -4,37 +4,40 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from "vue";
 import { useState } from "vuex-composition-helpers";
 
-export default {
+export default defineComponent({
     name: 'DownloadButtonSka',
     setup() {
-        const { allResults_ska } = useState(["allResults_ska"]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { allResults_ska } = useState(["allResults_ska"]) as any;
 
         return {
             allResults_ska
         }
     },
     methods: {
-        downloadALN() {
-
+        downloadALN(): void {
             let text = "";
             let mapping_alignment = "";
 
-            for (let file of Object.keys(this.allResults_ska.mapResults)) {
+            for (const file of Object.keys(this.allResults_ska.mapResults)) {
                 text += `>${file}\n`;
                 mapping_alignment = "";
-                let sequences = this.allResults_ska.mapResults[file].mapped_sequences;
-                for (const sequence of sequences) {
-                    mapping_alignment += sequence;
+                const sequences = this.allResults_ska.mapResults[file].mapped_sequences;
+                if (sequences) {
+                    for (const sequence of sequences) {
+                        mapping_alignment += sequence;
+                    }
                 }
                 text += mapping_alignment + "\n";
             }
             console.log(text);
 
-            let filename = 'alignment.aln';
-            let element = document.createElement('a');
+            const filename = 'alignment.aln';
+            const element = document.createElement('a');
             element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(text));
             element.setAttribute('download', filename);
 
@@ -45,7 +48,7 @@ export default {
             document.body.removeChild(element);
         }
     }
-}
+});
 </script>
 
 <style scoped>

@@ -1,4 +1,4 @@
-import { RootState } from "@/store/state";
+import {RootState} from "@/store/state";
 
 export default {
     SET_WORKER(state: RootState, worker: Worker | null) {
@@ -11,28 +11,34 @@ export default {
         state.workerState.worker_sketchlib = worker;
     },
 
-    setPreprocessing(state: RootState, input: { nKmers : number, histo : [], used_min_count : number }) {
+    setPreprocessing(state: RootState, input: { nKmers: number, histo: [], used_min_count: number }) {
         console.log("Preprocessing finished! Saving intermediate information in the state");
         console.log(input.nKmers);
 
         state.readsPreprocessing.nKmers = input.nKmers;
-        state.readsPreprocessing.histo  = input.histo;
+        state.readsPreprocessing.histo = input.histo;
         state.readsPreprocessing.used_min_count = input.used_min_count;
 
     },
 
-    setAssembly(state: RootState, input: { ncontigs : number, outfasta : string, outdot : string, outgfa : string, outgfav2 : string }) {
+    setAssembly(state: RootState, input: {
+        ncontigs: number,
+        outfasta: string,
+        outdot: string,
+        outgfa: string,
+        outgfav2: string
+    }) {
         console.log("Assembly finished! Saving contigs as fasta in the state");
 
-        state.allResults.nContigs    = input.ncontigs;
+        state.allResults.nContigs = input.ncontigs;
         state.allResults.fastaOutput = input.outfasta;
-        state.allResults.dotOutput   = input.outdot;
-        state.allResults.gfaOutput   = input.outgfa;
+        state.allResults.dotOutput = input.outdot;
+        state.allResults.gfaOutput = input.outgfa;
         state.allResults.gfav2Output = input.outgfav2;
 
     },
 
-    setReadsFileNames(state: RootState, input: { file1 : string, file2 : string }) {
+    setReadsFileNames(state: RootState, input: { file1: string, file2: string }) {
         console.log("Setting names of reads");
 
         state.readsFileNames = input.file1 + "," + input.file2;
@@ -57,16 +63,16 @@ export default {
         state.readsFileNames = null;
         state.min_count = 0;
         state.readsPreprocessing = {
-            nKmers : null,
-            histo  : [],
-            used_min_count : null,
+            nKmers: null,
+            histo: [],
+            used_min_count: null,
         }
         state.allResults = {
-            nContigs    : null,
-            fastaOutput : "",
-            dotOutput   : "",
-            gfaOutput   : "",
-            gfav2Output : "",
+            nContigs: null,
+            fastaOutput: "",
+            dotOutput: "",
+            gfaOutput: "",
+            gfav2Output: "",
         };
 
         if (state.workerState.worker) {
@@ -95,13 +101,18 @@ export default {
     },
 
     setMapped(state: RootState,
-              input: {name:string, nb_variants:number|null, coverage:number|null, mapped_sequences:string[]}) {
+              input: {
+                  name: string,
+                  nb_variants: number | null,
+                  coverage: number | null,
+                  mapped_sequences: string[]
+              }) {
         state.allResults_ska.mapResults[input.name].nb_variants = input.nb_variants
         state.allResults_ska.mapResults[input.name].coverage = input.coverage
         state.allResults_ska.mapResults[input.name].mapped_sequences = input.mapped_sequences
     },
 
-    setAligned(state: RootState, input: {aligned: boolean, names: string[], newick: string}) {
+    setAligned(state: RootState, input: { aligned: boolean, names: string[], newick: string }) {
         state.allResults_ska.alignResults[0] = {
             aligned: input.aligned,
             names: input.names,
@@ -123,7 +134,7 @@ export default {
     },
 
     // SKETCHLIB
-    saveIDResults(state: RootState, input : {probs : number[], names : string[], metadata : string[]} ) {
+    saveIDResults(state: RootState, input: { probs: number[], names: string[], metadata: string[] }) {
         console.log("Storing results in allResults_sketchlib");
         // console.log(input.probs);
         state.allResults_sketchlib.idProbs = input.probs;

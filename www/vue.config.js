@@ -97,13 +97,24 @@ module.exports = defineConfig({
         config.module
             .rule("js")
             .exclude
-            .add(/\.worker\.js$/);
+            .add(/\.worker\.(js|ts)$/);
+
+        config.module
+            .rule("ts")
+            .exclude
+            .add(/\.worker\.ts$/);
 
         config.module
             .rule("worker")
-            .test(/\.worker\.js$/)
+            .test(/\.worker\.(js|ts)$/)
             .use("worker-loader")
             .loader("worker-loader")
+            .end()
+            .use("ts-loader")
+            .loader("ts-loader")
+            .options({
+                transpileOnly: true
+            })
             .end();
 
         config.plugin('define').tap((definitions) => {

@@ -47,7 +47,9 @@
   </SidebarProvider>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
+import { useStore } from 'vuex';
 // eslint-disable-next-line
 import {Codesandbox, Map, ScanFace, Spline} from "lucide-vue-next";
 
@@ -58,9 +60,9 @@ import ResultsDisplayAssembly from './components/ResultsDisplayAssembly.vue';
 import ResultsDisplayMapping from './components/ResultsDisplayMapping.vue';
 import ResultsDisplayAlignment from './components/ResultsDisplayAlignment.vue';
 import KmerHistogram from './components/KmerHistogram.vue';
-import WorkerAssembler from '@/workers/Assembler.worker.js';
-import WorkerMapper from '@/workers/Mapper.worker.js';
-import WorkerSketcher from '@/workers/Sketcher.worker.js';
+import WorkerAssembler from '@/workers/Assembler.worker';
+import WorkerMapper from '@/workers/Mapper.worker';
+import WorkerSketcher from '@/workers/Sketcher.worker';
 import "@fontsource/ibm-plex-sans";
 import {
   SidebarContent,
@@ -74,7 +76,13 @@ import {
   SidebarTrigger
 } from "@/components/ui/sidebar";
 
-export default {
+interface Tab {
+  id: string;
+  label: string;
+  icon: string;
+}
+
+export default defineComponent({
   name: 'App',
 
   components: {
@@ -100,57 +108,60 @@ export default {
     ResultsDisplayAlignment
   },
 
+  setup() {
+    const store = useStore();
+    return { store };
+  },
+
   data() {
     return {
-      tabName: 'Assembly',
+      tabName: 'Assembly' as string,
       tabs: [
         {id: 'Assembly', label: 'Assembly', icon: 'Codesandbox'},
         {id: 'Mapping', label: 'Mapping', icon: 'Map'},
         {id: 'Alignment', label: 'Alignment', icon: 'Spline'},
         {id: 'TaxonomicID', label: 'Taxonomic ID', icon: 'ScanFace'}
-      ]
+      ] as Tab[]
     }
   },
 
-  mounted: function () {
+  mounted(): void {
     console.log("Loading wasm modules in workers...")
 
     import("@/pkg")
         .then(() => {
           if (window.Worker) {
             const worker = new WorkerAssembler();
-            this.$store.commit('SET_WORKER', worker);
+            this.store.commit('SET_WORKER', worker);
           } else {
-            throw "WebWorkers are not supported by this web browser.";
+            throw new Error("WebWorkers are not supported by this web browser.");
           }
         });
     import("@/pkg_ska")
         .then(() => {
           if (window.Worker) {
             const worker = new WorkerMapper();
-            this.$store.commit('SET_WORKER_SKA', worker);
+            this.store.commit('SET_WORKER_SKA', worker);
           } else {
-            throw "WebWorkers are not supported by this web browser.";
+            throw new Error("WebWorkers are not supported by this web browser.");
           }
         });
     import("@/pkg_sketchlib")
         .then(() => {
           if (window.Worker) {
             const worker = new WorkerSketcher();
-            this.$store.commit('SET_WORKER_SKETCHLIB', worker);
+            this.store.commit('SET_WORKER_SKETCHLIB', worker);
           } else {
-            throw "WebWorkers are not supported by this web browser.";
+            throw new Error("WebWorkers are not supported by this web browser.");
           }
         });
-
-    return;
   },
 
   methods: {
-    changeTab: function (tab) {
+    changeTab(tab: string): void {
       this.tabName = tab;
     }
   }
-}
+});
 
 </script>

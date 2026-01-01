@@ -6,38 +6,42 @@
     </div>
 </template>
 
-<script>
-import { useState }   from "vuex-composition-helpers";
-import { ref }        from "vue";
+<script lang="ts">
+import { defineComponent, ref, Ref } from "vue";
+import { useStore } from "vuex";
+import { useState } from "vuex-composition-helpers";
 import DownloadButton from "./DownloadButton.vue";
 
-export default {
+export default defineComponent({
     name: "ResultsDisplayAssembly",
     components: {
         DownloadButton
-        },
+    },
     setup() {
-        const { allResults } = useState(["allResults"]);
-        const skip = ref(true);
+        const store = useStore();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { allResults } = useState(["allResults"]) as any;
+        const skip: Ref<boolean> = ref(true);
 
         return {
             allResults,
             skip,
+            store
         }
     },
 
     computed: {
-        queryAssembled() {
-            return this.$store.getters.queryAssembled;
+        queryAssembled(): boolean {
+            return this.store.getters.queryAssembled;
         },
     },
 
     methods: {
-        use_keys(list_of_keys) {
+        use_keys(list_of_keys: (string | number | boolean)[]): string {
             return list_of_keys.join('-');
         },
     },
-};
+});
 </script>
 
 <style>

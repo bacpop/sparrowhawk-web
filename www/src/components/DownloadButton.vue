@@ -13,24 +13,26 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
+    import { defineComponent, Ref } from "vue";
     import { useState } from "vuex-composition-helpers";
+    import type { AllResults } from "@/types";
 
-    export default {
+    export default defineComponent({
         name: 'DownloadButton',
         setup() {
-            const { allResults } = useState(["allResults"]);
+            const { allResults } = useState(["allResults"]) as { allResults: Ref<AllResults> };
 
             return {
                 allResults
             }
         },
         methods: {
-            downloadFASTA() {
+            downloadFASTA(): void {
                 console.log(this.allResults.fastaOutput);
 
-                let filename = 'assembly.fasta';
-                let element = document.createElement('a');
+                const filename = 'assembly.fasta';
+                const element = document.createElement('a');
                 element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(this.allResults.fastaOutput));
                 element.setAttribute('download', filename);
 
@@ -41,12 +43,11 @@
                 document.body.removeChild(element);
             },
 
-
-            downloadDOT() {
+            downloadDOT(): void {
                 console.log(this.allResults.dotOutput);
 
-                let filename = 'graph.dot';
-                let element = document.createElement('a');
+                const filename = 'graph.dot';
+                const element = document.createElement('a');
                 element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(this.allResults.dotOutput));
                 element.setAttribute('download', filename);
 
@@ -57,12 +58,11 @@
                 document.body.removeChild(element);
             },
 
-
-            downloadGFA() {
+            downloadGFA(): void {
                 console.log(this.allResults.gfaOutput);
 
-                let filename = 'graph.gfa';
-                let element = document.createElement('a');
+                const filename = 'graph.gfa';
+                const element = document.createElement('a');
                 element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(this.allResults.gfaOutput));
                 element.setAttribute('download', filename);
 
@@ -73,11 +73,11 @@
                 document.body.removeChild(element);
             },
 
-            downloadGFAv2() {
+            downloadGFAv2(): void {
                 console.log(this.allResults.gfav2Output);
 
-                let filename = 'graph.gfa2';
-                let element = document.createElement('a');
+                const filename = 'graph.gfa2';
+                const element = document.createElement('a');
                 element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(this.allResults.gfav2Output));
                 element.setAttribute('download', filename);
 
@@ -88,7 +88,7 @@
                 document.body.removeChild(element);
             },
         }
-    }
+    });
 </script>
 
 <style scoped>

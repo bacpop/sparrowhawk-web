@@ -1,17 +1,17 @@
 export type Dict<T> = Record<string, T>
 
 export interface WorkerState {
-    worker:           Worker | null;
-    worker_ska:       Worker | null;
+    worker: Worker | null;
+    worker_ska: Worker | null;
     worker_sketchlib: Worker | null;
 }
 
 export interface AllResults {
-    nContigs    : number | null;
-    fastaOutput : string;
-    dotOutput   : string;
-    gfaOutput   : string;
-    gfav2Output   : string;
+    nContigs: number | null;
+    fastaOutput: string;
+    dotOutput: string;
+    gfaOutput: string;
+    gfav2Output: string;
 }
 
 export interface IsolateMapping {
@@ -40,7 +40,7 @@ export interface AllResultsSketchlib {
 }
 
 export interface ReadsPreprocessing {
-    nKmers : number | null;
-    histo  : [];
-    used_min_count : number | null;
+    nKmers: number | null;
+    histo: [];
+    used_min_count: number | null;
 }

@@ -73,22 +73,29 @@
   </div>
 </template>
 
-<script>
-import {useDropzone} from "vue3-dropzone";
-import {useActions, useState} from "vuex-composition-helpers";
-import VueSlider from 'vue-3-slider-component'
-import {ref} from "vue";
+<script lang="ts">
+import { defineComponent, ref, Ref } from "vue";
+import { useDropzone } from "vue3-dropzone";
+import { useActions, useState } from "vuex-composition-helpers";
+import { useStore } from "vuex";
+import VueSlider from 'vue-3-slider-component';
 
-export default {
+export default defineComponent({
   name: "DropZoneSka",
-  props: ["tabName"],
+  props: {
+    tabName: {
+      type: String,
+      required: true
+    }
+  },
   components: {
     VueSlider
   },
   setup() {
-    let k = ref(31);
-    let proportion_reads = ref(1);
-    let param = ref(false);
+    const store = useStore();
+    const k: Ref<number> = ref(31);
+    const proportion_reads: Ref<number> = ref(1);
+    const param: Ref<boolean> = ref(false);
 
     const {
       processRef,
@@ -96,21 +103,22 @@ export default {
       processQueryAlign,
       resetAllResults_ska
     } = useActions(["processRef", "processQueryMap", "processQueryAlign", "resetAllResults_ska"]);
-    const {allResults_ska} = useState(["allResults_ska"]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { allResults_ska } = useState(["allResults_ska"]) as any;
 
-    function onDropRef(acceptFiles) {
-      processRef({acceptFiles: acceptFiles, k: k.value});
+    function onDropRef(acceptFiles: File[]): void {
+      processRef({ acceptFiles: acceptFiles, k: k.value });
     }
 
-    function onDropQueryMap(acceptFiles) {
-      processQueryMap({acceptFiles: acceptFiles, proportion_reads: proportion_reads.value});
+    function onDropQueryMap(acceptFiles: File[]): void {
+      processQueryMap({ acceptFiles: acceptFiles, proportion_reads: proportion_reads.value });
     }
 
-    function onDropQueryAlign(acceptFiles) {
-      processQueryAlign({acceptFiles: acceptFiles, k: k.value, proportion_reads: proportion_reads.value});
+    function onDropQueryAlign(acceptFiles: File[]): void {
+      processQueryAlign({ acceptFiles: acceptFiles, k: k.value, proportion_reads: proportion_reads.value });
     }
 
-    function resetAll() {
+    function resetAll(): void {
       param.value = false;
       resetAllResults_ska();
     }
@@ -141,10 +149,11 @@ export default {
       ...restQueryAlign
     } = useDropzone({
       onDrop: onDropQueryAlign,
-      accept: [".fa", ".fasta", ".gz", ".fastq", ".fq"] // To be redifined
+      accept: [".fa", ".fasta", ".gz", ".fastq", ".fq"]
     });
 
     return {
+      store,
       k,
       proportion_reads,
       param,
@@ -168,21 +177,20 @@ export default {
     };
   },
   computed: {
-    refProcessed() {
-      return this.$store.getters.refProcessed;
+    refProcessed(): boolean {
+      return this.store.getters.refProcessed;
     },
-    refName() {
-      return this.$store.getters.refName;
+    refName(): string {
+      return this.store.getters.refName;
     }
   },
 
   methods: {
-    clear() {
-      resetAll()
+    clear(): void {
+      this.resetAll();
     }
   },
-
-};
+});
 </script>
 
 <style>

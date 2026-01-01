@@ -1,0 +1,58 @@
+import { Assembler } from './Assembler';
+
+interface PreprocessMessage {
+    preprocess: boolean;
+    file1: File;
+    file2: File;
+    k: number;
+    verbose: boolean;
+    min_count: number;
+    min_qual: number;
+    csize: number;
+    do_bloom: boolean;
+    do_fit: boolean;
+}
+
+interface AssembleMessage {
+    assemble: boolean;
+    no_bubble_collapse: boolean;
+    no_dead_end_removal: boolean;
+}
+
+interface ResetMessage {
+    reset: boolean;
+}
+
+type WorkerMessage = PreprocessMessage | AssembleMessage | ResetMessage;
+
+const ctx: Worker = self as unknown as Worker;
+const assembler = new Assembler(ctx);
+
+ctx.onmessage = (evt: MessageEvent<WorkerMessage>) => {
+    if (evt.data instanceof Object) {
+        if ('preprocess' in evt.data && evt.data.preprocess) {
+            console.log("Trying to preprocess!");
+            const data = evt.data as PreprocessMessage;
+            assembler.preprocess(
+                data.file1,
+                data.file2,
+                data.k,
+                data.verbose,
+                data.min_count,
+                data.min_qual,
+                data.csize,
+                data.do_bloom,
+                data.do_fit
+            );
+        } else if ('assemble' in evt.data && evt.data.assemble) {
+            console.log("Trying to assemble!");
+            const data = evt.data as AssembleMessage;
+            assembler.assemble(data.no_bubble_collapse, data.no_dead_end_removal);
+        } else if ('reset' in evt.data && evt.data.reset) {
+            console.log("Trying to reset!");
+            assembler.resetAll();
+        } else {
+            throw new Error("Event " + JSON.stringify(evt.data) + " is not supported");
+        }
+    }
+};

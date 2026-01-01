@@ -103,36 +103,43 @@
     </div>
 
   </div>
-  <button @click="doAss" v-if='readsPreprocessed && !readsProcessed' style="float: center; margin-top: 10px;"><b>Start
-    assembly</b></button>
+  <button @click="doAss" v-if='readsPreprocessed && !readsProcessed' style="float: center; margin-top: 10px;">
+    <b>Start assembly</b>
+  </button>
 </template>
 
 
-<script>
+<script lang="ts">
+import {defineComponent, ref, Ref} from "vue";
 import {useDropzone} from "vue3-dropzone";
 import {useActions, useState} from "vuex-composition-helpers";
-import VueSlider from 'vue-3-slider-component'
-import {ref} from "vue";
+import {useStore} from "vuex";
+import VueSlider from 'vue-3-slider-component';
 import "@fontsource/ibm-plex-mono";
 
-
-export default {
+export default defineComponent({
   name: "DropZone",
-  props: ["tabName"],
+  props: {
+    tabName: {
+      type: String,
+      required: true
+    }
+  },
   components: {
     VueSlider
   },
   setup() {
-    let k = ref(31);
-    let min_count = ref(5);
-    let min_qual = ref(20);
-    let csize = ref(150000);
-    let do_bloom = ref(false);
-    let do_fit = ref(false);
-    let param = ref(false);
-    let assemblying = ref(false);
-    let no_bubble = ref(false);
-    let no_deadend = ref(false);
+    const store = useStore();
+    const k: Ref<number> = ref(31);
+    const min_count: Ref<number> = ref(5);
+    const min_qual: Ref<number> = ref(20);
+    const csize: Ref<number> = ref(150000);
+    const do_bloom: Ref<boolean> = ref(false);
+    const do_fit: Ref<boolean> = ref(false);
+    const param: Ref<boolean> = ref(false);
+    const assemblying: Ref<boolean> = ref(false);
+    const no_bubble: Ref<boolean> = ref(false);
+    const no_deadend: Ref<boolean> = ref(false);
 
     const {
       processReads,
@@ -140,10 +147,11 @@ export default {
       resetAllResults,
       removeErrors
     } = useActions(["processReads", "doTheAssembly", "resetAllResults", "removeErrors"]);
-    const {allResults} = useState(["allResults"]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const {allResults} = useState(["allResults"]) as any;
 
 
-    function onDropReads(acceptFiles) {
+    function onDropReads(acceptFiles: File[]): void {
       processReads({
         acceptFiles: acceptFiles,
         k: k.value,
@@ -155,7 +163,7 @@ export default {
       });
     }
 
-    function doAss() {
+    function doAss(): void {
       assemblying.value = true;
       doTheAssembly({
         no_bubble_collapse: no_bubble.value,
@@ -163,7 +171,7 @@ export default {
       });
     }
 
-    function resetAll() {
+    function resetAll(): void {
       param.value = false;
       assemblying.value = false;
       do_bloom.value = false;
@@ -190,6 +198,7 @@ export default {
     });
 
     return {
+      store,
       k,
       min_count,
       min_qual,
@@ -212,41 +221,38 @@ export default {
   },
 
   computed: {
-    readsProcessed() {
-      return this.$store.getters.queryAssembled;
+    readsProcessed(): boolean {
+      return this.store.getters.queryAssembled;
     },
-    readsProcessing() {
-      return this.$store.getters.readsProcessing;
+    readsProcessing(): boolean {
+      return this.store.getters.readsProcessing;
     },
-    readsPreprocessed() {
-      return this.$store.getters.readsPreprocessed;
+    readsPreprocessed(): boolean {
+      return this.store.getters.readsPreprocessed;
     },
-    readsPreprocessing() {
-      return this.$store.getters.readsPreprocessing;
+    readsPreprocessing(): boolean {
+      return this.store.getters.readsPreprocessing;
     },
-    errorInProcessing() {
-      return this.$store.getters.getErrors;
+    errorInProcessing(): boolean {
+      return this.store.getters.getErrors;
     },
-    readsName() {
-      return this.$store.getters.readsName;
+    readsName(): string {
+      return this.store.getters.readsName;
     }
   },
 
   methods: {
-    clear() {
-      resetAll()
+    clear(): void {
+      this.resetAll();
     },
 
-    doAssembly() {
-      doAss()
+    doAssembly(): void {
+      this.doAss();
     },
-
-
   },
 
   watch: {},
-
-};
+});
 
 </script>
 

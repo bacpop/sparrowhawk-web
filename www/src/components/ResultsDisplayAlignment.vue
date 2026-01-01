@@ -2,17 +2,20 @@
     <svg id="tree_container"></svg>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from "vue";
 import { useState } from "vuex-composition-helpers";
+// @ts-ignore - phylotree doesn't have types
 import { phylotree } from "phylotree";
 import 'phylotree/dist/phylotree.css';
 import * as d3 from "d3";
 
-export default {
+export default defineComponent({
     name: "ResultsDisplayAlignment",
 
     setup() {
-        const { allResults_ska } = useState(["allResults_ska"]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { allResults_ska } = useState(["allResults_ska"]) as any;
 
         return {
             allResults_ska,
@@ -20,24 +23,27 @@ export default {
     },
 
     props: {
-        msg: String
+        msg: {
+            type: String,
+            default: ''
+        }
     },
 
-    mounted() {
-        if (this.allResults_ska.alignResults[0] ? this.allResults_ska.alignResults[0].names.length > 2 : false) {
+    mounted(): void {
+        if ((this.allResults_ska.alignResults[0]?.names?.length ?? 0) > 2) {
             this.createTree();
         }
     },
 
     watch: {
         'allResults_ska.alignResults': {
-            handler: function() {
-                if (this.allResults_ska.alignResults[0] ? this.allResults_ska.alignResults[0].aligned == false : false) {
+            handler(): void {
+                if (this.allResults_ska.alignResults[0]?.aligned === false) {
                     this.loading();
                     return;
                 }
 
-                if (this.allResults_ska.alignResults[0] ? this.allResults_ska.alignResults[0].names.length > 2 : false) {
+                if ((this.allResults_ska.alignResults[0]?.names?.length ?? 0) > 2) {
                     this.createTree();
                 } else {
                     this.notEnough();
@@ -47,14 +53,13 @@ export default {
         }
     },
 
-    methods: { 
-        notEnough() {
+    methods: {
+        notEnough(): void {
             console.log("Not enough alignments to visualise a tree");
 
-            // Clear previous tree
             d3.select("#tree_container").selectAll("*").remove();
 
-            let container = d3.select("#tree_container");
+            const container = d3.select("#tree_container");
 
             container.append("text")
                 .attr("x", "50%")
@@ -64,13 +69,12 @@ export default {
                 .attr("text-anchor", "middle");
         },
 
-        loading() {
+        loading(): void {
             console.log("Setting WIP message");
 
-            // Clear previous tree
             d3.select("#tree_container").selectAll("*").remove();
 
-            let container = d3.select("#tree_container");
+            const container = d3.select("#tree_container");
 
             container.append("text")
                 .attr("x", "50%")
@@ -80,33 +84,31 @@ export default {
                 .attr("text-anchor", "middle");
         },
 
-        createTree() {
+        createTree(): void {
             console.log("Creating tree");
 
-            // Clear previous tree
             d3.select("#tree_container").selectAll("*").remove();
 
             const container = document.getElementById("tree_container");
 
-            let nwk = this.allResults_ska.alignResults[0].newick;
+            const nwk = this.allResults_ska.alignResults[0].newick;
 
-            if (container) {
+            if (container && nwk) {
                 const tree = new phylotree(nwk);
-                var rendered_tree = tree.render({
-                    container: "#tree_container", 
+                const rendered_tree = tree.render({
+                    container: "#tree_container",
                     height: 400,
                     width: window.innerWidth,
                     "left-right-spacing": "fit-to-size",
                     "top-bottom-spacing": "fit-to-size"
                 });
 
-                // Append the SVG directly to the container
                 const svg = rendered_tree.show();
                 container.appendChild(svg);
             }
         },
     },
-};
+});
 </script>
 
 <style scoped>

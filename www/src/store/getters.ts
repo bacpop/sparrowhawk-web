@@ -1,5 +1,5 @@
-import { RootState } from "@/store/state";
-import { GetterTree } from "vuex";
+import {RootState} from "@/store/state";
+import {GetterTree} from "vuex";
 
 export const getters: GetterTree<RootState, RootState> = {
     readsProcessing(state: RootState) {

@@ -73,16 +73,17 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, ref, Ref } from "vue";
+import { useStore } from "vuex";
 import { useState } from "vuex-composition-helpers";
-import { ref } from "vue";
-import SequenceViewer from "./SequenceViewer/SequenceViewer.tsx";
-import VueSlider from 'vue-3-slider-component'
+import SequenceViewer from "./SequenceViewer/SequenceViewer";
+import VueSlider from 'vue-3-slider-component';
 import MinimisedSequenceViewer from "./MinimisedSequenceViewer/MinimisedSequenceViewer.vue";
 import Popper from "vue3-popper";
 import DownloadButtonSka from "./SequenceViewer/DownloadButtonSka.vue";
 
-export default {
+export default defineComponent({
     name: "ResultsDisplayMapping",
     components: {
         SequenceViewer,
@@ -90,29 +91,32 @@ export default {
         MinimisedSequenceViewer,
         Popper,
         DownloadButtonSka
-        },
+    },
     setup() {
-        const { allResults_ska } = useState(["allResults_ska"]);
-        const visualisation = ref(false);
-        const skip = ref(true);
-        const zoom = ref(10);
+        const store = useStore();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { allResults_ska } = useState(["allResults_ska"]) as any;
+        const visualisation: Ref<boolean> = ref(false);
+        const skip: Ref<boolean> = ref(true);
+        const zoom: Ref<number> = ref(10);
 
         return {
             allResults_ska,
             visualisation,
             skip,
-            zoom
+            zoom,
+            store
         }
     },
 
     watch: {
         'allResults_ska.mapResults': {
-            handler() {
-                let last_key = Object.keys(this.allResults_ska.mapResults)[Object.keys(this.allResults_ska.mapResults).length-1]
-                if (this.allResults_ska.mapResults[last_key]? this.allResults_ska.mapResults[last_key].mapped_sequences.length !== 0: false){
+            handler(): void {
+                const keys = Object.keys(this.allResults_ska.mapResults);
+                const last_key = keys[keys.length - 1];
+                if (this.allResults_ska.mapResults[last_key]?.mapped_sequences?.length !== 0) {
                     this.reloadKey++;
-                }
-                else {
+                } else {
                     this.zoom = 10;
                     this.visualisation = false;
                 }
@@ -122,12 +126,13 @@ export default {
     },
 
     computed: {
-        queryProcessed() {
-            return this.$store.getters.queryProcessed;
+        queryProcessed(): boolean {
+            return this.store.getters.queryProcessed;
         },
-        filesUploaded() {
-            let last_key = Object.keys(this.allResults_ska.mapResults)[Object.keys(this.allResults_ska.mapResults).length-1]
-            if (this.allResults_ska.mapResults[last_key].mapped_sequences.length !== 0){
+        filesUploaded(): boolean {
+            const keys = Object.keys(this.allResults_ska.mapResults);
+            const last_key = keys[keys.length - 1];
+            if (this.allResults_ska.mapResults[last_key]?.mapped_sequences?.length !== 0) {
                 return true;
             }
             return false;
@@ -135,20 +140,20 @@ export default {
     },
 
     methods: {
-        use_keys(list_of_keys) {
+        use_keys(list_of_keys: (string | number | boolean)[]): string {
             return list_of_keys.join('-');
         },
-        reset_zoom() {
+        reset_zoom(): void {
             this.zoom = 10;
         }
     },
-    
+
     data() {
         return {
-            reloadKey: 0
+            reloadKey: 0 as number
         }
     },
-};
+});
 </script>
 
 <style>

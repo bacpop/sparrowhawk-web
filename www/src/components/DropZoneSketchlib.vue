@@ -31,28 +31,38 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from "vue";
+import { useStore } from "vuex";
 import { useDropzone } from "vue3-dropzone";
 import { useActions, useState } from "vuex-composition-helpers";
 
-export default {
+export default defineComponent({
     name: "DropZoneSketchlib",
-    props:["tabName"],
-    setup() {
-        const { identifyFiles, resetAllResults_sketchlib } = useActions(["identifyFiles", "resetAllResults_sketchlib"]);
-        const { allResults_sketchlib } = useState(["allResults_sketchlib"]);
-
-        function onDropSample(acceptFiles) {
-            identifyFiles({acceptFiles: acceptFiles});
+    props: {
+        tabName: {
+            type: String,
+            required: true
         }
-        function resetAll() {
+    },
+    setup() {
+        const store = useStore();
+        const { identifyFiles, resetAllResults_sketchlib } = useActions(["identifyFiles", "resetAllResults_sketchlib"]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { allResults_sketchlib } = useState(["allResults_sketchlib"]) as any;
+
+        function onDropSample(acceptFiles: File[]): void {
+            identifyFiles({ acceptFiles: acceptFiles });
+        }
+        function resetAll(): void {
             resetAllResults_sketchlib();
         }
-        function getResultLine(idres) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        function getResultLine(this: any, idres: number): string {
             if (this.allResults_sketchlib.idSpecies == null) {
                 return "";
             } else {
-                return this.allResults_sketchlib.idSpecies[idres] + " : " + (this.allResults_sketchlib.idProbs[idres]*100).toFixed() + " % - " + this.allResults_sketchlib.idMetadata[idres];
+                return this.allResults_sketchlib.idSpecies[idres] + " : " + (this.allResults_sketchlib.idProbs[idres] * 100).toFixed() + " % - " + this.allResults_sketchlib.idMetadata[idres];
             }
         }
         const {
@@ -74,25 +84,25 @@ export default {
             onDropSample,
             getResultLine,
             allResults_sketchlib,
+            store,
             ...restSample,
         };
     },
     computed: {
-        sampleIdentified() {
-            return this.$store.getters.sampleIdentified;
+        sampleIdentified(): boolean {
+            return this.store.getters.sampleIdentified;
         },
-        results() {
-            return this.allResults_sketchlib.idProbs[0];
+        results(): number | null {
+            return this.allResults_sketchlib.idProbs ? this.allResults_sketchlib.idProbs[0] : null;
         },
     },
 
     methods: {
-        clear() {
-            resetAll()
+        clear(): void {
+            this.resetAll();
         }
     },
-
-};
+});
 </script>
 
 <style>
