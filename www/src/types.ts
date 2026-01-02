@@ -44,3 +44,13 @@ export interface ReadsPreprocessing {
     histo: [];
     used_min_count: number | null;
 }
+
+export interface ProcessingState {
+    isPreprocessing: boolean;
+    isAssembling: boolean;
+    isIndexingRef: boolean;
+    isMapping: boolean;
+    isMappingFiles: Set<string>;  // Track which files are being mapped
+    isAligning: boolean;
+    isIdentifying: boolean;
+}

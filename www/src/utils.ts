@@ -37,4 +37,14 @@ export const emptyState = (): RootState => ({
         worker_ska: null,
         worker_sketchlib: null,
     },
+
+    processingState: {
+        isPreprocessing: false,
+        isAssembling: false,
+        isIndexingRef: false,
+        isMapping: false,
+        isMappingFiles: new Set<string>(),
+        isAligning: false,
+        isIdentifying: false,
+    },
 });

@@ -89,14 +89,23 @@
             or click to select them</p>
         </div>
 
-        <div v-else-if="!readsProcessed && readsProcessing" class="dropzone dropzone-reads">
-          <p v-if="readsPreprocessing" class="dropzone-text">Preprocessing reads...</p>
-          <p v-else-if="!assemblying" class="dropzone-text">Reads {{ readsName }} preprocessed.</p>
-          <p v-else class="dropzone-text">Assemblying...</p>
+        <div v-else-if="!readsProcessed && readsProcessing" class="dropzone dropzone-reads dropzone-processing">
+          <div v-if="isPreprocessingActive" class="processing-content">
+            <LoadingSpinner message="Preprocessing reads..." />
+          </div>
+          <div v-else-if="isAssemblingActive" class="processing-content">
+            <LoadingSpinner message="Assembling genome..." />
+          </div>
+          <div v-else-if="!assemblying" class="processing-content">
+            <p class="dropzone-text ready-text">Reads <span class="monospace">{{ readsName }}</span> preprocessed and ready for assembly.</p>
+          </div>
+          <div v-else class="processing-content">
+            <LoadingSpinner message="Assembling..." />
+          </div>
         </div>
 
-        <div v-else class="dropzone dropzone-reads">
-          <p class="dropzone-text">✅ Reads assembled!</p>
+        <div v-else class="dropzone dropzone-reads dropzone-complete">
+          <p class="dropzone-text success-text">Reads assembled!</p>
         </div>
       </div>
 
@@ -115,6 +124,7 @@ import {useDropzone} from "vue3-dropzone";
 import {useActions, useState} from "vuex-composition-helpers";
 import {useStore} from "vuex";
 import VueSlider from 'vue-3-slider-component';
+import LoadingSpinner from './LoadingSpinner.vue';
 import "@fontsource/ibm-plex-mono";
 
 export default defineComponent({
@@ -126,7 +136,8 @@ export default defineComponent({
     }
   },
   components: {
-    VueSlider
+    VueSlider,
+    LoadingSpinner
   },
   setup() {
     const store = useStore();
@@ -238,6 +249,12 @@ export default defineComponent({
     },
     readsName(): string {
       return this.store.getters.readsName;
+    },
+    isPreprocessingActive(): boolean {
+      return this.store.getters.isPreprocessing;
+    },
+    isAssemblingActive(): boolean {
+      return this.store.getters.isAssembling;
     }
   },
 
@@ -307,6 +324,34 @@ export default defineComponent({
 
 button {
   font-family: 'IBM Plex sans';
+}
+
+.dropzone-processing {
+  background-color: #fef3c7;
+  border-color: #f59e0b;
+  justify-content: center;
+}
+
+.dropzone-complete {
+  background-color: #d1fae5;
+  border-color: #10b981;
+}
+
+.processing-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.ready-text {
+  color: #92400e;
+}
+
+.success-text {
+  color: #065f46;
+  font-weight: 500;
 }
 
 </style>

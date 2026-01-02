@@ -1,6 +1,46 @@
 import {RootState} from "@/store/state";
 
 export default {
+    // Processing state mutations
+    setPreprocessingState(state: RootState, isProcessing: boolean) {
+        state.processingState.isPreprocessing = isProcessing;
+    },
+    setAssemblingState(state: RootState, isAssembling: boolean) {
+        state.processingState.isAssembling = isAssembling;
+    },
+    setIndexingRefState(state: RootState, isIndexing: boolean) {
+        state.processingState.isIndexingRef = isIndexing;
+    },
+    setMappingState(state: RootState, isMapping: boolean) {
+        state.processingState.isMapping = isMapping;
+    },
+    addMappingFile(state: RootState, fileName: string) {
+        state.processingState.isMappingFiles.add(fileName);
+    },
+    removeMappingFile(state: RootState, fileName: string) {
+        state.processingState.isMappingFiles.delete(fileName);
+        if (state.processingState.isMappingFiles.size === 0) {
+            state.processingState.isMapping = false;
+        }
+    },
+    setAligningState(state: RootState, isAligning: boolean) {
+        state.processingState.isAligning = isAligning;
+    },
+    setIdentifyingState(state: RootState, isIdentifying: boolean) {
+        state.processingState.isIdentifying = isIdentifying;
+    },
+    resetProcessingState(state: RootState) {
+        state.processingState = {
+            isPreprocessing: false,
+            isAssembling: false,
+            isIndexingRef: false,
+            isMapping: false,
+            isMappingFiles: new Set<string>(),
+            isAligning: false,
+            isIdentifying: false,
+        };
+    },
+
     SET_WORKER(state: RootState, worker: Worker | null) {
         state.workerState.worker = worker;
     },

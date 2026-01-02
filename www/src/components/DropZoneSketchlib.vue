@@ -1,16 +1,17 @@
 <template>
     <div>
-        <h1>{{tabName}}</h1>
+        <h1 class="text-2xl font-semibold tracking-tight text-balance">{{tabName}}</h1>
         <div v-if="tabName=='TaxonomicID'">
 
-            <div v-if="!sampleIdentified" v-bind='getRootPropsSample()' class="dropzone dropzone-sample">
+            <!-- Upload or Loading state -->
+            <div v-if="!sampleIdentified && !isIdentifying" v-bind='getRootPropsSample()' class="dropzone dropzone-sample">
                 <input v-bind='getInputPropsSample()' />
                 <p v-if='isDragActiveSample' class="dropzone-text">Drop one FASTA/FASTQ file or either two FASTQ files here ...</p>
                 <p v-else class="dropzone-text">Drag and drop your <b>sample fastq/a file(s)</b> here,
                     or click to select a file</p>
             </div>
-            <div v-if="sampleIdentified" class="dropzone dropzone-sample">
-                <p class="dropzone-text">✅ Sample identified</p>
+            <div v-else-if="isIdentifying" class="dropzone dropzone-sample dropzone-processing">
+                <LoadingSpinner message="Identifying sample... (fetching database and processing)" />
             </div>
 
             <div v-if="sampleIdentified">
@@ -19,13 +20,11 @@
                 </div>
             </div>
 
-            <div v-if="sampleIdentified">
-                Probabilities:
-                <br>
+            <div v-if="sampleIdentified" class="results-container">
+                <h3 class="results-title">Top Matches:</h3>
                 <h5 class="id_results" style="margin-top: 3px;">{{ getResultLine(0) }}</h5>
                 <h5 class="id_results" style="margin-top: 3px;">{{ getResultLine(1) }}</h5>
                 <h5 class="id_results" style="margin-top: 3px;">{{ getResultLine(2) }}</h5>
-
             </div>
         </div>
     </div>
@@ -36,6 +35,7 @@ import { defineComponent } from "vue";
 import { useStore } from "vuex";
 import { useDropzone } from "vue3-dropzone";
 import { useActions, useState } from "vuex-composition-helpers";
+import LoadingSpinner from './LoadingSpinner.vue';
 
 export default defineComponent({
     name: "DropZoneSketchlib",
@@ -44,6 +44,9 @@ export default defineComponent({
             type: String,
             required: true
         }
+    },
+    components: {
+        LoadingSpinner
     },
     setup() {
         const store = useStore();
@@ -95,6 +98,9 @@ export default defineComponent({
         results(): number | null {
             return this.allResults_sketchlib.idProbs ? this.allResults_sketchlib.idProbs[0] : null;
         },
+        isIdentifying(): boolean {
+            return this.store.getters.isIdentifying;
+        }
     },
 
     methods: {
@@ -145,5 +151,40 @@ export default defineComponent({
         text-align: left;
         margin: 0px;
         width: 70%;
+    }
+
+    .dropzone-sample {
+        height: 100px;
+        margin-top: 20px;
+        background-color: rgb(200, 220, 240);
+    }
+
+    .dropzone-processing {
+        background-color: #fef3c7;
+        border-color: #f59e0b;
+        justify-content: center;
+    }
+
+    .dropzone-complete {
+        background-color: #d1fae5;
+        border-color: #10b981;
+    }
+
+    .success-text {
+        color: #065f46;
+        font-weight: 500;
+    }
+
+    .results-container {
+        margin: 20px 10%;
+        padding: 15px;
+        background-color: #f9fafb;
+        border-radius: 8px;
+    }
+
+    .results-title {
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #374151;
     }
 </style>

@@ -1,4 +1,4 @@
-import {AllResults, AllResultsSka, AllResultsSketchlib, ReadsPreprocessing, WorkerState,} from "@/types";
+import {AllResults, AllResultsSka, AllResultsSketchlib, ProcessingState, ReadsPreprocessing, WorkerState,} from "@/types";
 
 
 export interface RootState {
@@ -11,4 +11,5 @@ export interface RootState {
     errors: string,
     min_count: number,
     allResults_sketchlib: AllResultsSketchlib,
+    processingState: ProcessingState,
 }
