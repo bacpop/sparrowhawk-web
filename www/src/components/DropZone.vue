@@ -3,7 +3,9 @@
     <h1 class="text-2xl font-semibold tracking-tight text-balance mb-4">
       {{ tabName }}
     </h1>
-    <div v-if="!param" id="parameters">
+
+    <!-- Parameters section - always editable -->
+    <div id="parameters">
       <h5 class="parameters_legends" v-bind="k">k: {{ k }}</h5>
       <VueSlider
           v-model="k"
@@ -11,8 +13,8 @@
           :min="21"
           :max="89"
           :interval="2"
-      >
-      </VueSlider>
+          :disabled="isProcessingAny"
+      />
       <h5 class="parameters_legends" v-bind="min_qual">Minimum Illumina read quality: {{ min_qual }}</h5>
       <VueSlider
           v-model="min_qual"
@@ -20,8 +22,8 @@
           :min="0"
           :max="33"
           :interval="1"
-      >
-      </VueSlider>
+          :disabled="isProcessingAny"
+      />
       <h5 class="parameters_legends" v-if="!do_fit" v-bind="min_count">Minimum counts for k-mer filtering: {{
           min_count
         }}</h5>
@@ -32,89 +34,74 @@
           :max="30"
           :interval="1"
           v-if="!do_fit"
-      >
-      </VueSlider>
-      <h5 class="parameters_legends" v-bind="do_bloom" style="margin-top: 3px;">Automatically set the minimum counts for
+          :disabled="isProcessingAny"
+      />
+      <h5 class="parameters_legends" style="margin-top: 3px;">Automatically set the minimum counts for
         k-mer filtering (memory usage could increase): {{ do_fit }}</h5>
-      <input type="checkbox" id="checkbox" v-model="do_fit" style="float: right; margin-top: -16px;"/>
+      <input type="checkbox" v-model="do_fit" style="float: right; margin-top: -16px;" :disabled="isProcessingAny"/>
 
-      <h5 class="parameters_legends" v-if="!do_bloom" v-bind="csize" style="margin-top: 3px;">Chunk processing size (set
+      <h5 class="parameters_legends" v-if="!do_bloom" style="margin-top: 3px;">Chunk processing size (set
         zero for no chunking): {{ csize }}</h5>
-      <input type="text" v-if="!do_bloom" v-model.number.trim="csize" style="float: right; margin-top: -18px;">
-      <h5 class="parameters_legends" v-bind="do_bloom" style="margin-top: 3px;">Use Bloom filter for preprocessing
+      <input type="text" v-if="!do_bloom" v-model.number.trim="csize" style="float: right; margin-top: -18px;" :disabled="isProcessingAny">
+      <h5 class="parameters_legends" style="margin-top: 3px;">Use Bloom filter for preprocessing
         (recommended for non-small reads; chunking will be disabled): {{ do_bloom }}</h5>
+      <input type="checkbox" v-model="do_bloom" style="float: right; margin-top: -8px;" :disabled="isProcessingAny"/>
 
-      <input type="checkbox" id="checkbox" v-model="do_bloom" style="float: right; margin-top: -8px;"/>
-      <h5 class="parameters_legends" v-bind="no_deadend" style="margin-top: 3px;">Do not remove dead-ends while
+      <h5 class="parameters_legends" style="margin-top: 3px;">Do not remove dead-ends while
         correcting the assembly graph: {{ no_deadend }}</h5>
+      <input type="checkbox" v-model="no_deadend" style="float: right; margin-top: -8px;" :disabled="isProcessingAny"/>
 
-      <input type="checkbox" id="checkbox" v-model="no_deadend" style="float: right; margin-top: -8px;"/>
-
-      <h5 class="parameters_legends" v-bind="no_bubble" style="margin-top: 3px;">Do not collapse bubbles while
+      <h5 class="parameters_legends" style="margin-top: 3px;">Do not collapse bubbles while
         correcting the assembly graph: {{ no_bubble }}</h5>
-
-      <input type="checkbox" id="checkbox" v-model="no_bubble" style="float: right; margin-top: -8px;"/>
-
-      <button @click="param=true" style="float: left; margin-top: 7px;">Validate parameter choice</button>
-    </div>
-
-    <div v-if="param" id="parameters">
-      <h3 class="parameters_legends" style="margin-bottom: 5px;">Current parameters:</h3>
-      <h5 class="parameters_legends" v-bind="k">k: {{ k }}</h5>
-      <h5 class="parameters_legends" v-bind="min_count" v-if="!do_fit">Minimum count for k-mers: {{ min_count }}</h5>
-      <h5 class="parameters_legends" v-bind="min_count" v-if="do_fit">Automatic minimum k-mer count estimation:
-        {{ do_fit }}</h5>
-      <h5 class="parameters_legends" v-bind="min_qual">Minimum Illumina quality: {{ min_qual }}</h5>
-      <h5 class="parameters_legends" v-bind="csize" v-if="!do_bloom">Chunk processing size: {{ csize }}</h5>
-      <h5 class="parameters_legends" v-bind="do_bloom">Use Bloom filter: {{ do_bloom }}</h5>
-      <h5 class="parameters_legends" v-bind="no_deadend">Don't remove dead-ends: {{ no_deadend }}</h5>
-      <h5 class="parameters_legends" v-bind="no_bubble">Don't collapse bubbles: {{ no_bubble }}</h5>
-      <div style="display: flex; justify-content: flex-start;">
-        <button @click="resetAll" style="margin-top: 7px;">Reset parameters</button>
-      </div>
+      <input type="checkbox" v-model="no_bubble" style="float: right; margin-top: -8px;" :disabled="isProcessingAny"/>
     </div>
 
     <h5 class="memory_error_message" v-if="errorInProcessing">Error found while processing! It is most surely a memory
       issue: try increasing the chunking, or using a Bloom filter</h5>
 
-    <div v-if="param">
+    <!-- Assembly tab -->
+    <div v-if="tabName=='Assembly'">
 
-      <!-- Assembly tab -->
-      <div v-if="tabName=='Assembly'">
+      <!-- Dropzone for file upload -->
+      <div v-if="!readsProcessed && !readsProcessing" v-bind='getRootPropsReads()' class="dropzone dropzone-reads">
+        <input v-bind='getInputPropsReads()'/>
+        <p v-if='isDragActiveReads' class="dropzone-text">Drop the files here ...</p>
+        <p v-else class="dropzone-text">Drag and drop your <b>paired end fastq read files</b> here,
+          or click to select them</p>
+      </div>
 
-        <div v-if="!readsProcessed && !readsProcessing" v-bind='getRootPropsReads()' class="dropzone dropzone-reads">
-          <input v-bind='getInputPropsReads()'/>
-          <p v-if='isDragActiveReads' class="dropzone-text">Drop the files here ...</p>
-          <p v-else class="dropzone-text">Drag and drop your <b>paired end fastq read files</b> here,
-            or click to select them</p>
+      <!-- Processing states -->
+      <div v-else-if="!readsProcessed && readsProcessing" class="dropzone dropzone-reads dropzone-processing">
+        <div v-if="isPreprocessingActive" class="processing-content">
+          <LoadingSpinner message="Preprocessing reads..." />
         </div>
-
-        <div v-else-if="!readsProcessed && readsProcessing" class="dropzone dropzone-reads dropzone-processing">
-          <div v-if="isPreprocessingActive" class="processing-content">
-            <LoadingSpinner message="Preprocessing reads..." />
-          </div>
-          <div v-else-if="isAssemblingActive" class="processing-content">
-            <LoadingSpinner message="Assembling genome..." />
-          </div>
-          <div v-else-if="!assemblying" class="processing-content">
-            <p class="dropzone-text ready-text">Reads <span class="monospace">{{ readsName }}</span> preprocessed and ready for assembly.</p>
-          </div>
-          <div v-else class="processing-content">
-            <LoadingSpinner message="Assembling..." />
-          </div>
+        <div v-else-if="isAssemblingActive" class="processing-content">
+          <LoadingSpinner message="Assembling genome..." />
         </div>
-
-        <div v-else class="dropzone dropzone-reads dropzone-complete">
-          <p class="dropzone-text success-text">Reads assembled!</p>
+        <div v-else-if="!assemblying" class="processing-content">
+          <p class="dropzone-text ready-text">Reads <span class="monospace">{{ readsName }}</span> preprocessed and ready for assembly.</p>
+        </div>
+        <div v-else class="processing-content">
+          <LoadingSpinner message="Assembling..." />
         </div>
       </div>
 
-    </div>
+      <!-- Completed state -->
+      <div v-else class="dropzone dropzone-reads dropzone-complete">
+        <p class="dropzone-text success-text">Reads assembled!</p>
+      </div>
 
+      <!-- Start assembly button -->
+      <button @click="doAss" v-if='readsPreprocessed && !readsProcessed && !isAssemblingActive' class="action-button">
+        <b>Start assembly</b>
+      </button>
+
+      <!-- Reset button when processing is done or in progress -->
+      <button @click="resetAll" v-if="readsProcessing || readsProcessed" class="reset-button">
+        Reset and upload new files
+      </button>
+    </div>
   </div>
-  <button @click="doAss" v-if='readsPreprocessed && !readsProcessed' style="float: center; margin-top: 10px;">
-    <b>Start assembly</b>
-  </button>
 </template>
 
 
@@ -147,7 +134,6 @@ export default defineComponent({
     const csize: Ref<number> = ref(150000);
     const do_bloom: Ref<boolean> = ref(false);
     const do_fit: Ref<boolean> = ref(false);
-    const param: Ref<boolean> = ref(false);
     const assemblying: Ref<boolean> = ref(false);
     const no_bubble: Ref<boolean> = ref(false);
     const no_deadend: Ref<boolean> = ref(false);
@@ -183,16 +169,7 @@ export default defineComponent({
     }
 
     function resetAll(): void {
-      param.value = false;
       assemblying.value = false;
-      do_bloom.value = false;
-      do_fit.value = false;
-      no_bubble.value = false;
-      no_deadend.value = false;
-      k.value = 31;
-      min_count.value = 5;
-      min_qual.value = 20;
-      csize.value = 0;
       resetAllResults();
       removeErrors();
     }
@@ -218,7 +195,6 @@ export default defineComponent({
       do_fit,
       no_bubble,
       no_deadend,
-      param,
       assemblying,
       resetAll,
       doAss,
@@ -255,6 +231,9 @@ export default defineComponent({
     },
     isAssemblingActive(): boolean {
       return this.store.getters.isAssembling;
+    },
+    isProcessingAny(): boolean {
+      return this.store.getters.isPreprocessing || this.store.getters.isAssembling;
     }
   },
 
@@ -267,14 +246,12 @@ export default defineComponent({
       this.doAss();
     },
   },
-
-  watch: {},
 });
 
 </script>
 
 
-<style>
+<style scoped>
 .dropzone {
   border: 2px dotted rgb(56, 55, 55);
   margin: 10%;
@@ -292,18 +269,11 @@ export default defineComponent({
   background-color: rgb(159, 176, 190);
 }
 
-.dropzone-query {
-  height: 75px;
-  margin-top: 10px;
-  background-color: rgb(221, 249, 226);
-}
-
 .dropzone-text {
   padding: 30px;
 }
 
 .monospace {
-  /*     font-family: 'Courier New', monospace; */
   font-family: "IBM Plex mono";
 }
 
@@ -320,10 +290,6 @@ export default defineComponent({
 .memory_error_message {
   text-align: center;
   color: #D41645;
-}
-
-button {
-  font-family: 'IBM Plex sans';
 }
 
 .dropzone-processing {
@@ -354,4 +320,33 @@ button {
   font-weight: 500;
 }
 
+.action-button {
+  display: block;
+  margin: 10px auto;
+  padding: 10px 20px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.action-button:hover {
+  background-color: #2563eb;
+}
+
+.reset-button {
+  display: block;
+  margin: 10px auto;
+  padding: 8px 16px;
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.reset-button:hover {
+  background-color: #4b5563;
+}
 </style>

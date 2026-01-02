@@ -3,83 +3,84 @@
     <h1 class="text-2xl font-semibold tracking-tight text-balance">
       {{ tabName }}
     </h1>
-    <div v-if="!param" id="parameters">
-      <h5 class="parameters_legends" v-bind="k">k: {{ k }}</h5>
+
+    <!-- Parameters section - always visible and editable when not processing -->
+    <div id="parameters">
+      <h5 class="parameters_legends">k: {{ k }}</h5>
       <VueSlider
           v-model="k"
           :lazy="true"
           :min="5"
           :max="61"
           :interval="2"
-      >
-      </VueSlider>
-      <h5 class="parameters_legends" v-bind="proportion_reads">Proportion of reads: {{ proportion_reads }}</h5>
+          :disabled="isProcessingAny"
+      />
+      <h5 class="parameters_legends">Proportion of reads: {{ proportion_reads }}</h5>
       <VueSlider
           v-model="proportion_reads"
           :lazy="true"
           :min="0"
           :max="1"
           :interval="0.05"
-      >
-      </VueSlider>
-      <button @click="param=true" style="float: left; margin-top: 7px;">Validate parameter choice</button>
+          :disabled="isProcessingAny"
+      />
     </div>
 
-    <div v-if="param" id="parameters">
-      <h3 class="parameters_legends" style="margin-bottom: 5px;">Current parameters:</h3>
-      <h5 class="parameters_legends" v-bind="k">k: {{ k }}</h5>
-      <h5 class="parameters_legends" v-bind="proportion_reads">Proportion of reads: {{ proportion_reads }}</h5>
-      <div style="display: flex; justify-content: flex-start;">
-        <button @click="resetAll" style="margin-top: 7px;">Reset parameters</button>
+    <!-- Mapping tab -->
+    <div v-if="tabName=='Mapping'">
+
+      <!-- Reference upload/indexing -->
+      <div v-if="!refProcessed && !isIndexingRef" v-bind='getRootPropsRef()' class="dropzone dropzone-ref">
+        <input v-bind='getInputPropsRef()'/>
+        <p v-if='isDragActiveRef' class="dropzone-text">Drop the files here ...</p>
+        <p v-else class="dropzone-text">Drag and drop your <b>reference fasta file</b> here,
+          or click to select a file</p>
       </div>
+      <div v-else-if="isIndexingRef" class="dropzone dropzone-ref dropzone-processing">
+        <LoadingSpinner message="Indexing reference genome..." />
+      </div>
+      <div v-else class="dropzone dropzone-ref dropzone-complete">
+        <p class="dropzone-text success-text">Reference indexed: <span class="monospace">{{ refName }}</span></p>
+      </div>
+
+      <!-- Query mapping -->
+      <div v-if="refProcessed && !isMapping" v-bind='getRootPropsQueryMap()' class="dropzone dropzone-query">
+        <input v-bind='getInputPropsQueryMap()'/>
+        <p v-if='isDragActiveQueryMap' class="dropzone-text">Drop the files here ...</p>
+        <p v-else class="dropzone-text">Drag and drop read or assembly <b>files to be mapped</b> here,
+          or click to select files</p>
+      </div>
+      <div v-else-if="refProcessed && isMapping" class="dropzone dropzone-query dropzone-processing">
+        <LoadingSpinner message="Mapping files to reference..." />
+      </div>
+      <p v-if="refProcessed" class="count">Files mapped: {{ Object.keys(allResults_ska.mapResults).length }}</p>
+
+      <!-- Reset button -->
+      <button v-if="refProcessed" @click="resetAll" class="reset-button">
+        Reset and start over
+      </button>
     </div>
 
-    <div v-if="param">
-
-      <!-- Mapping tab -->
-      <div v-if="tabName=='Mapping'">
-
-        <!-- Reference upload/indexing -->
-        <div v-if="!refProcessed && !isIndexingRef" v-bind='getRootPropsRef()' class="dropzone dropzone-ref">
-          <input v-bind='getInputPropsRef()'/>
-          <p v-if='isDragActiveRef' class="dropzone-text">Drop the files here ...</p>
-          <p v-else class="dropzone-text">Drag and drop your <b>reference fasta file</b> here,
-            or click to select a file</p>
-        </div>
-        <div v-else-if="isIndexingRef" class="dropzone dropzone-ref dropzone-processing">
-          <LoadingSpinner message="Indexing reference genome..." />
-        </div>
-        <div v-else class="dropzone dropzone-ref dropzone-complete">
-          <p class="dropzone-text success-text">Reference indexed: <span class="monospace">{{ refName }}</span></p>
-        </div>
-
-        <!-- Query mapping -->
-        <div v-if="refProcessed && !isMapping" v-bind='getRootPropsQueryMap()' class="dropzone dropzone-query">
-          <input v-bind='getInputPropsQueryMap()'/>
-          <p v-if='isDragActiveQueryMap' class="dropzone-text">Drop the files here ...</p>
-          <p v-else class="dropzone-text">Drag and drop read or assembly <b>files to be mapped</b> here,
-            or click to select files</p>
-        </div>
-        <div v-else-if="refProcessed && isMapping" class="dropzone dropzone-query dropzone-processing">
-          <LoadingSpinner message="Mapping files to reference..." />
-        </div>
-        <p v-if="refProcessed" class="count"> Files received: {{ Object.keys(allResults_ska.mapResults).length }}</p>
+    <!-- Alignment tab -->
+    <div v-else-if="tabName=='Alignment'">
+      <div v-if="!isAligning && !hasAlignmentResults" v-bind='getRootPropsQueryAlign()' class="dropzone dropzone-query">
+        <input v-bind='getInputPropsQueryAlign()'/>
+        <p v-if='isDragActiveQueryAlign' class="dropzone-text">Drop the files here ...</p>
+        <p v-else class="dropzone-text">Drag and drop read or assembly <b>files to be aligned</b> here,
+          or click to select files</p>
       </div>
-
-      <!-- Alignment tab -->
-      <div v-else-if="tabName=='Alignment'">
-        <div v-if="!isAligning" v-bind='getRootPropsQueryAlign()' class="dropzone dropzone-query">
-          <input v-bind='getInputPropsQueryAlign()'/>
-          <p v-if='isDragActiveQueryAlign' class="dropzone-text">Drop the files here ...</p>
-          <p v-else class="dropzone-text">Drag and drop read or assembly <b>files to be aligned</b> here,
-            or click to select files</p>
-        </div>
-        <div v-else class="dropzone dropzone-query dropzone-processing">
-          <LoadingSpinner message="Aligning sequences..." />
-        </div>
-        <p class="count"> Files received:
-          {{ allResults_ska.alignResults[0] ? allResults_ska.alignResults[0].names.length : 0 }}</p>
+      <div v-else-if="isAligning" class="dropzone dropzone-query dropzone-processing">
+        <LoadingSpinner message="Aligning sequences..." />
       </div>
+      <div v-else-if="hasAlignmentResults" class="dropzone dropzone-query dropzone-complete">
+        <p class="dropzone-text success-text">Alignment complete!</p>
+      </div>
+      <p v-if="hasAlignmentResults" class="count">Files aligned: {{ allResults_ska.alignResults[0] ? allResults_ska.alignResults[0].names.length : 0 }}</p>
+
+      <!-- Reset button -->
+      <button v-if="hasAlignmentResults" @click="resetAll" class="reset-button">
+        Reset and upload new files
+      </button>
     </div>
   </div>
 </template>
@@ -108,7 +109,6 @@ export default defineComponent({
     const store = useStore();
     const k: Ref<number> = ref(31);
     const proportion_reads: Ref<number> = ref(1);
-    const param: Ref<boolean> = ref(false);
 
     const {
       processRef,
@@ -132,7 +132,6 @@ export default defineComponent({
     }
 
     function resetAll(): void {
-      param.value = false;
       resetAllResults_ska();
     }
 
@@ -169,7 +168,6 @@ export default defineComponent({
       store,
       k,
       proportion_reads,
-      param,
       resetAll,
       getRootPropsRef,
       getInputPropsRef,
@@ -204,6 +202,12 @@ export default defineComponent({
     },
     isAligning(): boolean {
       return this.store.getters.isAligning;
+    },
+    isProcessingAny(): boolean {
+      return this.store.getters.isIndexingRef || this.store.getters.isMapping || this.store.getters.isAligning;
+    },
+    hasAlignmentResults(): boolean {
+      return this.allResults_ska.alignResults[0] && this.allResults_ska.alignResults[0].aligned;
     }
   },
 
@@ -215,7 +219,7 @@ export default defineComponent({
 });
 </script>
 
-<style>
+<style scoped>
 .dropzone {
   border: 2px dotted rgb(56, 55, 55);
   margin: 10%;
@@ -278,5 +282,20 @@ export default defineComponent({
   margin: 0 10%;
   color: #6b7280;
   font-size: 14px;
+}
+
+.reset-button {
+  display: block;
+  margin: 10px auto;
+  padding: 8px 16px;
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.reset-button:hover {
+  background-color: #4b5563;
 }
 </style>
