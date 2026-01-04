@@ -1,8 +1,8 @@
 <template>
   <SidebarProvider>
-    <Sidebar class="my-3.5 mx-6">
+    <Sidebar class="my-3.5 mx-6 min-w-[185px] flex flex-col">
       <SidebarHeader>
-        <img src="sparrowhawk_logo.png" alt="Sparrowhawk logo" class="h-20">
+        <img src="sparrowhawk-transparent.png" alt="Sparrowhawk" class="h-[120px] w-fit">
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -10,20 +10,34 @@
             <SidebarMenu>
               <SidebarMenuItem v-for="item in tabs"
                                :key="item.title"
-                               class="py-2.5 px-3">
-                <SidebarMenuButton @click="changeTab(item.id)">
+                               :class="item.id === tabName ? 'bg-white rounded-sm shadow-sm' : ''"
+                               class="py-2 px-3 cursor-pointer">
+                <SidebarMenuButton @click="changeTab(item.id)" class="p-0 hover:bg-transparent cursor-pointer">
                   <component :is="item.icon"/>
-                  <span class="text-md">{{ item.label }}</span>
+                  <span class="text-md">
+                    {{ item.label }}
+                  </span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <div class="flex flex-col opacity-80">
+          <Button variant="link" size="sm" class="cursor-pointer items-center justify-start p-0"
+                  @click="changeTab('faq')">
+            FAQ
+          </Button>
+          <Button variant="link" size="sm" class="cursor-pointer items-center justify-start p-0">
+            Credits
+          </Button>
+        </div>
+      </SidebarFooter>
     </Sidebar>
 
     <!-- Main Content -->
-    <main class="bg-white mt-6 mb-6 rounded-tl-xl rounded-bl-xl border-2 border-gray-200 border-r-0 flex-1 p-8">
+    <main class="bg-white mt-6 mb-6 rounded-tl-xl rounded-bl-xl border border-gray-200 border-r-0 flex-1 p-8">
       <div v-if="tabName === 'Assembly'">
         <DropZone :tabName="tabName">
           <KmerHistogram class="mt-6"/>
@@ -42,6 +56,10 @@
       <div v-else-if="tabName === 'Alignment'">
         <DropZoneSka :tabName="tabName"/>
         <ResultsDisplayAlignment class="mt-6"/>
+      </div>
+
+      <div v-else-if="tabName === 'faq'">
+        <FaqPage/>
       </div>
     </main>
   </SidebarProvider>
@@ -65,6 +83,7 @@ import WorkerSketcher from '@/workers/Sketcher.worker';
 import "@fontsource/ibm-plex-sans";
 import {
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -74,6 +93,8 @@ import {
   SidebarProvider,
   SidebarTrigger
 } from "@/components/ui/sidebar";
+import {Button} from "@/components/ui/button";
+import FaqPage from "@/components/pages/FaqPage.vue";
 
 interface Tab {
   id: string;
@@ -85,6 +106,8 @@ export default defineComponent({
   name: 'App',
 
   components: {
+    FaqPage,
+    SidebarFooter,
     SidebarHeader,
     SidebarMenuItem,
     SidebarMenuButton,
@@ -103,7 +126,8 @@ export default defineComponent({
     DropZoneSketchlib,
     KmerHistogram,
     ResultsDisplayMapping,
-    ResultsDisplayAlignment
+    ResultsDisplayAlignment,
+    Button
   },
 
   setup() {
