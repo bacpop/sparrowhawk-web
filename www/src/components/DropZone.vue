@@ -87,7 +87,7 @@
           </label>
         </div>
 
-        <div :class="do_bloom ? 'opacity-50' : ''">
+        <div :class="do_bloom ? 'opacity-50 flex flex-row gap-1' : ''">
           <label for="csize">
             Chunk size (zero for no chunking)
           </label>
@@ -109,55 +109,59 @@
       <!-- Assembly tab -->
       <div v-if="tabName=='Assembly'">
 
-        <!-- Dropzone for file upload -->
-        <div v-if="!readsProcessed && !readsProcessing"
-             v-bind='getRootPropsReads()'
-             class="p-6 mx-6 bg-white border border-grey-200 rounded-md flex flex-col justify-center items-center gap-2 cursor-pointer text-gray-600">
+        <!-- Dropzone for file upload - always visible -->
+        <div v-bind='getRootPropsReads()'
+             :class="[
+               'p-6 mx-6 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
+               isProcessingAny ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-gray-400'
+             ]">
 
-          <input v-bind='getInputPropsReads()'/>
+          <input v-bind='getInputPropsReads()' :disabled="isProcessingAny"/>
 
-          <FileUp />
+          <FileUp/>
 
-          <p v-if='isDragActiveReads' class="">
+          <p v-if='isDragActiveReads'>
             Drop files here ...
           </p>
-          <p v-else class="">
+          <p v-else>
             Drop or click to upload your <b>paired end fastq read files</b>
           </p>
 
         </div>
 
-        <!-- Processing states -->
-        <div v-else-if="!readsProcessed && readsProcessing" class="">
-          <div v-if="isPreprocessingActive" class="">
-            <LoadingSpinner message="Preprocessing reads..."/>
+        <p v-if="isPreprocessingActive" class="mx-6 mt-4 text-sm text-gray-500">
+          Pre-processing...
+        </p>
+        <p v-else-if="isAssemblingActive" class="mx-6 mt-4 text-sm text-gray-500">
+          Assembling...
+        </p>
+
+        <!-- File list with status -->
+        <div class="flex flex-row gap-2 w-full mt-4">
+          <div v-if="uploadedFiles.length > 0" class="mx-6 w-1/2 flex-grow">
+            <div v-for="fileName in uploadedFiles" :key="fileName"
+                 class="flex items-center gap-2 py-2 px-3 bg-gray-50 rounded-md mb-2">
+
+              <Loader2 v-if="isPreprocessingActive" class="w-4 h-4 text-blue-500 animate-spin"/>
+              <Loader2 v-else-if="isAssemblingActive" class="w-4 h-4 text-orange-500 animate-spin"/>
+              <Check v-else-if="readsProcessed || readsPreprocessed" class="w-4 h-4 text-green-500"/>
+
+              <span class="flex-grow text-sm font-mono truncate">
+              {{ fileName }}
+            </span>
+            </div>
           </div>
-          <div v-else-if="isAssemblingActive" class="">
-            <LoadingSpinner message="Assembling genome..."/>
-          </div>
-          <div v-else-if="!assemblying" class="">
-            <p class=" ready-text">Reads <span class="monospace">{{ readsName }}</span> preprocessed and
-              ready for assembly.</p>
-          </div>
-          <div v-else class="">
-            <LoadingSpinner message="Assembling..."/>
+          <div v-if="readsProcessed" class="w-1/2 flex-grow">
+            <DownloadButton/>
           </div>
         </div>
-
-        <!-- Completed state -->
-        <div v-else class="">
-          <p class="">Reads assembled!</p>
-        </div>
-
-        <!-- Start assembly button -->
-        <button @click="doAss" v-if='readsPreprocessed && !readsProcessed && !isAssemblingActive' class="">
-          <b>Start assembly</b>
-        </button>
 
         <!-- Reset button when processing is done or in progress -->
-        <button @click="resetAll" v-if="readsProcessing || readsProcessed" class="">
-          Reset and upload new files
-        </button>
+        <!--        <button @click="resetAll"-->
+        <!--                v-if="uploadedFiles.length > 0"-->
+        <!--                class="mx-6 mt-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">-->
+        <!--          Reset-->
+        <!--        </button>-->
 
         <slot/>
       </div>
@@ -172,9 +176,9 @@ import {useDropzone} from "vue3-dropzone";
 import {useActions, useState} from "vuex-composition-helpers";
 import {useStore} from "vuex";
 import VueSlider from 'vue-3-slider-component';
-import LoadingSpinner from './LoadingSpinner.vue';
 import "@fontsource/ibm-plex-mono";
-import {FileUp} from "lucide-vue-next";
+import {Check, FileUp, Loader2} from "lucide-vue-next";
+import DownloadButton from "@/components/DownloadButton.vue";
 
 export default defineComponent({
   name: "DropZone",
@@ -185,9 +189,11 @@ export default defineComponent({
     }
   },
   components: {
+    DownloadButton,
     VueSlider,
-    LoadingSpinner,
-    FileUp
+    FileUp,
+    Loader2,
+    Check
   },
   setup() {
     const store = useStore();
@@ -200,6 +206,7 @@ export default defineComponent({
     const assemblying: Ref<boolean> = ref(false);
     const no_bubble: Ref<boolean> = ref(false);
     const no_deadend: Ref<boolean> = ref(false);
+    const uploadedFiles: Ref<string[]> = ref([]);
 
     const {
       processReads,
@@ -212,6 +219,7 @@ export default defineComponent({
 
 
     function onDropReads(acceptFiles: File[]): void {
+      uploadedFiles.value = acceptFiles.map(f => f.name);
       processReads({
         acceptFiles: acceptFiles,
         k: k.value,
@@ -233,6 +241,7 @@ export default defineComponent({
 
     function resetAll(): void {
       assemblying.value = false;
+      uploadedFiles.value = [];
       resetAllResults();
       removeErrors();
     }
@@ -266,6 +275,7 @@ export default defineComponent({
       isDragActiveReads,
       onDropReads,
       allResults,
+      uploadedFiles,
       ...restReads,
     };
   },
@@ -297,6 +307,14 @@ export default defineComponent({
     },
     isProcessingAny(): boolean {
       return this.store.getters.isPreprocessing || this.store.getters.isAssembling;
+    }
+  },
+
+  watch: {
+    readsPreprocessed(newVal: boolean) {
+      if (newVal) {
+        this.doAss();
+      }
     }
   },
 

@@ -26,7 +26,6 @@
     <main class="bg-white mt-6 mb-6 rounded-tl-xl rounded-bl-xl border-2 border-gray-200 border-r-0 flex-1 p-8">
       <div v-if="tabName === 'Assembly'">
         <DropZone :tabName="tabName">
-          <ResultsDisplayAssembly class="mt-6"/>
           <KmerHistogram class="mt-6"/>
         </DropZone>
       </div>
@@ -57,7 +56,6 @@ import {Codesandbox, Map, ScanFace, Spline} from "lucide-vue-next";
 import DropZone from './components/DropZone.vue';
 import DropZoneSka from './components/DropZoneSka.vue';
 import DropZoneSketchlib from './components/DropZoneSketchlib.vue';
-import ResultsDisplayAssembly from './components/ResultsDisplayAssembly.vue';
 import ResultsDisplayMapping from './components/ResultsDisplayMapping.vue';
 import ResultsDisplayAlignment from './components/ResultsDisplayAlignment.vue';
 import KmerHistogram from './components/KmerHistogram.vue';
@@ -103,7 +101,6 @@ export default defineComponent({
     DropZone,
     DropZoneSka,
     DropZoneSketchlib,
-    ResultsDisplayAssembly,
     KmerHistogram,
     ResultsDisplayMapping,
     ResultsDisplayAlignment

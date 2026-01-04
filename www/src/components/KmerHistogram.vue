@@ -1,6 +1,9 @@
 <template>
-  <div v-bind:class="queryPreprocessed ? 'isVisible' : 'notVisible'">
-    <div ref="plotElement" id="plotElement" class="w-full"></div>
+  <div v-bind:class="queryPreprocessed ? 'isVisible my-6 border-t border-t-gray-200 pt-6' : 'notVisible'">
+    <div ref="plotElement"
+         id="plotElement"
+         class="w-full">
+    </div>
   </div>
 </template>
 

@@ -1,15 +1,25 @@
 <template>
-  <div>
-    <button @click="downloadFASTA" id="Download">Download assembly as .fasta</button>
-  </div>
-  <div>
-    <button @click="downloadDOT" id="Download">Download de Bruijn graph as .dot</button>
-  </div>
-  <div>
-    <button @click="downloadGFA" id="Download">Download de Bruijn graph as .gfa</button>
-  </div>
-  <div>
-    <button @click="downloadGFAv2" id="Download">Download de Bruijn graph as .gfa2</button>
+  <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-2">
+      Download Assembly
+      <Button class="max-w-fit cursor-pointer" variant="outline" size="sm" @click="downloadFASTA">
+        .fasta
+      </Button>
+    </div>
+    <div class="flex flex-col gap-2">
+      Download De Bruijn graph
+      <div class="flex flex-row gap-2">
+        <Button class="max-w-fit cursor-pointer" variant="outline" size="sm" @click="downloadDOT">
+          .dot
+        </Button>
+        <Button class="max-w-fit cursor-pointer" variant="outline" size="sm" @click="downloadGFA">
+          .gfa
+        </Button>
+        <Button class="max-w-fit cursor-pointer" variant="outline" size="sm" @click="downloadGFAv2">
+          .gfa2
+        </Button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -17,6 +27,7 @@
 import {defineComponent, Ref} from "vue";
 import {useState} from "vuex-composition-helpers";
 import type {AllResults} from "@/types";
+import {Button} from "@/components/ui/button";
 
 export default defineComponent({
   name: 'DownloadButton',
@@ -26,6 +37,9 @@ export default defineComponent({
     return {
       allResults
     }
+  },
+  components: {
+    Button
   },
   methods: {
     downloadFASTA(): void {
