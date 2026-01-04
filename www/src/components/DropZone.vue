@@ -1,105 +1,166 @@
 <template>
-  <div>
-    <h1 class="text-2xl font-semibold tracking-tight text-balance mb-4">
-      {{ tabName }}
-    </h1>
+  <div class="flex flex-row">
+    <div class="w-1/3">
+      <h1 class="text-2xl font-medium mb-4">
+        {{ tabName }}
+      </h1>
 
-    <!-- Parameters section - always editable -->
-    <div id="parameters">
-      <h5 class="parameters_legends" v-bind="k">k: {{ k }}</h5>
-      <VueSlider
-          v-model="k"
-          :lazy="true"
-          :min="21"
-          :max="89"
-          :interval="2"
-          :disabled="isProcessingAny"
-      />
-      <h5 class="parameters_legends" v-bind="min_qual">Minimum Illumina read quality: {{ min_qual }}</h5>
-      <VueSlider
-          v-model="min_qual"
-          :lazy="true"
-          :min="0"
-          :max="33"
-          :interval="1"
-          :disabled="isProcessingAny"
-      />
-      <h5 class="parameters_legends" v-if="!do_fit" v-bind="min_count">Minimum counts for k-mer filtering: {{
-          min_count
-        }}</h5>
-      <VueSlider
-          v-model="min_count"
-          :lazy="true"
-          :min="0"
-          :max="30"
-          :interval="1"
-          v-if="!do_fit"
-          :disabled="isProcessingAny"
-      />
-      <h5 class="parameters_legends" style="margin-top: 3px;">Automatically set the minimum counts for
-        k-mer filtering (memory usage could increase): {{ do_fit }}</h5>
-      <input type="checkbox" v-model="do_fit" style="float: right; margin-top: -16px;" :disabled="isProcessingAny"/>
+      <div class="flex flex-col gap-4">
+        <div>
+          <p>k</p>
+          <div class="flex flex-row items-center w-full gap-2">
+            <VueSlider class="flex-grow"
+                       v-model="k"
+                       :lazy="true"
+                       :min="21"
+                       :max="89"
+                       :interval="2"
+                       :disabled="isProcessingAny"
+            />
+            <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
+              {{ k }}
+            </span>
+          </div>
+        </div>
 
-      <h5 class="parameters_legends" v-if="!do_bloom" style="margin-top: 3px;">Chunk processing size (set
-        zero for no chunking): {{ csize }}</h5>
-      <input type="text" v-if="!do_bloom" v-model.number.trim="csize" style="float: right; margin-top: -18px;" :disabled="isProcessingAny">
-      <h5 class="parameters_legends" style="margin-top: 3px;">Use Bloom filter for preprocessing
-        (recommended for non-small reads; chunking will be disabled): {{ do_bloom }}</h5>
-      <input type="checkbox" v-model="do_bloom" style="float: right; margin-top: -8px;" :disabled="isProcessingAny"/>
+        <div>
+          <p>Min Illumina read quality</p>
+          <div class="flex flex-row items-center w-full gap-2">
+            <VueSlider class="flex-grow"
+                       v-model="min_qual"
+                       :lazy="true"
+                       :min="0"
+                       :max="33"
+                       :interval="1"
+                       :disabled="isProcessingAny"
+            />
+            <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
+              {{ min_qual }}
+            </span>
+          </div>
+        </div>
 
-      <h5 class="parameters_legends" style="margin-top: 3px;">Do not remove dead-ends while
-        correcting the assembly graph: {{ no_deadend }}</h5>
-      <input type="checkbox" v-model="no_deadend" style="float: right; margin-top: -8px;" :disabled="isProcessingAny"/>
+        <div :class="do_fit ? 'opacity-50' : ''">
+          <p>Min counts for k-mer filtering</p>
+          <div class="flex flex-row items-center w-full gap-2">
+            <VueSlider class="flex-grow"
+                       v-model="min_count"
+                       :lazy="true"
+                       :min="0"
+                       :max="30"
+                       :interval="1"
+                       :disabled="isProcessingAny || do_fit"
+            />
+            <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
+              {{ min_count }}
+            </span>
+          </div>
+        </div>
 
-      <h5 class="parameters_legends" style="margin-top: 3px;">Do not collapse bubbles while
-        correcting the assembly graph: {{ no_bubble }}</h5>
-      <input type="checkbox" v-model="no_bubble" style="float: right; margin-top: -8px;" :disabled="isProcessingAny"/>
+        <div class="flex flex-row items-center w-full gap-2">
+          <input id="do_fit" type="checkbox" v-model="do_fit" :disabled="isProcessingAny"/>
+          <label for="do_fit">
+            Automatically set min counts
+          </label>
+          <!--           for k-mer filtering (memory usage could increase)-->
+        </div>
+
+        <div class="flex flex-row items-center w-full gap-2">
+          <input id="do_bloom" type="checkbox" v-model="do_bloom" :disabled="isProcessingAny"/>
+          <label for="do_bloom">
+            Use Bloom filter
+          </label>
+          <!--           for preprocessing (recommended for non-small reads; chunking will be disabled)-->
+        </div>
+
+        <div class="flex flex-row items-center w-full gap-2">
+          <input id="no_deadend" type="checkbox" v-model="no_deadend" :disabled="isProcessingAny"/>
+          <label for="no_deadend">
+            Keep dead-ends
+          </label>
+        </div>
+
+        <div class="flex flex-row items-center w-full gap-2">
+          <input id="no_bubble" type="checkbox" v-model="no_bubble" :disabled="isProcessingAny"/>
+          <label for="no_bubble">
+            Do not collapse bubbles
+          </label>
+        </div>
+
+        <div :class="do_bloom ? 'opacity-50' : ''">
+          <label for="csize">
+            Chunk size (zero for no chunking)
+          </label>
+          <input id="csize"
+                 type="number"
+                 class="w-full border border-gray-300 rounded-md text-sm p-2 active:outline-none focus:outline-none"
+                 v-model.number.trim="csize"
+                 :disabled="do_bloom || isProcessingAny">
+        </div>
+      </div>
     </div>
 
-    <h5 class="memory_error_message" v-if="errorInProcessing">Error found while processing! It is most surely a memory
-      issue: try increasing the chunking, or using a Bloom filter</h5>
+    <div class="w-2/3 pt-12">
+      <h5 class="memory_error_message" v-if="errorInProcessing">
+        Error found while processing! It is most surely a memory issue: try increasing the chunking, or using a Bloom
+        filter
+      </h5>
 
-    <!-- Assembly tab -->
-    <div v-if="tabName=='Assembly'">
+      <!-- Assembly tab -->
+      <div v-if="tabName=='Assembly'">
 
-      <!-- Dropzone for file upload -->
-      <div v-if="!readsProcessed && !readsProcessing" v-bind='getRootPropsReads()' class="dropzone dropzone-reads">
-        <input v-bind='getInputPropsReads()'/>
-        <p v-if='isDragActiveReads' class="dropzone-text">Drop the files here ...</p>
-        <p v-else class="dropzone-text">Drag and drop your <b>paired end fastq read files</b> here,
-          or click to select them</p>
+        <!-- Dropzone for file upload -->
+        <div v-if="!readsProcessed && !readsProcessing"
+             v-bind='getRootPropsReads()'
+             class="p-6 mx-6 bg-white border border-grey-200 rounded-md flex flex-col justify-center items-center gap-2 cursor-pointer text-gray-600">
+
+          <input v-bind='getInputPropsReads()'/>
+
+          <FileUp />
+
+          <p v-if='isDragActiveReads' class="">
+            Drop files here ...
+          </p>
+          <p v-else class="">
+            Drop or click to upload your <b>paired end fastq read files</b>
+          </p>
+
+        </div>
+
+        <!-- Processing states -->
+        <div v-else-if="!readsProcessed && readsProcessing" class="">
+          <div v-if="isPreprocessingActive" class="">
+            <LoadingSpinner message="Preprocessing reads..."/>
+          </div>
+          <div v-else-if="isAssemblingActive" class="">
+            <LoadingSpinner message="Assembling genome..."/>
+          </div>
+          <div v-else-if="!assemblying" class="">
+            <p class=" ready-text">Reads <span class="monospace">{{ readsName }}</span> preprocessed and
+              ready for assembly.</p>
+          </div>
+          <div v-else class="">
+            <LoadingSpinner message="Assembling..."/>
+          </div>
+        </div>
+
+        <!-- Completed state -->
+        <div v-else class="">
+          <p class="">Reads assembled!</p>
+        </div>
+
+        <!-- Start assembly button -->
+        <button @click="doAss" v-if='readsPreprocessed && !readsProcessed && !isAssemblingActive' class="">
+          <b>Start assembly</b>
+        </button>
+
+        <!-- Reset button when processing is done or in progress -->
+        <button @click="resetAll" v-if="readsProcessing || readsProcessed" class="">
+          Reset and upload new files
+        </button>
+
+        <slot/>
       </div>
-
-      <!-- Processing states -->
-      <div v-else-if="!readsProcessed && readsProcessing" class="dropzone dropzone-reads dropzone-processing">
-        <div v-if="isPreprocessingActive" class="processing-content">
-          <LoadingSpinner message="Preprocessing reads..." />
-        </div>
-        <div v-else-if="isAssemblingActive" class="processing-content">
-          <LoadingSpinner message="Assembling genome..." />
-        </div>
-        <div v-else-if="!assemblying" class="processing-content">
-          <p class="dropzone-text ready-text">Reads <span class="monospace">{{ readsName }}</span> preprocessed and ready for assembly.</p>
-        </div>
-        <div v-else class="processing-content">
-          <LoadingSpinner message="Assembling..." />
-        </div>
-      </div>
-
-      <!-- Completed state -->
-      <div v-else class="dropzone dropzone-reads dropzone-complete">
-        <p class="dropzone-text success-text">Reads assembled!</p>
-      </div>
-
-      <!-- Start assembly button -->
-      <button @click="doAss" v-if='readsPreprocessed && !readsProcessed && !isAssemblingActive' class="action-button">
-        <b>Start assembly</b>
-      </button>
-
-      <!-- Reset button when processing is done or in progress -->
-      <button @click="resetAll" v-if="readsProcessing || readsProcessed" class="reset-button">
-        Reset and upload new files
-      </button>
     </div>
   </div>
 </template>
@@ -113,6 +174,7 @@ import {useStore} from "vuex";
 import VueSlider from 'vue-3-slider-component';
 import LoadingSpinner from './LoadingSpinner.vue';
 import "@fontsource/ibm-plex-mono";
+import {FileUp} from "lucide-vue-next";
 
 export default defineComponent({
   name: "DropZone",
@@ -124,7 +186,8 @@ export default defineComponent({
   },
   components: {
     VueSlider,
-    LoadingSpinner
+    LoadingSpinner,
+    FileUp
   },
   setup() {
     const store = useStore();
@@ -250,103 +313,5 @@ export default defineComponent({
 
 </script>
 
-
 <style scoped>
-.dropzone {
-  border: 2px dotted rgb(56, 55, 55);
-  margin: 10%;
-  text-align: center;
-  vertical-align: middle;
-  display: flex;
-  align-items: center;
-  border-radius: 4px;
-  margin-bottom: 5px;
-}
-
-.dropzone-reads {
-  height: 75px;
-  margin-top: 20px;
-  background-color: rgb(159, 176, 190);
-}
-
-.dropzone-text {
-  padding: 30px;
-}
-
-.monospace {
-  font-family: "IBM Plex mono";
-}
-
-#parameters {
-  margin: 1% 10%;
-}
-
-.parameters_legends {
-  text-align: left;
-  margin: 0px;
-  width: 70%;
-}
-
-.memory_error_message {
-  text-align: center;
-  color: #D41645;
-}
-
-.dropzone-processing {
-  background-color: #fef3c7;
-  border-color: #f59e0b;
-  justify-content: center;
-}
-
-.dropzone-complete {
-  background-color: #d1fae5;
-  border-color: #10b981;
-}
-
-.processing-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.ready-text {
-  color: #92400e;
-}
-
-.success-text {
-  color: #065f46;
-  font-weight: 500;
-}
-
-.action-button {
-  display: block;
-  margin: 10px auto;
-  padding: 10px 20px;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.action-button:hover {
-  background-color: #2563eb;
-}
-
-.reset-button {
-  display: block;
-  margin: 10px auto;
-  padding: 8px 16px;
-  background-color: #6b7280;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.reset-button:hover {
-  background-color: #4b5563;
-}
 </style>

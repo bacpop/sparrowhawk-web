@@ -1,5 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@fontsource/dm-sans/400.css";
+@import "@fontsource/dm-sans/500.css";
+@import "@fontsource/dm-sans/600.css";
+@import "@fontsource/dm-sans/700.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -75,6 +79,7 @@
 }
 
 @theme inline {
+    --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
     --color-background: var(--background);
     --color-foreground: var(--foreground);
     --color-card: var(--card);
@@ -119,7 +124,7 @@
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground font-sans;
         background-color: #F5F7F9;
     }
 }

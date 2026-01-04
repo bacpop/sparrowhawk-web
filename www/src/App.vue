@@ -25,9 +25,10 @@
     <!-- Main Content -->
     <main class="bg-white mt-6 mb-6 rounded-tl-xl rounded-bl-xl border-2 border-gray-200 border-r-0 flex-1 p-8">
       <div v-if="tabName === 'Assembly'">
-        <DropZone :tabName="tabName"/>
-        <ResultsDisplayAssembly class="mt-6"/>
-        <KmerHistogram class="mt-6"/>
+        <DropZone :tabName="tabName">
+          <ResultsDisplayAssembly class="mt-6"/>
+          <KmerHistogram class="mt-6"/>
+        </DropZone>
       </div>
 
       <div v-else-if="tabName === 'TaxonomicID'">
@@ -48,8 +49,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { useStore } from 'vuex';
+import {defineComponent} from 'vue';
+import {useStore} from 'vuex';
 // eslint-disable-next-line
 import {Codesandbox, Map, ScanFace, Spline} from "lucide-vue-next";
 
@@ -110,7 +111,7 @@ export default defineComponent({
 
   setup() {
     const store = useStore();
-    return { store };
+    return {store};
   },
 
   data() {

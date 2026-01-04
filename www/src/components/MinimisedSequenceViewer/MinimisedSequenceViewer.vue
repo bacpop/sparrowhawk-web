@@ -200,7 +200,7 @@ export default defineComponent({
                             .attr("text-anchor", "middle")
                             .attr("alignment-baseline", "middle")
                             .style("font-size", "12px")
-                            .style("font-family", "IBM Plex Sans")
+                            .style("font-family", "DM Sans")
                             .text(nuc_i);
                         xAxis.append("line")
                             .attr("x1", position + (next_position - position) / 2)
