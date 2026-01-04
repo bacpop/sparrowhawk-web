@@ -97,6 +97,11 @@
                  v-model.number.trim="csize"
                  :disabled="do_bloom || isProcessingAny">
         </div>
+
+        <Button @click="doPreProcess()" v-if="readsProcessed" class="max-w-fit mt-2"
+                variant="outline" size="sm">
+          Re-process
+        </Button>
       </div>
     </div>
 
@@ -139,7 +144,7 @@
         <!-- File list with status -->
         <div class="flex flex-row gap-2 w-full mt-4">
           <div v-if="uploadedFiles.length > 0" class="mx-6 w-1/2 flex-grow">
-            <div v-for="fileName in uploadedFiles" :key="fileName"
+            <div v-for="file in uploadedFiles" :key="file.name"
                  class="flex items-center gap-2 py-2 px-3 bg-gray-50 rounded-md mb-2">
 
               <Loader2 v-if="isPreprocessingActive" class="w-4 h-4 text-blue-500 animate-spin"/>
@@ -147,7 +152,7 @@
               <Check v-else-if="readsProcessed || readsPreprocessed" class="w-4 h-4 text-green-500"/>
 
               <span class="flex-grow text-sm font-mono truncate">
-              {{ fileName }}
+              {{ file.name }}
             </span>
             </div>
           </div>
@@ -179,6 +184,7 @@ import VueSlider from 'vue-3-slider-component';
 import "@fontsource/ibm-plex-mono";
 import {Check, FileUp, Loader2} from "lucide-vue-next";
 import DownloadButton from "@/components/DownloadButton.vue";
+import {Button} from "@/components/ui/button";
 
 export default defineComponent({
   name: "DropZone",
@@ -190,6 +196,7 @@ export default defineComponent({
   },
   components: {
     DownloadButton,
+    Button,
     VueSlider,
     FileUp,
     Loader2,
@@ -206,7 +213,7 @@ export default defineComponent({
     const assemblying: Ref<boolean> = ref(false);
     const no_bubble: Ref<boolean> = ref(false);
     const no_deadend: Ref<boolean> = ref(false);
-    const uploadedFiles: Ref<string[]> = ref([]);
+    const uploadedFiles: Ref<File[]> = ref([]);
 
     const {
       processReads,
@@ -217,11 +224,14 @@ export default defineComponent({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const {allResults} = useState(["allResults"]) as any;
 
-
     function onDropReads(acceptFiles: File[]): void {
-      uploadedFiles.value = acceptFiles.map(f => f.name);
+      uploadedFiles.value = acceptFiles;
+      doPreProcess();
+    }
+
+    function doPreProcess(): void {
       processReads({
-        acceptFiles: acceptFiles,
+        acceptFiles: uploadedFiles.value,
         k: k.value,
         min_count: min_count.value,
         min_qual: min_qual.value,
@@ -269,6 +279,7 @@ export default defineComponent({
       no_deadend,
       assemblying,
       resetAll,
+      doPreProcess,
       doAss,
       getRootPropsReads,
       getInputPropsReads,

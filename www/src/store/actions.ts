@@ -16,6 +16,8 @@ export default {
         console.log("Checking number of uploaded files...")
         if (state.workerState.worker) {
             if (payload.acceptFiles.length == 2) {
+                commit("resetAllResults");
+
                 console.log("Removing errors if they are")
                 commit("removeErrors");
 
