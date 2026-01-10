@@ -258,7 +258,7 @@ import "@fontsource/ibm-plex-mono";
 import {Check, FileUp, Loader2, Info, Codesandbox} from "lucide-vue-next";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import DownloadButton from "@/components/DownloadButton.vue";
-import AssemblyHelpCollapsible from "@/components/AssemblyHelpCollapsible.vue";
+import AssemblyHelpCollapsible from "@/components/help/AssemblyHelpCollapsible.vue";
 import {Button} from "@/components/ui/button";
 
 export default defineComponent({

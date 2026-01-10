@@ -13,39 +13,30 @@
 
     <CollapsibleContent class="px-3 pb-3">
       <Tabs default-value="overview" class="mt-2">
-        <TabsList class="grid w-full grid-cols-4 h-8">
+        <TabsList class="grid w-full grid-cols-2 h-8">
           <TabsTrigger value="overview" class="text-xs">Overview</TabsTrigger>
-          <TabsTrigger value="workflow" class="text-xs">Workflow</TabsTrigger>
           <TabsTrigger value="parameters" class="text-xs">Parameters</TabsTrigger>
-          <TabsTrigger value="notes" class="text-xs">Notes</TabsTrigger>
         </TabsList>
 
         <div class="mt-3 text-sm text-gray-600 max-h-64 overflow-y-auto">
           <TabsContent value="overview" class="space-y-4">
             <p>
-              Genome assembly consists on recovering a genome (the DNA sequence) from organisms that have been sequenced. Genome sequencing is an experimental method that provides with the raw data needed to later extract the genome sequence. Sparrowhawk, the assembler we have developed, works with one family of technologies called "short read" sequencing. The raw files obtained are in FASTQ (extensions <code class="text-xs bg-gray-100 px-1 rounded">.fq</code>, <code class="text-xs bg-gray-100 px-1 rounded">.fastq</code>, usually) format, that is a text file, and they mostly come in pairs. They contain small subsequences obtained from the original complete genome sequence, alongside some quality information on how confident we are of an individual element of the sequence (or nucleotide) is what it is. Genome assembly is the task of taking this subsequences, and reconstruct (assemble) the original genome. The output is provided in FASTA format (extensions <code class="text-xs bg-gray-100 px-1 rounded">.fa</code>, <code class="text-xs bg-gray-100 px-1 rounded">.fasta</code>, usually), which as FASTQ is a text file, but in this case simpler (no qualities, only two types of lines allowed).
+              Here you can perform genome assembly of short read sequencing data. You will need your sequencing read files (in
+              FASTQ format, compressed or not), that can be single files or paired-end ones (keep in mind that these tools were
+              designed for bacterial genomes, so large reads files might not work!).
+            </p>
+
+            <p>
+              You can then "upload" them (though actually
+              you are just loading them into your computer's memory), starting the assembly process. At the end, you can
+              "download" (from memory) the final configs in FASTA format, as well as the intermediate de Bruijn graph in
+              different formats. You can check the documentation for more information on what the different parameters do.
             </p>
 
             <div>
-              <p class="font-medium text-gray-900 mb-2">Example Files</p>
-              <ul class="list-disc list-inside space-y-1">
-                <li>
-                  <code class="text-xs bg-gray-100 px-1 rounded">small_paired_dat*.fq</code> are two cropped fastq files that are small to be used for quick debugging.
-                  <a href="/example-files/small_paired_dat1.fq" download class="text-blue-600 hover:underline ml-1">Download dat1</a>,
-                  <a href="/example-files/small_paired_dat2.fq" download class="text-blue-600 hover:underline">dat2</a>
-                </li>
-                <li>
-                  <code class="text-xs bg-gray-100 px-1 rounded">paired_dat*.fq</code> are two complete simulations for running it.
-                  <a href="/example-files/paired_dat1.fq" download class="text-blue-600 hover:underline ml-1">Download dat1</a>,
-                  <a href="/example-files/paired_dat2.fq" download class="text-blue-600 hover:underline">dat2</a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <p class="font-medium text-gray-900 mb-2">Quick Start: Mycobacterium tuberculosis reads from ENA</p>
+              <p class="font-medium text-gray-900 mb-2">Example record and files</p>
               <p class="text-sm mb-1">
-                <a href="https://www.ebi.ac.uk/ena/browser/view/ERR8158023" target="_blank" class="text-blue-600 hover:underline">Record: ERR8158023</a>
+                <a href="https://www.ebi.ac.uk/ena/browser/view/ERR8158023" target="_blank" class="text-blue-600 hover:underline">Mycobacterium tuberculosis reads from ENA</a>
               </p>
               <ul class="list-disc list-inside space-y-1">
                 <li>
@@ -56,16 +47,6 @@
                 </li>
               </ul>
             </div>
-          </TabsContent>
-
-          <TabsContent value="workflow">
-            <ol class="list-decimal list-outside ml-4 space-y-2">
-              <li>User uploads sequencing raw data / fastq files (also called "reads", commonly) by either clicking on a drag&amp;drop area or pressing somewhere that spans a file explorer.</li>
-              <li>Preprocessing happens, automatically triggered after upload.</li>
-              <li>Preprocessing finishes, showing an interactive plot with the k-mer spectrum (a histogram) and the filtered k-mer area.</li>
-              <li>Assembly happens (currently by clicking a button).</li>
-              <li>Assembly finishes and allows to download the result as a FASTA file, and also other intermediate graph files as different formats (DOT, GFA, and GFAv2).</li>
-            </ol>
           </TabsContent>
 
           <TabsContent value="parameters">
@@ -99,13 +80,6 @@
                 <dd class="ml-4">The last two options are booleans that modify two parameters from the algorithm. They do not affect the rest of the parameters.</dd>
               </div>
             </dl>
-          </TabsContent>
-
-          <TabsContent value="notes">
-            <ul class="list-disc list-outside ml-4 space-y-2">
-              <li>Currently, there are "unknown errors" from wasm that actually are a memory issue error (the wasm-Rust interfaces are currently unable to use 64 bit memory addresses). These are notified by a message when they happen, prompting the user to modify some parameters.</li>
-              <li>Files that are not reads (with usual extensions) should not be expected to be uploaded.</li>
-            </ul>
           </TabsContent>
         </div>
       </Tabs>

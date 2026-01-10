@@ -13,37 +13,29 @@
 
     <CollapsibleContent class="px-3 pb-3">
       <Tabs default-value="overview" class="mt-2">
-        <TabsList class="grid w-full grid-cols-4 h-8">
+        <TabsList class="grid w-full grid-cols-2 h-8">
           <TabsTrigger value="overview" class="text-xs">Overview</TabsTrigger>
-          <TabsTrigger value="workflow" class="text-xs">Workflow</TabsTrigger>
           <TabsTrigger value="parameters" class="text-xs">Parameters</TabsTrigger>
-          <TabsTrigger value="notes" class="text-xs">Notes</TabsTrigger>
         </TabsList>
 
         <div class="mt-3 text-sm text-gray-600 max-h-64 overflow-y-auto">
           <TabsContent value="overview" class="space-y-4">
             <p>
-              Mapping is often used as an alternative way of reconstructing a genome from sequencing raw data. Instead of doing genome assembly, if you have a good, previously assembled, reference genome and you know that the genomes you work with do not vary much between them, you can just map the sequencing raw data/reads (FASTQ files) to the reference, where by "map" we refer to place each raw subsequence in some location of the reference genome, noting down those entries/nucleotides that might be different.
+              Here you can map a sequence (reads or assemblies) or more to a reference one, normally a reference assembly. You
+              will need first your reference sequence (in FASTA format, can be compressed), that you can "upload" (load in
+              memory) and afterwards you will need to do the same with the sequence(s) you want to map.
+            </p>
+            <p>
+              At the end you can
+              download the mapping alignment as a FASTA file and also see it with a viewer below. You can check the
+              documentation for more information on what the different parameters do.
             </p>
 
             <div>
-              <p class="font-medium text-gray-900 mb-2">Example Files</p>
-              <ul class="list-disc list-inside space-y-1">
-                <li>
-                  You can use both the small cropped files, and the normal size ones from the assembly test files as run files for the mapping.
-                </li>
-                <li>
-                  <code class="text-xs bg-gray-100 px-1 rounded">GCA_900618555.1.fasta</code> is the original genome, that should deviate little from the sequences, and you can use as reference.
-                  <a href="/example-files/GCA_900618555.1.fasta" download class="text-blue-600 hover:underline ml-1">Download</a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <p class="font-medium text-gray-900 mb-2">Quick Start: Mycobacterium tuberculosis</p>
+              <p class="font-medium text-gray-900 mb-2">Example record and files</p>
               <div class="space-y-2">
                 <div>
-                  <p class="text-sm font-medium">Reference (main M. tuberculosis reference):</p>
+                  <p class="text-sm font-medium">Reference (Mycobacterium tuberculosis reference):</p>
                   <p class="text-sm">
                     <a href="https://www.ebi.ac.uk/ena/browser/view/GCA_000195955.2" target="_blank" class="text-blue-600 hover:underline">Record: GCA_000195955.2</a>
                   </p>
@@ -54,7 +46,7 @@
                   </ul>
                 </div>
                 <div>
-                  <p class="text-sm font-medium">Files to map (different M. tuberculosis reads):</p>
+                  <p class="text-sm font-medium">Files to map (Mycobacterium tuberculosis reads):</p>
                   <p class="text-sm">
                     <a href="https://www.ebi.ac.uk/ena/browser/view/ERR8158023" target="_blank" class="text-blue-600 hover:underline">Record: ERR8158023</a>
                   </p>
@@ -71,15 +63,6 @@
             </div>
           </TabsContent>
 
-          <TabsContent value="workflow">
-            <ol class="list-decimal list-outside ml-4 space-y-2">
-              <li>User set their parameters.</li>
-              <li>User uploads a reference genome (FASTA file).</li>
-              <li>User uploads other sequences, either as reads (FASTQ files) or other DNA sequences (FASTA files).</li>
-              <li>Processing is done, and later a visualisation of the mapping can be seen by activating the tickbox. Also, the alignment of the secondly uploaded sequences vs the reference can be downloaded by clicking a button.</li>
-            </ol>
-          </TabsContent>
-
           <TabsContent value="parameters">
             <dl class="space-y-3">
               <div>
@@ -91,13 +74,6 @@
                 <dd class="ml-4">When using reads, this allows to subsample them (making thus the analysis faster). A real number between 0 and 1.</dd>
               </div>
             </dl>
-          </TabsContent>
-
-          <TabsContent value="notes">
-            <ul class="list-disc list-outside ml-4 space-y-2">
-              <li>Upload a reference genome first, then upload the sequences you want to map to it.</li>
-              <li>You can map both reads (FASTQ) and assembled sequences (FASTA) to the reference.</li>
-            </ul>
           </TabsContent>
         </div>
       </Tabs>

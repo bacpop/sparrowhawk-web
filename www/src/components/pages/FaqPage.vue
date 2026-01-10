@@ -5,15 +5,6 @@
     </h1>
   </div>
   <div class="max-w-3/4">
-    <h3 class="mb-2 font-medium">
-      What is this website for?
-    </h3>
-    <p class="text-sm">
-      This page offers various bioinformatic methodologies (genome assembly, sequence mapping and alignment, and
-      taxonomic identification) that are commonly used in bacterial genomics analyses. Thanks to their lightweight
-      design and implementation, they are all run locally in your computer, without uploading any file to a remote
-      server, or having to wait for a job to finish with your results.
-    </p>
     <h3 class="mt-2 mb-2 font-medium">
       Who is this website for?
     </h3>

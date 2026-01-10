@@ -13,27 +13,24 @@
 
     <CollapsibleContent class="px-3 pb-3">
       <Tabs default-value="overview" class="mt-2">
-        <TabsList class="grid w-full grid-cols-3 h-8">
+        <TabsList class="grid w-full grid-cols-2 h-8">
           <TabsTrigger value="overview" class="text-xs">Overview</TabsTrigger>
-          <TabsTrigger value="workflow" class="text-xs">Workflow</TabsTrigger>
-          <TabsTrigger value="notes" class="text-xs">Notes</TabsTrigger>
+          <TabsTrigger value="parameters" class="text-xs">Parameters</TabsTrigger>
         </TabsList>
 
         <div class="mt-3 text-sm text-gray-600 max-h-64 overflow-y-auto">
           <TabsContent value="overview" class="space-y-4">
             <p>
-              We call taxonomic identification, in this "genomics" context, to assign a taxonomic category (i.e. a life organism classification), usually the species, to a genome. This is broadly done by comparing an assembled genome, or even reads, to a preknown database of genomes, whose species are known.
+              Here you can identify the taxonomic classification at the level of species of bacterial genomic sequences (either
+              reads in FASTQ format, or any FASTA sequence). For that, you just need to "upload" (load into memory) your
+              sequence files, and you will obtain the three most closest results, with its probability, that the methodology
+              obtains for your sequences. You can check the documentation for more information on how this works.
             </p>
 
             <div>
-              <p class="font-medium text-gray-900 mb-2">Example Files</p>
-              <p class="mb-2">There are various genomes (FASTAs), whose actual species can be seen in the file names.</p>
-            </div>
-
-            <div>
-              <p class="font-medium text-gray-900 mb-2">Quick Start: Klebsiella pneumoniae assembly</p>
+              <p class="font-medium text-gray-900 mb-2">Example record and files</p>
               <p class="text-sm">
-                <a href="https://www.ebi.ac.uk/ena/browser/view/GCA_004138665.1" target="_blank" class="text-blue-600 hover:underline">Record: GCA_004138665.1</a>
+                <a href="https://www.ebi.ac.uk/ena/browser/view/GCA_004138665.1" target="_blank" class="text-blue-600 hover:underline">Klebsiella pneumoniae assembly: GCA_004138665.1</a>
               </p>
               <ul class="list-disc list-inside mt-1">
                 <li>
@@ -43,20 +40,17 @@
             </div>
           </TabsContent>
 
-          <TabsContent value="workflow">
-            <ol class="list-decimal list-outside ml-4 space-y-2">
-              <li>User uploads a genome file.</li>
-              <li>Taxonomic ID happens by calling the Rust code/wasm module.</li>
-              <li>ID is done by showing the most probable candidates, from the known database.</li>
-            </ol>
-          </TabsContent>
-
-          <TabsContent value="notes">
-            <ul class="list-disc list-outside ml-4 space-y-2">
-              <li>Upload one FASTA/FASTQ file or two paired FASTQ files.</li>
-              <li>The system will compare your genome against a known database of species.</li>
-              <li>Results show the most probable taxonomic matches with confidence percentages.</li>
-            </ul>
+          <TabsContent value="parameters">
+            <dl class="space-y-3">
+              <div>
+                <dt class="font-medium text-gray-900">k</dt>
+                <dd class="ml-4">Controls the size of the subsequences (k-mers) used to process the reads or assemblies. Similar to that of the assembly, but in this case only up until 63.</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-gray-900">Proportion of reads</dt>
+                <dd class="ml-4">When using reads, this allows to subsample them (making thus the analysis faster). A real number between 0 and 1.</dd>
+              </div>
+            </dl>
           </TabsContent>
         </div>
       </Tabs>

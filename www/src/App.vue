@@ -74,9 +74,9 @@ import {useStore} from 'vuex';
 // eslint-disable-next-line
 import {Codesandbox, Map, ScanFace, Spline} from "lucide-vue-next";
 
-import AssemblyPage from './components/AssemblyPage.vue';
-import MappingAlignmentPage from './components/MappingAlignmentPage.vue';
-import TaxonomicIDPage from './components/TaxonomicIDPage.vue';
+import AssemblyPage from './components/pages/AssemblyPage.vue';
+import MappingAlignmentPage from './components/pages/MappingAlignmentPage.vue';
+import TaxonomicIDPage from './components/pages/TaxonomicIDPage.vue';
 import ResultsDisplayMapping from './components/ResultsDisplayMapping.vue';
 import ResultsDisplayAlignment from './components/ResultsDisplayAlignment.vue';
 import KmerHistogram from './components/KmerHistogram.vue';

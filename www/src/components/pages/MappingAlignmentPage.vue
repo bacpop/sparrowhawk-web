@@ -186,8 +186,8 @@ import VueSlider from 'vue-3-slider-component';
 import { Check, FileUp, Loader2, Info, Map, Spline } from "lucide-vue-next";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import MappingHelpCollapsible from "@/components/MappingHelpCollapsible.vue";
-import AlignmentHelpCollapsible from "@/components/AlignmentHelpCollapsible.vue";
+import MappingHelpCollapsible from "@/components/help/MappingHelpCollapsible.vue";
+import AlignmentHelpCollapsible from "@/components/help/AlignmentHelpCollapsible.vue";
 
 export default defineComponent({
   name: "MappingAlignmentPage",

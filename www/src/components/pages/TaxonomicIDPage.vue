@@ -118,7 +118,7 @@ import VueSlider from 'vue-3-slider-component';
 import { FileUp, Loader2, Info, ScanFace } from "lucide-vue-next";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import TaxonomicIDHelpCollapsible from "@/components/TaxonomicIDHelpCollapsible.vue";
+import TaxonomicIDHelpCollapsible from "@/components/help/TaxonomicIDHelpCollapsible.vue";
 
 export default defineComponent({
   name: "TaxonomicIDPage",
