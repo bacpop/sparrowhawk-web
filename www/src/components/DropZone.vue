@@ -5,104 +5,174 @@
         {{ tabName }}
       </h1>
 
-      <div class="flex flex-col gap-4">
-        <div>
-          <p>k</p>
-          <div class="flex flex-row items-center w-full gap-2">
-            <VueSlider class="flex-grow"
-                       v-model="k"
-                       :lazy="true"
-                       :min="21"
-                       :max="89"
-                       :interval="2"
-                       :disabled="isProcessingAny"
-            />
-            <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
-              {{ k }}
-            </span>
+      <TooltipProvider>
+        <div class="flex flex-col gap-4">
+          <div>
+            <p class="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p class="max-w-xs">Controls the size of the subsequences (k-mers) used to process the reads.</p>
+                </TooltipContent>
+              </Tooltip>
+              k
+            </p>
+            <div class="flex flex-row items-center w-full gap-2">
+              <VueSlider class="flex-grow"
+                         v-model="k"
+                         :lazy="true"
+                         :min="21"
+                         :max="89"
+                         :interval="2"
+                         :disabled="isProcessingAny"
+              />
+              <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
+                {{ k }}
+              </span>
+            </div>
           </div>
-        </div>
 
-        <div>
-          <p>Min Illumina read quality</p>
-          <div class="flex flex-row items-center w-full gap-2">
-            <VueSlider class="flex-grow"
-                       v-model="min_qual"
-                       :lazy="true"
-                       :min="0"
-                       :max="33"
-                       :interval="1"
-                       :disabled="isProcessingAny"
-            />
-            <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
-              {{ min_qual }}
-            </span>
+          <div>
+            <p class="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p class="max-w-xs">Controls the filtering of nucleotides depending on the sequencing error information.</p>
+                </TooltipContent>
+              </Tooltip>
+              Min Illumina read quality
+            </p>
+            <div class="flex flex-row items-center w-full gap-2">
+              <VueSlider class="flex-grow"
+                         v-model="min_qual"
+                         :lazy="true"
+                         :min="0"
+                         :max="33"
+                         :interval="1"
+                         :disabled="isProcessingAny"
+              />
+              <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
+                {{ min_qual }}
+              </span>
+            </div>
           </div>
-        </div>
 
-        <div :class="do_fit ? 'opacity-50' : ''">
-          <p>Min counts for k-mer filtering</p>
-          <div class="flex flex-row items-center w-full gap-2">
-            <VueSlider class="flex-grow"
-                       v-model="min_count"
-                       :lazy="true"
-                       :min="0"
-                       :max="30"
-                       :interval="1"
-                       :disabled="isProcessingAny || do_fit"
-            />
-            <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
-              {{ min_count }}
-            </span>
+          <div :class="do_fit ? 'opacity-50' : ''">
+            <p class="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p class="max-w-xs">Only k-mers appearing more than this value will be used.</p>
+                </TooltipContent>
+              </Tooltip>
+              Min counts for k-mer filtering
+            </p>
+            <div class="flex flex-row items-center w-full gap-2">
+              <VueSlider class="flex-grow"
+                         v-model="min_count"
+                         :lazy="true"
+                         :min="0"
+                         :max="30"
+                         :interval="1"
+                         :disabled="isProcessingAny || do_fit"
+              />
+              <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
+                {{ min_count }}
+              </span>
+            </div>
           </div>
-        </div>
 
-        <div class="flex flex-row items-center w-full gap-2">
-          <input id="do_fit" type="checkbox" v-model="do_fit" :disabled="isProcessingAny"/>
-          <label for="do_fit">
-            Automatically set min counts
-          </label>
-          <!--           for k-mer filtering (memory usage could increase)-->
-        </div>
+          <div class="flex flex-row items-center w-full gap-2">
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p class="max-w-xs">Allows automatic setting of the minimum k-mer count. Memory usage could increase.</p>
+              </TooltipContent>
+            </Tooltip>
+            <input id="do_fit" type="checkbox" v-model="do_fit" :disabled="isProcessingAny"/>
+            <label for="do_fit">
+              Automatically set min counts
+            </label>
+          </div>
 
-        <div class="flex flex-row items-center w-full gap-2">
-          <input id="do_bloom" type="checkbox" v-model="do_bloom" :disabled="isProcessingAny"/>
-          <label for="do_bloom">
-            Use Bloom filter
-          </label>
-          <!--           for preprocessing (recommended for non-small reads; chunking will be disabled)-->
-        </div>
+          <div class="flex flex-row items-center w-full gap-2">
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p class="max-w-xs">Alternative filtering with significantly lower memory usage. Recommended for non-small reads. Chunking will be disabled.</p>
+              </TooltipContent>
+            </Tooltip>
+            <input id="do_bloom" type="checkbox" v-model="do_bloom" :disabled="isProcessingAny"/>
+            <label for="do_bloom">
+              Use Bloom filter
+            </label>
+          </div>
 
-        <div class="flex flex-row items-center w-full gap-2">
-          <input id="no_deadend" type="checkbox" v-model="no_deadend" :disabled="isProcessingAny"/>
-          <label for="no_deadend">
-            Keep dead-ends
-          </label>
-        </div>
+          <div class="flex flex-row items-center w-full gap-2">
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p class="max-w-xs">Maintains short paths in the graph that would usually be pruned.</p>
+              </TooltipContent>
+            </Tooltip>
+            <input id="no_deadend" type="checkbox" v-model="no_deadend" :disabled="isProcessingAny"/>
+            <label for="no_deadend">
+              Keep dead-ends
+            </label>
+          </div>
 
-        <div class="flex flex-row items-center w-full gap-2">
-          <input id="no_bubble" type="checkbox" v-model="no_bubble" :disabled="isProcessingAny"/>
-          <label for="no_bubble">
-            Do not collapse bubbles
-          </label>
-        </div>
+          <div class="flex flex-row items-center w-full gap-2">
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p class="max-w-xs">Disables simple bubble collapse in the assembly graph.</p>
+              </TooltipContent>
+            </Tooltip>
+            <input id="no_bubble" type="checkbox" v-model="no_bubble" :disabled="isProcessingAny"/>
+            <label for="no_bubble">
+              Do not collapse bubbles
+            </label>
+          </div>
 
-        <div :class="do_bloom ? 'opacity-50 flex flex-row gap-1' : ''">
-          <label for="csize">
-            Chunk size (zero for no chunking)
-          </label>
-          <input id="csize"
-                 type="number"
-                 class="w-full border border-gray-300 rounded-md text-sm p-2 active:outline-none focus:outline-none"
-                 v-model.number.trim="csize"
-                 :disabled="do_bloom || isProcessingAny">
-        </div>
+          <div :class="do_bloom ? 'opacity-50' : ''">
+            <label for="csize" class="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p class="max-w-xs">Size of the preprocessing batches. Lowering this value will usually decrease memory usage somewhat.</p>
+                </TooltipContent>
+              </Tooltip>
+              Chunk size (zero for no chunking)
+            </label>
+            <input id="csize"
+                   type="number"
+                   class="w-full border border-gray-300 rounded-md text-sm p-2 active:outline-none focus:outline-none"
+                   v-model.number.trim="csize"
+                   :disabled="do_bloom || isProcessingAny">
+          </div>
 
-        <Button @click="doPreProcess()" v-if="readsProcessed" class="max-w-fit mt-2"
-                variant="outline" size="sm">
-          Re-process
-        </Button>
-      </div>
+          <Button @click="doPreProcess()" v-if="readsProcessed" class="max-w-fit mt-2"
+                  variant="outline" size="sm">
+            Re-process
+          </Button>
+        </div>
+      </TooltipProvider>
     </div>
 
     <div class="w-2/3 pt-12">
@@ -182,7 +252,8 @@ import {useActions, useState} from "vuex-composition-helpers";
 import {useStore} from "vuex";
 import VueSlider from 'vue-3-slider-component';
 import "@fontsource/ibm-plex-mono";
-import {Check, FileUp, Loader2} from "lucide-vue-next";
+import {Check, FileUp, Loader2, Info} from "lucide-vue-next";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import DownloadButton from "@/components/DownloadButton.vue";
 import {Button} from "@/components/ui/button";
 
@@ -200,7 +271,12 @@ export default defineComponent({
     VueSlider,
     FileUp,
     Loader2,
-    Check
+    Check,
+    Info,
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger
   },
   setup() {
     const store = useStore();
