@@ -151,6 +151,24 @@ export default defineComponent({
   },
 
   mounted(): void {
+    // Set initial tab from URL hash
+    const hash = window.location.hash.slice(1); // Remove the '#'
+    const validTabs = this.tabs.map(t => t.id).concat(['faq']);
+    if (hash && validTabs.includes(hash)) {
+      this.tabName = hash;
+    } else {
+      // Set default hash if none or invalid
+      window.location.hash = this.tabName;
+    }
+
+    // Listen for back/forward navigation
+    window.addEventListener('hashchange', () => {
+      const newHash = window.location.hash.slice(1);
+      if (newHash && validTabs.includes(newHash)) {
+        this.tabName = newHash;
+      }
+    });
+
     console.log("Loading wasm modules in workers...")
 
     import("@/pkg")
@@ -185,6 +203,7 @@ export default defineComponent({
   methods: {
     changeTab(tab: string): void {
       this.tabName = tab;
+      window.location.hash = tab;
     }
   }
 });
