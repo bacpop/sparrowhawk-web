@@ -291,7 +291,7 @@ export default defineComponent({
     const min_qual: Ref<number> = ref(20);
     const csize: Ref<number> = ref(150000);
     const do_bloom: Ref<boolean> = ref(false);
-    const do_fit: Ref<boolean> = ref(false);
+    const do_fit: Ref<boolean> = ref(true);
     const assemblying: Ref<boolean> = ref(false);
     const no_bubble: Ref<boolean> = ref(false);
     const no_deadend: Ref<boolean> = ref(false);
