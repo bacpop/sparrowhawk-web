@@ -121,7 +121,7 @@ import { Button } from "@/components/ui/button";
 import TaxonomicIDHelpCollapsible from "@/components/TaxonomicIDHelpCollapsible.vue";
 
 export default defineComponent({
-  name: "DropZoneSketchlib",
+  name: "TaxonomicIDPage",
   props: {
     tabName: {
       type: String,

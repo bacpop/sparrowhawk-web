@@ -262,7 +262,7 @@ import AssemblyHelpCollapsible from "@/components/AssemblyHelpCollapsible.vue";
 import {Button} from "@/components/ui/button";
 
 export default defineComponent({
-  name: "DropZone",
+  name: "AssemblyPage",
   props: {
     tabName: {
       type: String,

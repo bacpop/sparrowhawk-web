@@ -36,23 +36,29 @@
     <!-- Main Content -->
     <main class="bg-white mt-6 mb-6 rounded-tl-xl rounded-bl-xl border border-gray-200 border-r-0 flex-1 p-8">
       <div v-if="tabName === 'Assembly'">
-        <DropZone :tabName="tabName">
+        <AssemblyPage :tabName="tabName">
           <KmerHistogram class="mt-6"/>
-        </DropZone>
+        </AssemblyPage>
       </div>
 
       <div v-else-if="tabName === 'TaxonomicID'">
-        <DropZoneSketchlib :tabName="tabName"/>
+        <TaxonomicIDPage :tabName="tabName"/>
       </div>
 
       <div v-else-if="tabName === 'Mapping'">
-        <DropZoneSka :tabName="tabName"/>
-        <ResultsDisplayMapping class="mt-6"/>
+        <MappingAlignmentPage :tabName="tabName">
+          <template #mapping>
+            <ResultsDisplayMapping class="mt-6"/>
+          </template>
+        </MappingAlignmentPage>
       </div>
 
       <div v-else-if="tabName === 'Alignment'">
-        <DropZoneSka :tabName="tabName"/>
-        <ResultsDisplayAlignment class="mt-6"/>
+        <MappingAlignmentPage :tabName="tabName">
+          <template #alignment>
+            <ResultsDisplayAlignment class="mt-6"/>
+          </template>
+        </MappingAlignmentPage>
       </div>
 
       <div v-else-if="tabName === 'faq'">
@@ -68,9 +74,9 @@ import {useStore} from 'vuex';
 // eslint-disable-next-line
 import {Codesandbox, Map, ScanFace, Spline} from "lucide-vue-next";
 
-import DropZone from './components/DropZone.vue';
-import DropZoneSka from './components/DropZoneSka.vue';
-import DropZoneSketchlib from './components/DropZoneSketchlib.vue';
+import AssemblyPage from './components/AssemblyPage.vue';
+import MappingAlignmentPage from './components/MappingAlignmentPage.vue';
+import TaxonomicIDPage from './components/TaxonomicIDPage.vue';
 import ResultsDisplayMapping from './components/ResultsDisplayMapping.vue';
 import ResultsDisplayAlignment from './components/ResultsDisplayAlignment.vue';
 import KmerHistogram from './components/KmerHistogram.vue';
@@ -118,9 +124,9 @@ export default defineComponent({
     Map,
     Spline,
     ScanFace,
-    DropZone,
-    DropZoneSka,
-    DropZoneSketchlib,
+    AssemblyPage,
+    MappingAlignmentPage,
+    TaxonomicIDPage,
     KmerHistogram,
     ResultsDisplayMapping,
     ResultsDisplayAlignment,

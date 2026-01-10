@@ -130,6 +130,8 @@
         <Button v-if="refProcessed" @click="resetAll" class="mx-6 mt-4" variant="outline" size="sm">
           Reset and start over
         </Button>
+
+        <slot name="mapping"/>
       </div>
 
       <!-- Alignment tab -->
@@ -168,6 +170,8 @@
         <Button v-if="hasAlignmentResults" @click="resetAll" class="mx-6 mt-4" variant="outline" size="sm">
           Reset and upload new files
         </Button>
+
+        <slot name="alignment"/>
       </div>
     </div>
   </div>
@@ -186,7 +190,7 @@ import MappingHelpCollapsible from "@/components/MappingHelpCollapsible.vue";
 import AlignmentHelpCollapsible from "@/components/AlignmentHelpCollapsible.vue";
 
 export default defineComponent({
-  name: "DropZoneSka",
+  name: "MappingAlignmentPage",
   props: {
     tabName: {
       type: String,
