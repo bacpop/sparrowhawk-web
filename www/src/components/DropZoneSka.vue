@@ -1,86 +1,174 @@
 <template>
-  <div>
-    <h1 class="text-2xl font-semibold tracking-tight text-balance">
-      {{ tabName }}
-    </h1>
+  <div class="flex flex-row">
+    <div class="w-1/3">
+      <h1 class="text-2xl font-medium mb-4 flex items-center gap-2">
+        <Map v-if="tabName === 'Mapping'" class="w-6 h-6" />
+        <Spline v-else-if="tabName === 'Alignment'" class="w-6 h-6" />
+        {{ tabName }}
+      </h1>
 
-    <!-- Parameters section - always visible and editable when not processing -->
-    <div id="parameters">
-      <h5 class="parameters_legends">k: {{ k }}</h5>
-      <VueSlider
-          v-model="k"
-          :lazy="true"
-          :min="5"
-          :max="61"
-          :interval="2"
-          :disabled="isProcessingAny"
-      />
-      <h5 class="parameters_legends">Proportion of reads: {{ proportion_reads }}</h5>
-      <VueSlider
-          v-model="proportion_reads"
-          :lazy="true"
-          :min="0"
-          :max="1"
-          :interval="0.05"
-          :disabled="isProcessingAny"
-      />
+      <MappingHelpCollapsible v-if="tabName === 'Mapping'" />
+      <AlignmentHelpCollapsible v-else-if="tabName === 'Alignment'" />
+
+      <TooltipProvider>
+        <div class="flex flex-col gap-4">
+          <div>
+            <p class="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p class="max-w-xs">Controls the size of the subsequences (k-mers) used to process the reads. Maximum value is 63 for this mode.</p>
+                </TooltipContent>
+              </Tooltip>
+              k
+            </p>
+            <div class="flex flex-row items-center w-full gap-2">
+              <VueSlider class="flex-grow"
+                         v-model="k"
+                         :lazy="true"
+                         :min="5"
+                         :max="63"
+                         :interval="2"
+                         :disabled="isProcessingAny"
+              />
+              <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
+                {{ k }}
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <p class="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p class="max-w-xs">A real number between 0 and 1 that controls what proportion of reads to use for processing.</p>
+                </TooltipContent>
+              </Tooltip>
+              Proportion of reads
+            </p>
+            <div class="flex flex-row items-center w-full gap-2">
+              <VueSlider class="flex-grow"
+                         v-model="proportion_reads"
+                         :lazy="true"
+                         :min="0"
+                         :max="1"
+                         :interval="0.05"
+                         :disabled="isProcessingAny"
+              />
+              <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
+                {{ proportion_reads }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </TooltipProvider>
     </div>
 
-    <!-- Mapping tab -->
-    <div v-if="tabName=='Mapping'">
+    <div class="w-2/3 pt-12">
+      <!-- Mapping tab -->
+      <div v-if="tabName=='Mapping'">
 
-      <!-- Reference upload/indexing -->
-      <div v-if="!refProcessed && !isIndexingRef" v-bind='getRootPropsRef()' class="dropzone dropzone-ref">
-        <input v-bind='getInputPropsRef()'/>
-        <p v-if='isDragActiveRef' class="dropzone-text">Drop the files here ...</p>
-        <p v-else class="dropzone-text">Drag and drop your <b>reference fasta file</b> here,
-          or click to select a file</p>
-      </div>
-      <div v-else-if="isIndexingRef" class="dropzone dropzone-ref dropzone-processing">
-        <LoadingSpinner message="Indexing reference genome..." />
-      </div>
-      <div v-else class="dropzone dropzone-ref dropzone-complete">
-        <p class="dropzone-text success-text">Reference indexed: <span class="monospace">{{ refName }}</span></p>
+        <!-- Reference upload/indexing -->
+        <div v-if="!refProcessed && !isIndexingRef"
+             v-bind='getRootPropsRef()'
+             :class="[
+               'p-6 mx-6 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
+               'cursor-pointer hover:border-gray-400'
+             ]">
+          <input v-bind='getInputPropsRef()'/>
+          <FileUp/>
+          <p v-if='isDragActiveRef'>
+            Drop files here ...
+          </p>
+          <p v-else>
+            Drop or click to upload your <b>reference fasta file</b>
+          </p>
+        </div>
+
+        <div v-else-if="isIndexingRef" class="p-6 mx-6 bg-amber-50 border border-amber-400 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600">
+          <Loader2 class="w-6 h-6 text-amber-500 animate-spin"/>
+          <p class="text-sm text-gray-500">Indexing reference genome...</p>
+        </div>
+
+        <div v-else class="p-6 mx-6 bg-green-50 border border-green-400 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600">
+          <Check class="w-6 h-6 text-green-500"/>
+          <p class="text-green-700">Reference indexed: <span class="font-mono">{{ refName }}</span></p>
+        </div>
+
+        <!-- Query mapping -->
+        <div v-if="refProcessed && !isMapping"
+             v-bind='getRootPropsQueryMap()'
+             :class="[
+               'p-6 mx-6 mt-4 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
+               'cursor-pointer hover:border-gray-400'
+             ]">
+          <input v-bind='getInputPropsQueryMap()'/>
+          <FileUp/>
+          <p v-if='isDragActiveQueryMap'>
+            Drop files here ...
+          </p>
+          <p v-else>
+            Drop or click to upload <b>files to be mapped</b>
+          </p>
+        </div>
+
+        <div v-else-if="refProcessed && isMapping" class="p-6 mx-6 mt-4 bg-amber-50 border border-amber-400 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600">
+          <Loader2 class="w-6 h-6 text-amber-500 animate-spin"/>
+          <p class="text-sm text-gray-500">Mapping files to reference...</p>
+        </div>
+
+        <p v-if="refProcessed" class="mx-6 mt-4 text-sm text-gray-500">
+          Files mapped: {{ Object.keys(allResults_ska.mapResults).length }}
+        </p>
+
+        <!-- Reset button -->
+        <Button v-if="refProcessed" @click="resetAll" class="mx-6 mt-4" variant="outline" size="sm">
+          Reset and start over
+        </Button>
       </div>
 
-      <!-- Query mapping -->
-      <div v-if="refProcessed && !isMapping" v-bind='getRootPropsQueryMap()' class="dropzone dropzone-query">
-        <input v-bind='getInputPropsQueryMap()'/>
-        <p v-if='isDragActiveQueryMap' class="dropzone-text">Drop the files here ...</p>
-        <p v-else class="dropzone-text">Drag and drop read or assembly <b>files to be mapped</b> here,
-          or click to select files</p>
-      </div>
-      <div v-else-if="refProcessed && isMapping" class="dropzone dropzone-query dropzone-processing">
-        <LoadingSpinner message="Mapping files to reference..." />
-      </div>
-      <p v-if="refProcessed" class="count">Files mapped: {{ Object.keys(allResults_ska.mapResults).length }}</p>
+      <!-- Alignment tab -->
+      <div v-else-if="tabName=='Alignment'">
+        <div v-if="!isAligning && !hasAlignmentResults"
+             v-bind='getRootPropsQueryAlign()'
+             :class="[
+               'p-6 mx-6 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
+               'cursor-pointer hover:border-gray-400'
+             ]">
+          <input v-bind='getInputPropsQueryAlign()'/>
+          <FileUp/>
+          <p v-if='isDragActiveQueryAlign'>
+            Drop files here ...
+          </p>
+          <p v-else>
+            Drop or click to upload <b>files to be aligned</b>
+          </p>
+        </div>
 
-      <!-- Reset button -->
-      <button v-if="refProcessed" @click="resetAll" class="reset-button">
-        Reset and start over
-      </button>
-    </div>
+        <div v-else-if="isAligning" class="p-6 mx-6 bg-amber-50 border border-amber-400 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600">
+          <Loader2 class="w-6 h-6 text-amber-500 animate-spin"/>
+          <p class="text-sm text-gray-500">Aligning sequences...</p>
+        </div>
 
-    <!-- Alignment tab -->
-    <div v-else-if="tabName=='Alignment'">
-      <div v-if="!isAligning && !hasAlignmentResults" v-bind='getRootPropsQueryAlign()' class="dropzone dropzone-query">
-        <input v-bind='getInputPropsQueryAlign()'/>
-        <p v-if='isDragActiveQueryAlign' class="dropzone-text">Drop the files here ...</p>
-        <p v-else class="dropzone-text">Drag and drop read or assembly <b>files to be aligned</b> here,
-          or click to select files</p>
-      </div>
-      <div v-else-if="isAligning" class="dropzone dropzone-query dropzone-processing">
-        <LoadingSpinner message="Aligning sequences..." />
-      </div>
-      <div v-else-if="hasAlignmentResults" class="dropzone dropzone-query dropzone-complete">
-        <p class="dropzone-text success-text">Alignment complete!</p>
-      </div>
-      <p v-if="hasAlignmentResults" class="count">Files aligned: {{ allResults_ska.alignResults[0] ? allResults_ska.alignResults[0].names.length : 0 }}</p>
+        <div v-else-if="hasAlignmentResults" class="p-6 mx-6 bg-green-50 border border-green-400 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600">
+          <Check class="w-6 h-6 text-green-500"/>
+          <p class="text-green-700">Alignment complete!</p>
+        </div>
 
-      <!-- Reset button -->
-      <button v-if="hasAlignmentResults" @click="resetAll" class="reset-button">
-        Reset and upload new files
-      </button>
+        <p v-if="hasAlignmentResults" class="mx-6 mt-4 text-sm text-gray-500">
+          Files aligned: {{ allResults_ska.alignResults[0] ? allResults_ska.alignResults[0].names.length : 0 }}
+        </p>
+
+        <!-- Reset button -->
+        <Button v-if="hasAlignmentResults" @click="resetAll" class="mx-6 mt-4" variant="outline" size="sm">
+          Reset and upload new files
+        </Button>
+      </div>
     </div>
   </div>
 </template>
@@ -91,7 +179,11 @@ import { useDropzone } from "vue3-dropzone";
 import { useActions, useState } from "vuex-composition-helpers";
 import { useStore } from "vuex";
 import VueSlider from 'vue-3-slider-component';
-import LoadingSpinner from './LoadingSpinner.vue';
+import { Check, FileUp, Loader2, Info, Map, Spline } from "lucide-vue-next";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import MappingHelpCollapsible from "@/components/MappingHelpCollapsible.vue";
+import AlignmentHelpCollapsible from "@/components/AlignmentHelpCollapsible.vue";
 
 export default defineComponent({
   name: "DropZoneSka",
@@ -103,7 +195,19 @@ export default defineComponent({
   },
   components: {
     VueSlider,
-    LoadingSpinner
+    FileUp,
+    Loader2,
+    Check,
+    Info,
+    Map,
+    Spline,
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+    Button,
+    MappingHelpCollapsible,
+    AlignmentHelpCollapsible
   },
   setup() {
     const store = useStore();
@@ -220,82 +324,4 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.dropzone {
-  border: 2px dotted rgb(56, 55, 55);
-  margin: 10%;
-  text-align: center;
-  vertical-align: middle;
-  display: flex;
-  align-items: center;
-  border-radius: 4px;
-  margin-bottom: 5px;
-}
-
-.dropzone-ref {
-  height: 75px;
-  margin-top: 20px;
-  background-color: rgb(159, 176, 190);
-}
-
-.dropzone-query {
-  height: 75px;
-  margin-top: 10px;
-  background-color: rgb(221, 249, 226);
-}
-
-.dropzone-text {
-  padding: 30px;
-}
-
-.monospace {
-  font-family: 'Courier New', monospace;
-}
-
-#parameters {
-  margin: 1% 10%;
-}
-
-.parameters_legends {
-  text-align: left;
-  margin: 0px;
-  width: 70%;
-}
-
-.dropzone-processing {
-  background-color: #fef3c7;
-  border-color: #f59e0b;
-  justify-content: center;
-}
-
-.dropzone-complete {
-  background-color: #d1fae5;
-  border-color: #10b981;
-}
-
-.success-text {
-  color: #065f46;
-  font-weight: 500;
-}
-
-.count {
-  text-align: center;
-  margin: 0 10%;
-  color: #6b7280;
-  font-size: 14px;
-}
-
-.reset-button {
-  display: block;
-  margin: 10px auto;
-  padding: 8px 16px;
-  background-color: #6b7280;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.reset-button:hover {
-  background-color: #4b5563;
-}
 </style>

@@ -29,9 +29,6 @@
                   @click="changeTab('faq')">
             FAQ
           </Button>
-          <Button variant="link" size="sm" class="cursor-pointer items-center justify-start p-0">
-            Credits
-          </Button>
         </div>
       </SidebarFooter>
     </Sidebar>

@@ -1,9 +1,12 @@
 <template>
   <div class="flex flex-row">
     <div class="w-1/3">
-      <h1 class="text-2xl font-medium mb-4">
+      <h1 class="text-2xl font-medium flex items-center gap-2 mb-4">
+        <Codesandbox class="w-6 h-6" />
         {{ tabName }}
       </h1>
+
+      <AssemblyHelpCollapsible />
 
       <TooltipProvider>
         <div class="flex flex-col gap-4">
@@ -89,6 +92,7 @@
           </div>
 
           <div class="flex flex-row items-center w-full gap-2">
+            <input id="do_fit" type="checkbox" v-model="do_fit" :disabled="isProcessingAny"/>
             <Tooltip>
               <TooltipTrigger as-child>
                 <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
@@ -97,13 +101,13 @@
                 <p class="max-w-xs">Allows automatic setting of the minimum k-mer count. Memory usage could increase.</p>
               </TooltipContent>
             </Tooltip>
-            <input id="do_fit" type="checkbox" v-model="do_fit" :disabled="isProcessingAny"/>
             <label for="do_fit">
               Automatically set min counts
             </label>
           </div>
 
           <div class="flex flex-row items-center w-full gap-2">
+            <input id="do_bloom" type="checkbox" v-model="do_bloom" :disabled="isProcessingAny"/>
             <Tooltip>
               <TooltipTrigger as-child>
                 <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
@@ -112,13 +116,13 @@
                 <p class="max-w-xs">Alternative filtering with significantly lower memory usage. Recommended for non-small reads. Chunking will be disabled.</p>
               </TooltipContent>
             </Tooltip>
-            <input id="do_bloom" type="checkbox" v-model="do_bloom" :disabled="isProcessingAny"/>
             <label for="do_bloom">
               Use Bloom filter
             </label>
           </div>
 
           <div class="flex flex-row items-center w-full gap-2">
+            <input id="no_deadend" type="checkbox" v-model="no_deadend" :disabled="isProcessingAny"/>
             <Tooltip>
               <TooltipTrigger as-child>
                 <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
@@ -127,13 +131,13 @@
                 <p class="max-w-xs">Maintains short paths in the graph that would usually be pruned.</p>
               </TooltipContent>
             </Tooltip>
-            <input id="no_deadend" type="checkbox" v-model="no_deadend" :disabled="isProcessingAny"/>
             <label for="no_deadend">
               Keep dead-ends
             </label>
           </div>
 
           <div class="flex flex-row items-center w-full gap-2">
+            <input id="no_bubble" type="checkbox" v-model="no_bubble" :disabled="isProcessingAny"/>
             <Tooltip>
               <TooltipTrigger as-child>
                 <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
@@ -142,7 +146,6 @@
                 <p class="max-w-xs">Disables simple bubble collapse in the assembly graph.</p>
               </TooltipContent>
             </Tooltip>
-            <input id="no_bubble" type="checkbox" v-model="no_bubble" :disabled="isProcessingAny"/>
             <label for="no_bubble">
               Do not collapse bubbles
             </label>
@@ -252,9 +255,10 @@ import {useActions, useState} from "vuex-composition-helpers";
 import {useStore} from "vuex";
 import VueSlider from 'vue-3-slider-component';
 import "@fontsource/ibm-plex-mono";
-import {Check, FileUp, Loader2, Info} from "lucide-vue-next";
+import {Check, FileUp, Loader2, Info, Codesandbox} from "lucide-vue-next";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import DownloadButton from "@/components/DownloadButton.vue";
+import AssemblyHelpCollapsible from "@/components/AssemblyHelpCollapsible.vue";
 import {Button} from "@/components/ui/button";
 
 export default defineComponent({
@@ -267,12 +271,14 @@ export default defineComponent({
   },
   components: {
     DownloadButton,
+    AssemblyHelpCollapsible,
     Button,
     VueSlider,
     FileUp,
     Loader2,
     Check,
     Info,
+    Codesandbox,
     Tooltip,
     TooltipContent,
     TooltipProvider,
