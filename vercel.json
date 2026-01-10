@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd www && npm run build",
+  "buildCommand": ". $HOME/.cargo/env && cd www && npm run build",
   "outputDirectory": "www/dist",
   "installCommand": "curl https://sh.rustup.rs -sSf | sh -s -- -y && . $HOME/.cargo/env && rustup target add wasm32-unknown-unknown && cargo install wasm-pack && cd www && npm install",
   "framework": null
