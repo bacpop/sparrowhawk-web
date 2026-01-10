@@ -99,8 +99,8 @@ export default defineComponent({
                     container: "#tree_container",
                     height: 400,
                     width: window.innerWidth,
-                    "left-right-spacing": "fit-to-size",
-                    "top-bottom-spacing": "fit-to-size"
+                    "left-right-spacing": "fit",
+                    "top-bottom-spacing": "fit"
                 });
 
                 const svg = rendered_tree.show();
