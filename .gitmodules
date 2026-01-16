@@ -7,8 +7,8 @@
 [submodule "rust/ska.rust"]
 	path = rust/ska.rust
 	url  = https://github.com/vrbouza/ska.rust.git
-    branch = victordev
+    branch = master
 [submodule "rust/sketchlib.rust"]
 	path = rust/sketchlib.rust
 	url  = https://github.com/vrbouza/sketchlib.rust.git
-	branch = victordev
+	branch = main

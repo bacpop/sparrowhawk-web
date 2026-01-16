@@ -13,6 +13,8 @@ use crate::fastx_wasm::open_fasta;
 use seq_io::fasta::Record;
 use json;
 
+const MIN_NT_CONTIG : usize = 15000;
+
 #[wasm_bindgen]
 extern {
     #[wasm_bindgen(js_namespace = console)]
@@ -112,21 +114,28 @@ impl OrphosData {
         let mut reader = open_fasta(&mut input_file_ws);
         let mut analyser = OrphosAnalyzer::new(orphosconfig);
         let mut all_results = Vec::new();
+        let (mut seqrec, mut id, mut desc, mut tmpid, mut tmpdesc, mut tmpvec, mut tmpres);
 
         logw("Entering while loop (analysing)...", Some("info"));
         while let Some(record) = reader.next() {
-            let seqrec = record.expect("Invalid FASTA record");
-            let (id, desc) = seqrec.id_desc().unwrap();
+            seqrec = record.expect("Invalid FASTA record");
+            (id, desc) = seqrec.id_desc().unwrap();
 
-            let tmpdesc = desc.map(|s| s.to_string());
-            let tmpid = id.to_owned();
-            let tmpvec = seqrec.full_seq().to_vec();
+            tmpdesc = desc.map(|s| s.to_string());
+            tmpid = id.to_owned();
+            tmpvec = seqrec.full_seq().to_vec();
 
-            // logw(format!("tmpvec: {:?}", tmpvec).as_str(), None);
+            logw(format!("tmpid: {:?}, tmpdesc: {:?}, tmpvec len: {:?}", tmpid, tmpdesc, tmpvec.len()).as_str(), None);
+            logw(format!("{:?}", str::from_utf8(&tmpvec)).as_str(), None);
+            logw(format!("tmpvec: {:?}", tmpvec).as_str(), None);
             // logw(format!("tmpvec: {:?}", tmpvec.iter().rev().take(25).collect::<Vec<_>>()).as_str(), None);
-            // logw(format!("tmpid: {:?}, tmpdesc: {:?}", tmpid, tmpdesc).as_str(), None);
-            // logw(format!("tmpvec: {:?}", tmpvec.len()).as_str(), None);
-            let tmpres = analyser.analyze_sequence_bytes(
+
+            if tmpvec.len() < MIN_NT_CONTIG {
+                logw(format!("Contig found with less than {:?} nucleotides. Ignoring...", MIN_NT_CONTIG).as_str(), Some("warn"));
+                continue;
+            }
+
+            tmpres = analyser.analyze_sequence_bytes(
                     &tmpvec,
                     tmpid,
                     tmpdesc
