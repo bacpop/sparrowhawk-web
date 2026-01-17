@@ -73,61 +73,52 @@
       <!-- Mapping tab -->
       <div v-if="tabName=='Mapping'">
 
-        <!-- Reference upload/indexing -->
-        <div v-if="!refProcessed && !isIndexingRef"
-             v-bind='getRootPropsRef()'
+        <!-- Single dropzone - always visible -->
+        <div v-bind='getRootPropsMapping()'
              :class="[
                'p-6 mx-6 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
-               'cursor-pointer hover:border-gray-400'
+               isProcessingAny ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-gray-400'
              ]">
-          <input v-bind='getInputPropsRef()'/>
+          <input v-bind='getInputPropsMapping()' :disabled="isProcessingAny"/>
           <FileUp/>
-          <p v-if='isDragActiveRef'>
+          <p v-if='isDragActiveMapping'>
             Drop files here ...
           </p>
           <p v-else>
-            Drop or click to upload your <b>reference fasta file</b>
+            Drop or click to upload your <b>{{ dropzonePrompt }}</b>
           </p>
         </div>
 
-        <div v-else-if="isIndexingRef" class="p-6 mx-6 bg-amber-50 border border-amber-400 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600">
-          <Loader2 class="w-6 h-6 text-amber-500 animate-spin"/>
-          <p class="text-sm text-gray-500">Indexing reference genome...</p>
-        </div>
-
-        <div v-else class="p-6 mx-6 bg-green-50 border border-green-400 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600">
-          <Check class="w-6 h-6 text-green-500"/>
-          <p class="text-green-700">Reference indexed: <span class="font-mono">{{ refName }}</span></p>
-        </div>
-
-        <!-- Query mapping -->
-        <div v-if="refProcessed && !isMapping"
-             v-bind='getRootPropsQueryMap()'
-             :class="[
-               'p-6 mx-6 mt-4 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
-               'cursor-pointer hover:border-gray-400'
-             ]">
-          <input v-bind='getInputPropsQueryMap()'/>
-          <FileUp/>
-          <p v-if='isDragActiveQueryMap'>
-            Drop files here ...
-          </p>
-          <p v-else>
-            Drop or click to upload <b>files to be mapped</b>
-          </p>
-        </div>
-
-        <div v-else-if="refProcessed && isMapping" class="p-6 mx-6 mt-4 bg-amber-50 border border-amber-400 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600">
-          <Loader2 class="w-6 h-6 text-amber-500 animate-spin"/>
-          <p class="text-sm text-gray-500">Mapping files to reference...</p>
-        </div>
-
-        <p v-if="refProcessed" class="mx-6 mt-4 text-sm text-gray-500">
-          Files mapped: {{ Object.keys(allResults_ska.mapResults).length }}
+        <p v-if="isIndexingRef" class="mx-6 mt-4 text-sm text-gray-500">
+          Indexing reference...
+        </p>
+        <p v-else-if="isMapping" class="mx-6 mt-4 text-sm text-gray-500">
+          Mapping...
         </p>
 
+        <!-- File list with status and download button -->
+        <div class="flex flex-row gap-2 w-full mt-4">
+          <div v-if="uploadedFiles.length > 0" class="mx-6 w-1/2 flex-grow">
+            <div v-for="file in uploadedFiles" :key="file.name"
+                 class="flex items-center gap-2 py-2 px-3 bg-gray-50 rounded-md mb-2">
+
+              <Loader2 v-if="getFileStatus(file) === 'indexing'" class="w-4 h-4 text-blue-500 animate-spin"/>
+              <Loader2 v-else-if="getFileStatus(file) === 'mapping'" class="w-4 h-4 text-orange-500 animate-spin"/>
+              <Check v-else-if="getFileStatus(file) === 'done'" class="w-4 h-4 text-green-500"/>
+
+              <span class="flex-grow text-sm font-mono truncate">
+                {{ file.name }}
+              </span>
+              <span v-if="file.type === 'reference'" class="text-xs text-gray-400">(ref)</span>
+            </div>
+          </div>
+          <div v-if="hasMappingResults" class="w-1/2 flex-grow">
+            <DownloadButtonSka />
+          </div>
+        </div>
+
         <!-- Reset button -->
-        <Button v-if="refProcessed" @click="resetAll" class="mx-6 mt-4" variant="outline" size="sm">
+        <Button v-if="uploadedFiles.length > 0" @click="resetAll" class="mx-6 mt-4" variant="outline" size="sm">
           Reset and start over
         </Button>
 
@@ -136,7 +127,8 @@
 
       <!-- Alignment tab -->
       <div v-else-if="tabName=='Alignment'">
-        <div v-if="!isAligning && !hasAlignmentResults"
+        <!-- Dropbox - always visible when not aligning -->
+        <div v-if="!isAligning"
              v-bind='getRootPropsQueryAlign()'
              :class="[
                'p-6 mx-6 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
@@ -152,24 +144,22 @@
           </p>
         </div>
 
-        <div v-else-if="isAligning" class="p-6 mx-6 bg-amber-50 border border-amber-400 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600">
+        <div v-else class="p-6 mx-6 bg-amber-50 border border-amber-400 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600">
           <Loader2 class="w-6 h-6 text-amber-500 animate-spin"/>
-          <p class="text-sm text-gray-500">Aligning sequences...</p>
+          <p class="text-sm text-gray-500">Aligning...</p>
         </div>
 
-        <div v-else-if="hasAlignmentResults" class="p-6 mx-6 bg-green-50 border border-green-400 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600">
-          <Check class="w-6 h-6 text-green-500"/>
-          <p class="text-green-700">Alignment complete!</p>
+        <!-- File list with status -->
+        <div v-if="uploadedAlignmentFiles.length > 0" class="mx-6 mt-4">
+          <div v-for="fileName in uploadedAlignmentFiles" :key="fileName"
+               class="flex items-center gap-2 py-2 px-3 bg-gray-50 rounded-md mb-2">
+            <Loader2 v-if="isAligning" class="w-4 h-4 text-orange-500 animate-spin"/>
+            <Check v-else-if="hasAlignmentResults" class="w-4 h-4 text-green-500"/>
+            <span class="flex-grow text-sm font-mono truncate">
+              {{ fileName }}
+            </span>
+          </div>
         </div>
-
-        <p v-if="hasAlignmentResults" class="mx-6 mt-4 text-sm text-gray-500">
-          Files aligned: {{ allResults_ska.alignResults[0] ? allResults_ska.alignResults[0].names.length : 0 }}
-        </p>
-
-        <!-- Reset button -->
-        <Button v-if="hasAlignmentResults" @click="resetAll" class="mx-6 mt-4" variant="outline" size="sm">
-          Reset and upload new files
-        </Button>
 
         <slot name="alignment"/>
       </div>
@@ -178,7 +168,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, Ref } from "vue";
+import { defineComponent, ref, Ref, computed } from "vue";
 import { useDropzone } from "vue3-dropzone";
 import { useActions, useState } from "vuex-composition-helpers";
 import { useStore } from "vuex";
@@ -188,6 +178,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Button } from "@/components/ui/button";
 import MappingHelpCollapsible from "@/components/help/MappingHelpCollapsible.vue";
 import AlignmentHelpCollapsible from "@/components/help/AlignmentHelpCollapsible.vue";
+import DownloadButtonSka from "@/components/SequenceViewer/DownloadButtonSka.vue";
+
+interface UploadedFile {
+  name: string;
+  type: 'reference' | 'query';
+}
 
 export default defineComponent({
   name: "MappingAlignmentPage",
@@ -211,12 +207,15 @@ export default defineComponent({
     TooltipTrigger,
     Button,
     MappingHelpCollapsible,
-    AlignmentHelpCollapsible
+    AlignmentHelpCollapsible,
+    DownloadButtonSka
   },
   setup() {
     const store = useStore();
     const k: Ref<number> = ref(31);
     const proportion_reads: Ref<number> = ref(1);
+    const uploadedFiles: Ref<UploadedFile[]> = ref([]);
+    const uploadedAlignmentFiles: Ref<string[]> = ref([]);
 
     const {
       processRef,
@@ -227,39 +226,41 @@ export default defineComponent({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { allResults_ska } = useState(["allResults_ska"]) as any;
 
-    function onDropRef(acceptFiles: File[]): void {
-      processRef({ acceptFiles: acceptFiles, k: k.value });
-    }
+    const refProcessed = computed(() => store.getters.refProcessed);
+    const isIndexingRef = computed(() => store.getters.isIndexingRef);
+    const isMapping = computed(() => store.getters.isMapping);
 
-    function onDropQueryMap(acceptFiles: File[]): void {
-      processQueryMap({ acceptFiles: acceptFiles, proportion_reads: proportion_reads.value });
+    function onDropMapping(acceptFiles: File[]): void {
+      if (!refProcessed.value && !isIndexingRef.value) {
+        // First upload is reference
+        uploadedFiles.value = [{ name: acceptFiles[0].name, type: 'reference' }];
+        processRef({ acceptFiles: acceptFiles, k: k.value });
+      } else if (refProcessed.value && !isMapping.value) {
+        // Subsequent uploads are query files
+        const newFiles = acceptFiles.map(f => ({ name: f.name, type: 'query' as const }));
+        uploadedFiles.value = [...uploadedFiles.value, ...newFiles];
+        processQueryMap({ acceptFiles: acceptFiles, proportion_reads: proportion_reads.value });
+      }
     }
 
     function onDropQueryAlign(acceptFiles: File[]): void {
+      uploadedAlignmentFiles.value = acceptFiles.map(f => f.name);
       processQueryAlign({ acceptFiles: acceptFiles, k: k.value, proportion_reads: proportion_reads.value });
     }
 
     function resetAll(): void {
+      uploadedFiles.value = [];
+      uploadedAlignmentFiles.value = [];
       resetAllResults_ska();
     }
 
     const {
-      getRootProps: getRootPropsRef,
-      getInputProps: getInputPropsRef,
-      isDragActive: isDragActiveRef,
-      ...restRef
+      getRootProps: getRootPropsMapping,
+      getInputProps: getInputPropsMapping,
+      isDragActive: isDragActiveMapping,
+      ...restMapping
     } = useDropzone({
-      onDrop: onDropRef,
-      accept: [".fa", ".fasta"],
-      multiple: false
-    });
-    const {
-      getRootProps: getRootPropsQueryMap,
-      getInputProps: getInputPropsQueryMap,
-      isDragActive: isDragActiveQueryMap,
-      ...restQueryMap
-    } = useDropzone({
-      onDrop: onDropQueryMap,
+      onDrop: onDropMapping,
       accept: [".fa", ".fasta", ".gz", ".fastq", ".fq"]
     });
     const {
@@ -277,21 +278,18 @@ export default defineComponent({
       k,
       proportion_reads,
       resetAll,
-      getRootPropsRef,
-      getInputPropsRef,
-      isDragActiveRef,
-      getRootPropsQueryMap,
-      getInputPropsQueryMap,
-      isDragActiveQueryMap,
+      uploadedFiles,
+      uploadedAlignmentFiles,
+      getRootPropsMapping,
+      getInputPropsMapping,
+      isDragActiveMapping,
       getRootPropsQueryAlign,
       getInputPropsQueryAlign,
       isDragActiveQueryAlign,
-      onDropRef,
-      onDropQueryMap,
+      onDropMapping,
       onDropQueryAlign,
       allResults_ska,
-      ...restRef,
-      ...restQueryMap,
+      ...restMapping,
       ...restQueryAlign
     };
   },
@@ -316,12 +314,33 @@ export default defineComponent({
     },
     hasAlignmentResults(): boolean {
       return this.allResults_ska.alignResults[0] && this.allResults_ska.alignResults[0].aligned;
+    },
+    hasMappingResults(): boolean {
+      return Object.keys(this.allResults_ska.mapResults).length > 0;
+    },
+    dropzonePrompt(): string {
+      if (!this.refProcessed && !this.isIndexingRef) {
+        return 'reference fasta file';
+      }
+      return 'files to be mapped';
     }
   },
 
   methods: {
     clear(): void {
       this.resetAll();
+    },
+    getFileStatus(file: UploadedFile): 'indexing' | 'mapping' | 'done' {
+      if (file.type === 'reference') {
+        if (this.isIndexingRef) return 'indexing';
+        if (this.refProcessed) return 'done';
+      } else {
+        // Query file - check if mapped_sequences has data
+        const result = this.allResults_ska.mapResults[file.name];
+        if (this.isMapping) return 'mapping';
+        if (result?.mapped_sequences?.length > 0 || !this.isMapping) return 'done';
+      }
+      return 'mapping';
     }
   },
 });

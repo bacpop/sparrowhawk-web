@@ -76,12 +76,12 @@ export default defineComponent({
 
             const container = d3.select("#tree_container");
 
-            container.append("text")
-                .attr("x", "50%")
-                .attr("y", 40)
-                .text("Processing files...")
-                .attr("font-size", "40px")
-                .attr("text-anchor", "middle");
+            // container.append("text")
+            //     .attr("x", "50%")
+            //     .attr("y", 40)
+            //     .text("Processing files...")
+            //     .attr("font-size", "40px")
+            //     .attr("text-anchor", "middle");
         },
 
         createTree(): void {

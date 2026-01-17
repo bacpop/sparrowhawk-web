@@ -70,8 +70,8 @@
     <div class="w-2/3 pt-12">
       <div v-if="tabName=='TaxonomicID'">
 
-        <!-- Upload or Loading state -->
-        <div v-if="!sampleIdentified && !isIdentifying"
+        <!-- Upload dropbox - always visible when not identifying -->
+        <div v-if="!isIdentifying"
              v-bind='getRootPropsSample()'
              :class="[
                'p-6 mx-6 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
@@ -87,15 +87,20 @@
           </p>
         </div>
 
-        <div v-else-if="isIdentifying" class="p-6 mx-6 bg-amber-50 border border-amber-400 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600">
+        <div v-else class="p-6 mx-6 bg-amber-50 border border-amber-400 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600">
           <Loader2 class="w-6 h-6 text-amber-500 animate-spin"/>
           <p class="text-sm text-gray-500">Identifying sample... (fetching database and processing)</p>
         </div>
 
-        <div v-if="sampleIdentified" class="mt-4">
-          <Button @click="resetAll" class="mx-6" variant="outline" size="sm">
-            Reset
-          </Button>
+        <!-- Show uploaded files -->
+        <div v-if="uploadedFileNames.length > 0" class="mx-6 mt-4">
+          <div v-for="fileName in uploadedFileNames" :key="fileName"
+               class="flex items-center gap-2 py-2 px-3 bg-gray-50 rounded-md mb-2">
+            <Check v-if="sampleIdentified" class="w-4 h-4 text-green-500"/>
+            <span class="flex-grow text-sm font-mono truncate">
+              {{ fileName }}
+            </span>
+          </div>
         </div>
 
         <div v-if="sampleIdentified" class="mx-6 mt-4 p-4 bg-gray-50 rounded-lg">
@@ -115,9 +120,8 @@ import { useStore } from "vuex";
 import { useDropzone } from "vue3-dropzone";
 import { useActions, useState } from "vuex-composition-helpers";
 import VueSlider from 'vue-3-slider-component';
-import { FileUp, Loader2, Info, ScanFace } from "lucide-vue-next";
+import { Check, FileUp, Loader2, Info, ScanFace } from "lucide-vue-next";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 import TaxonomicIDHelpCollapsible from "@/components/help/TaxonomicIDHelpCollapsible.vue";
 
 export default defineComponent({
@@ -130,6 +134,7 @@ export default defineComponent({
   },
   components: {
     VueSlider,
+    Check,
     FileUp,
     Loader2,
     Info,
@@ -138,22 +143,24 @@ export default defineComponent({
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
-    Button,
     TaxonomicIDHelpCollapsible
   },
   setup() {
     const store = useStore();
     const k: Ref<number> = ref(31);
     const proportion_reads: Ref<number> = ref(1);
+    const uploadedFileNames: Ref<string[]> = ref([]);
 
     const { identifyFiles, resetAllResults_sketchlib } = useActions(["identifyFiles", "resetAllResults_sketchlib"]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { allResults_sketchlib } = useState(["allResults_sketchlib"]) as any;
 
     function onDropSample(acceptFiles: File[]): void {
+      uploadedFileNames.value = acceptFiles.map(f => f.name);
       identifyFiles({ acceptFiles: acceptFiles, k: k.value, proportion_reads: proportion_reads.value });
     }
     function resetAll(): void {
+      uploadedFileNames.value = [];
       resetAllResults_sketchlib();
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -178,6 +185,7 @@ export default defineComponent({
     return {
       k,
       proportion_reads,
+      uploadedFileNames,
       resetAll,
       getRootPropsSample,
       getInputPropsSample,

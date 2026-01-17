@@ -48,7 +48,7 @@
       <div v-else-if="tabName === 'Mapping'">
         <MappingAlignmentPage :tabName="tabName">
           <template #mapping>
-            <ResultsDisplayMapping class="mt-6"/>
+            <ResultsDisplayMapping/>
           </template>
         </MappingAlignmentPage>
       </div>
