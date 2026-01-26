@@ -1,201 +1,166 @@
 <template>
-    <div v-if="queryProcessed" class="variants"> 
-        <div id="band" style="height: 30px">
-            <div v-if="filesUploaded" class="checkbox">
-                <input type="checkbox" id="visualisation" @click="reset_zoom" v-model="visualisation"/>
-                <label for="visualisation">See visualisation</label>
-            </div>
-            <div v-if="zoom>8 && visualisation" class="checkbox">
-                <input type="checkbox" id="skip" v-model="skip"/>
-                <label for="skip">Skip unmapped sequences</label>
-            </div>
-            <div v-if="zoom>8 && visualisation" class="legend">
-                <Popper>
-                    <button>?</button>
-                    <template #content>
-                        <div style="text-align: left;">
-                            <b style="color: red; display: inline-block; width: 60px;">A</b> Diffence between the reference and the mapped sequence<br>
-                            <b style="display: inline-block; width: 60px;">-</b> Similarity between the reference and the mapped sequence<br>
-                            <div style="display: inline-block; width: 60px; font-size: 10px;">Blank space</div> Unmapped nucleotide<br>
-                            <b style="display: inline-block; width: 60px;">.......</b> Skipped unmapped fraction of the sequence<br>
-                        </div>
-                    </template>
-                </Popper>
-            </div>
-            <div v-else-if="visualisation" class="legend">
-                <Popper>
-                    <button>?</button>
-                    <template #content>
-                        <div style="text-align: left;">
-                            <div class="square" style="background-color: red;"></div> Part of the sequence different to the reference<br>
-                            <div class="square" style="background-color: black;"></div> Part of the sequence similar to the reference<br>
-                            <div class="square" style="background-color: white;"></div> Part of the sequence not mapped<br>
-                        </div>
-                    </template>
-                </Popper>
-            </div>
-            <DownloadButtonSka></DownloadButtonSka>
+  <TooltipProvider>
+    <div v-if="queryProcessed && hasReadyData" class="mt-6 ml-6 border-t border-t-gray-200 pt-6">
+      <div id="band" class="flex items-center gap-4 h-[30px]">
+        <div v-if="zoom>8" class="flex items-center gap-1">
+          <input type="checkbox" id="skip" v-model="skip"/>
+          <label for="skip">Skip unmapped sequences</label>
         </div>
-        <div v-if="visualisation" id="Slider">
-            <VueSlider 
-                v-model="zoom" 
-                :lazy="true" 
-                :min="0"
-                :max="20"
-                :interval="0.1"
-                :tooltip="'none'"
-                style="margin: 5px 0;"
-                >
-            </VueSlider>
-        </div>
-        <div id="MainView">
-            <div v-if="!visualisation" id="table">
-                <li v-for="filename in Object.keys(allResults_ska.mapResults)" :key="filename">
-                    {{allResults_ska.mapResults[filename]["nb_variants"] !== null ?
-                            "File: " + filename + " → Number of variants detected: " +  allResults_ska.mapResults[filename]["nb_variants"] + ", Coverage: " + Math.round(allResults_ska.mapResults[filename]['coverage']*100) + "%"
-                            : 'Loading...' }}
-                </li>
+        <Tooltip v-if="zoom>8">
+          <TooltipTrigger as-child>
+            <Button variant="outline" size="sm" class="cursor-help">Legend</Button>
+          </TooltipTrigger>
+          <TooltipContent class="max-w-sm">
+            <div class="text-sm text-left">
+              <div class="flex items-center gap-2 mb-1">
+                <b class="text-red-500 w-12">A</b>
+                <span>Difference between the reference and the mapped sequence</span>
+              </div>
+              <div class="flex items-center gap-2 mb-1">
+                <b class="w-12">-</b>
+                <span>Similarity between the reference and the mapped sequence</span>
+              </div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="w-12 text-xs">Blank</span>
+                <span>Unmapped nucleotide</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <b class="w-12">.......</b>
+                <span>Skipped unmapped fraction of the sequence</span>
+              </div>
             </div>
-            <div v-else-if="zoom>8" id="FullViewer">
-                <SequenceViewer 
-                    :zoom_level="zoom"
-                    :no_skip="!skip"
-                    :key="use_keys([zoom, skip, reloadKey])"> <!-- Reactivity on zoom and skip changes and reload -->
-                </SequenceViewer>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip v-else>
+          <TooltipTrigger as-child>
+            <Button variant="outline" size="sm" class="cursor-help">Legend</Button>
+          </TooltipTrigger>
+          <TooltipContent class="max-w-sm">
+            <div class="text-sm text-left">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-3 h-3 bg-red-500"></div>
+                <span>Part of the sequence different to the reference</span>
+              </div>
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-3 h-3 bg-black"></div>
+                <span>Part of the sequence similar to the reference</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-3 h-3 bg-white border border-gray-300"></div>
+                <span>Part of the sequence not mapped</span>
+              </div>
             </div>
-            <div v-else id="MinimisedViewer">
-                <MinimisedSequenceViewer 
-                    :zoom_level="zoom"
-                    :key="use_keys([zoom, skip, reloadKey])"> <!-- Reactivity on zoom and skip changes and reload -->
-                </MinimisedSequenceViewer>
-            </div>
-        </div>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    <div id="Slider">
+      <VueSlider
+          v-model="zoom"
+          :lazy="true"
+          :min="3"
+          :max="20"
+          :interval="0.1"
+          :tooltip="'none'"
+          style="margin: 5px 0;"
+      >
+      </VueSlider>
     </div>
+    <div id="MainView">
+      <div v-if="zoom>8" id="FullViewer">
+        <SequenceViewer
+            :zoom_level="zoom"
+            :no_skip="!skip"
+            :key="use_keys([zoom, skip, reloadKey])"> <!-- Reactivity on zoom and skip changes and reload -->
+        </SequenceViewer>
+      </div>
+      <div v-else id="MinimisedViewer">
+        <MinimisedSequenceViewer
+            :zoom_level="zoom"
+            :key="use_keys([zoom, skip, reloadKey])"> <!-- Reactivity on zoom and skip changes and reload -->
+        </MinimisedSequenceViewer>
+      </div>
+    </div>
+  </div>
+  </TooltipProvider>
 </template>
 
-<script>
-import { useState } from "vuex-composition-helpers";
-import { ref } from "vue";
-import SequenceViewer from "./SequenceViewer/SequenceViewer.tsx";
-import VueSlider from 'vue-3-slider-component'
+<script lang="ts">
+import {defineComponent, ref, Ref} from "vue";
+import {useStore} from "vuex";
+import {useState} from "vuex-composition-helpers";
+import SequenceViewer from "./SequenceViewer/SequenceViewer";
+import VueSlider from 'vue-3-slider-component';
 import MinimisedSequenceViewer from "./MinimisedSequenceViewer/MinimisedSequenceViewer.vue";
-import Popper from "vue3-popper";
-import DownloadButtonSka from "./SequenceViewer/DownloadButtonSka.vue";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+import {Button} from "@/components/ui/button";
 
-export default {
-    name: "ResultsDisplayMapping",
-    components: {
-        SequenceViewer,
-        VueSlider,
-        MinimisedSequenceViewer,
-        Popper,
-        DownloadButtonSka
-        },
-    setup() {
-        const { allResults_ska } = useState(["allResults_ska"]);
-        const visualisation = ref(false);
-        const skip = ref(true);
-        const zoom = ref(10);
+export default defineComponent({
+  name: "ResultsDisplayMapping",
+  components: {
+    SequenceViewer,
+    VueSlider,
+    MinimisedSequenceViewer,
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+    Button
+  },
+  setup() {
+    const store = useStore();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const {allResults_ska} = useState(["allResults_ska"]) as any;
+    const skip: Ref<boolean> = ref(true);
+    const zoom: Ref<number> = ref(10);
 
-        return {
-            allResults_ska,
-            visualisation,
-            skip,
-            zoom
+    return {
+      allResults_ska,
+      skip,
+      zoom,
+      store
+    }
+  },
+
+  watch: {
+    'allResults_ska.mapResults': {
+      handler(): void {
+        const keys = Object.keys(this.allResults_ska.mapResults);
+        const last_key = keys[keys.length - 1];
+        if (this.allResults_ska.mapResults[last_key]?.mapped_sequences?.length !== 0) {
+          this.reloadKey++;
+        } else {
+          this.zoom = 10;
         }
+      },
+      deep: true,
     },
+  },
 
-    watch: {
-        'allResults_ska.mapResults': {
-            handler() {
-                let last_key = Object.keys(this.allResults_ska.mapResults)[Object.keys(this.allResults_ska.mapResults).length-1]
-                if (this.allResults_ska.mapResults[last_key]? this.allResults_ska.mapResults[last_key].mapped_sequences.length !== 0: false){
-                    this.reloadKey++;
-                }
-                else {
-                    this.zoom = 10;
-                    this.visualisation = false;
-                }
-            },
-            deep: true,
-        },
+  computed: {
+    queryProcessed(): boolean {
+      return this.store.getters.queryProcessed;
     },
+    hasReadyData(): boolean {
+      const keys = Object.keys(this.allResults_ska.mapResults);
+      if (keys.length === 0) return false;
+      const last_key = keys[keys.length - 1];
+      return this.allResults_ska.mapResults[last_key]?.mapped_sequences?.length > 0;
+    }
+  },
 
-    computed: {
-        queryProcessed() {
-            return this.$store.getters.queryProcessed;
-        },
-        filesUploaded() {
-            let last_key = Object.keys(this.allResults_ska.mapResults)[Object.keys(this.allResults_ska.mapResults).length-1]
-            if (this.allResults_ska.mapResults[last_key].mapped_sequences.length !== 0){
-                return true;
-            }
-            return false;
-        }
-    },
+  methods: {
+    use_keys(list_of_keys: (string | number | boolean)[]): string {
+      return list_of_keys.join('-');
+    }
+  },
 
-    methods: {
-        use_keys(list_of_keys) {
-            return list_of_keys.join('-');
-        },
-        reset_zoom() {
-            this.zoom = 10;
-        }
-    },
-    
-    data() {
-        return {
-            reloadKey: 0
-        }
-    },
-};
+  data() {
+    return {
+      reloadKey: 0 as number
+    }
+  },
+});
 </script>
 
-<style>
-  :root {
-    --popper-theme-background-color: lightgray;
-    --popper-theme-background-color-hover: lightgray;
-    --popper-theme-text-color: black;
-    --popper-theme-border-width: 3px;
-    --popper-theme-border-style: solid;
-    --popper-theme-border-radius: 6px;
-    --popper-theme-padding: 5px;
-  }
-
-  .checkbox {
-    float: left;
-    text-align: left;
-    margin-right: 20px;
-  }
-
-  .legend button {
-    background-color: #333333;
-    color: white;
-    border: none;
-    cursor: pointer;
-    padding: 5px 10px;
-    text-decoration: none;
-    font-size: 14px;
-    transition-duration: 0.4s;
-    border-radius: 100px;
-    float: left;
-  }
-
-  .legend {
-    margin-right: 20px;
-    float: left;
-  }
-
-  #table {
-    float: left;
-    text-align: left;
-    margin-left: 50px;
-  }
-
-  .square {
-    height: 15px;
-    width: 5px;
-    margin-right: 30px;
-    float: left;
-  }
+<style scoped>
 </style>

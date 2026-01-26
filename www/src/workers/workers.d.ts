@@ -1,0 +1,15 @@
+// Type declarations for worker modules processed by worker-loader
+declare module '@/workers/Assembler.worker' {
+    const WorkerFactory: new () => Worker;
+    export default WorkerFactory;
+}
+
+declare module '@/workers/Mapper.worker' {
+    const WorkerFactory: new () => Worker;
+    export default WorkerFactory;
+}
+
+declare module '@/workers/Sketcher.worker' {
+    const WorkerFactory: new () => Worker;
+    export default WorkerFactory;
+}

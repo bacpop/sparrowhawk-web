@@ -1,10 +1,10 @@
-
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require("path");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { defineConfig } = require('@vue/cli-service')
+const {defineConfig} = require('@vue/cli-service')
 
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
+
 module.exports = defineConfig({
     publicPath: '/',
     transpileDependencies: true,
@@ -14,24 +14,34 @@ module.exports = defineConfig({
         },
 
         // To fix fallback madness issue
-        resolve:{
+        resolve: {
             fallback: {
                 stream: require.resolve('stream-browserify'),
             }
         },
 
-        devServer : {
+        devServer: {
             // watchOptions : {
             //     ignored : ["/node_modules/", "/../rust"],
             // },
-            hot : false,
-            liveReload : false,
-            watchFiles : {
-                paths : [],
+            hot: false,
+            liveReload: false,
+            watchFiles: {
+                paths: [],
             }
         },
     },
     chainWebpack: (config) => {
+        // config
+        //     .module
+        //     .rule('eslint')
+        //     .use('eslint-loader')
+        //     .options({
+        //         rules: {
+        //             'vue/multi-word-component-names': 'off'
+        //         }
+        //     })
+
         // rust wasm bindgen https://github.com/rustwasm/wasm-bindgen
         config
             .plugin("wasm-pack_sphk")
@@ -42,7 +52,8 @@ module.exports = defineConfig({
                         crateDirectory: path.resolve(__dirname, "../rust/sparrowhawk"),
                         // args: '-t wasm64-unknown-unknown',
                         // extraArgs: "--features wasm --release",
-                        extraArgs: "--features wasm",
+                        // extraArgs: "--features wasm",
+                        extraArgs: "--no-default-features -F wasm --target wasm32-unknown-unknown",
 //                        extraArgs: "--features wasm --target wasm64-unknown-unknown",
                         outDir: path.resolve(__dirname, "./src/pkg"),
                         // forceMode: "development",
@@ -50,6 +61,7 @@ module.exports = defineConfig({
                     })
             )
             .end()
+
         config
             .plugin("wasm-pack_ska")
             .use(WasmPackPlugin)
@@ -65,6 +77,7 @@ module.exports = defineConfig({
                     })
             )
             .end()
+
         config
             .plugin("wasm-pack_sketchlib")
             .use(WasmPackPlugin)
@@ -80,13 +93,30 @@ module.exports = defineConfig({
                     })
             )
             .end()
-        config.module.rule("js").exclude.add(/\.worker\.js$/);
+
+        config.module
+            .rule("js")
+            .exclude
+            .add(/\.worker\.(js|ts)$/);
+
+        config.module
+            .rule("ts")
+            .exclude
+            .add(/\.worker\.ts$/);
+
         config.module
             .rule("worker")
-            .test(/\.worker\.js$/)
+            .test(/\.worker\.(js|ts)$/)
             .use("worker-loader")
             .loader("worker-loader")
+            .end()
+            .use("ts-loader")
+            .loader("ts-loader")
+            .options({
+                transpileOnly: true
+            })
             .end();
+
         config.plugin('define').tap((definitions) => {
             Object.assign(definitions[0], {
                 __VUE_OPTIONS_API__: 'true',
