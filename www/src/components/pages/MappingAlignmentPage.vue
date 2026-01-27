@@ -122,6 +122,17 @@
           Reset and start over
         </Button>
 
+        <div v-if="hasMappingResults" class="mx-6 mt-6">
+          <div class="w-full">
+            <MSAViewer
+              :data="mappingMSAData"
+              filename="Mapping Results"
+              :show-header="false"
+              class="h-[400px] w-full"
+            />
+          </div>
+        </div>
+
         <slot name="mapping"/>
       </div>
 
@@ -179,6 +190,7 @@ import { Button } from "@/components/ui/button";
 import MappingHelpCollapsible from "@/components/help/MappingHelpCollapsible.vue";
 import AlignmentHelpCollapsible from "@/components/help/AlignmentHelpCollapsible.vue";
 import DownloadButtonSka from "@/components/SequenceViewer/DownloadButtonSka.vue";
+import { MSAViewer } from "@/components/MSAViewer";
 
 interface UploadedFile {
   name: string;
@@ -208,7 +220,8 @@ export default defineComponent({
     Button,
     MappingHelpCollapsible,
     AlignmentHelpCollapsible,
-    DownloadButtonSka
+    DownloadButtonSka,
+    MSAViewer
   },
   setup() {
     const store = useStore();
@@ -216,6 +229,7 @@ export default defineComponent({
     const proportion_reads: Ref<number> = ref(1);
     const uploadedFiles: Ref<UploadedFile[]> = ref([]);
     const uploadedAlignmentFiles: Ref<string[]> = ref([]);
+
 
     const {
       processRef,
@@ -286,8 +300,6 @@ export default defineComponent({
       getRootPropsQueryAlign,
       getInputPropsQueryAlign,
       isDragActiveQueryAlign,
-      onDropMapping,
-      onDropQueryAlign,
       allResults_ska,
       ...restMapping,
       ...restQueryAlign
@@ -317,6 +329,36 @@ export default defineComponent({
     },
     hasMappingResults(): boolean {
       return Object.keys(this.allResults_ska.mapResults).length > 0;
+    },
+    // Convert mapping results to MSA format for the viewer
+    mappingMSAData(): { id: string; sequence: string }[] {
+      const results: { id: string; sequence: string }[] = [];
+
+      // Add reference sequence first
+      if (this.allResults_ska.ref && this.allResults_ska.ref.length > 0) {
+        const refSeq = this.allResults_ska.ref.join('');
+        console.log('[mappingMSAData] ref sequence length:', refSeq.length);
+        results.push({
+          id: this.refName || 'Reference',
+          sequence: refSeq
+        });
+      }
+
+      // Add mapped sequences
+      for (const fileName of Object.keys(this.allResults_ska.mapResults)) {
+        const mapping = this.allResults_ska.mapResults[fileName];
+        if (mapping?.mapped_sequences && mapping.mapped_sequences.length > 0) {
+          const seq = mapping.mapped_sequences.join('');
+          console.log('[mappingMSAData] mapped sequence length:', seq.length, 'for', fileName);
+          results.push({
+            id: fileName,
+            sequence: seq
+          });
+        }
+      }
+
+      console.log('[mappingMSAData] total sequences:', results.length);
+      return results;
     },
     dropzonePrompt(): string {
       if (!this.refProcessed && !this.isIndexingRef) {
