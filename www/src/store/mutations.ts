@@ -1,6 +1,46 @@
-import { RootState } from "@/store/state";
+import {RootState} from "@/store/state";
 
 export default {
+    // Processing state mutations
+    setPreprocessingState(state: RootState, isProcessing: boolean) {
+        state.processingState.isPreprocessing = isProcessing;
+    },
+    setAssemblingState(state: RootState, isAssembling: boolean) {
+        state.processingState.isAssembling = isAssembling;
+    },
+    setIndexingRefState(state: RootState, isIndexing: boolean) {
+        state.processingState.isIndexingRef = isIndexing;
+    },
+    setMappingState(state: RootState, isMapping: boolean) {
+        state.processingState.isMapping = isMapping;
+    },
+    addMappingFile(state: RootState, fileName: string) {
+        state.processingState.isMappingFiles.add(fileName);
+    },
+    removeMappingFile(state: RootState, fileName: string) {
+        state.processingState.isMappingFiles.delete(fileName);
+        if (state.processingState.isMappingFiles.size === 0) {
+            state.processingState.isMapping = false;
+        }
+    },
+    setAligningState(state: RootState, isAligning: boolean) {
+        state.processingState.isAligning = isAligning;
+    },
+    setIdentifyingState(state: RootState, isIdentifying: boolean) {
+        state.processingState.isIdentifying = isIdentifying;
+    },
+    resetProcessingState(state: RootState) {
+        state.processingState = {
+            isPreprocessing: false,
+            isAssembling: false,
+            isIndexingRef: false,
+            isMapping: false,
+            isMappingFiles: new Set<string>(),
+            isAligning: false,
+            isIdentifying: false,
+        };
+    },
+
     SET_WORKER(state: RootState, worker: Worker | null) {
         state.workerState.worker = worker;
     },
@@ -14,28 +54,34 @@ export default {
         state.workerState.worker_orphos = worker;
     },
 
-    setPreprocessing(state: RootState, input: { nKmers : number, histo : [], used_min_count : number }) {
+    setPreprocessing(state: RootState, input: { nKmers: number, histo: [], used_min_count: number }) {
         console.log("Preprocessing finished! Saving intermediate information in the state");
         console.log(input.nKmers);
 
         state.readsPreprocessing.nKmers = input.nKmers;
-        state.readsPreprocessing.histo  = input.histo;
+        state.readsPreprocessing.histo = input.histo;
         state.readsPreprocessing.used_min_count = input.used_min_count;
 
     },
 
-    setAssembly(state: RootState, input: { ncontigs : number, outfasta : string, outdot : string, outgfa : string, outgfav2 : string }) {
+    setAssembly(state: RootState, input: {
+        ncontigs: number,
+        outfasta: string,
+        outdot: string,
+        outgfa: string,
+        outgfav2: string
+    }) {
         console.log("Assembly finished! Saving contigs as fasta in the state");
 
-        state.allResults.nContigs    = input.ncontigs;
+        state.allResults.nContigs = input.ncontigs;
         state.allResults.fastaOutput = input.outfasta;
-        state.allResults.dotOutput   = input.outdot;
-        state.allResults.gfaOutput   = input.outgfa;
+        state.allResults.dotOutput = input.outdot;
+        state.allResults.gfaOutput = input.outgfa;
         state.allResults.gfav2Output = input.outgfav2;
 
     },
 
-    setReadsFileNames(state: RootState, input: { file1 : string, file2 : string }) {
+    setReadsFileNames(state: RootState, input: { file1: string, file2: string }) {
         console.log("Setting names of reads");
 
         state.readsFileNames = input.file1 + "," + input.file2;
@@ -60,16 +106,16 @@ export default {
         state.readsFileNames = null;
         state.min_count = 0;
         state.readsPreprocessing = {
-            nKmers : null,
-            histo  : [],
-            used_min_count : null,
+            nKmers: null,
+            histo: [],
+            used_min_count: null,
         }
         state.allResults = {
-            nContigs    : null,
-            fastaOutput : "",
-            dotOutput   : "",
-            gfaOutput   : "",
-            gfav2Output : "",
+            nContigs: null,
+            fastaOutput: "",
+            dotOutput: "",
+            gfaOutput: "",
+            gfav2Output: "",
         };
 
         if (state.workerState.worker) {
@@ -98,13 +144,18 @@ export default {
     },
 
     setMapped(state: RootState,
-              input: {name:string, nb_variants:number|null, coverage:number|null, mapped_sequences:string[]}) {
+              input: {
+                  name: string,
+                  nb_variants: number | null,
+                  coverage: number | null,
+                  mapped_sequences: string[]
+              }) {
         state.allResults_ska.mapResults[input.name].nb_variants = input.nb_variants
         state.allResults_ska.mapResults[input.name].coverage = input.coverage
         state.allResults_ska.mapResults[input.name].mapped_sequences = input.mapped_sequences
     },
 
-    setAligned(state: RootState, input: {aligned: boolean, names: string[], newick: string}) {
+    setAligned(state: RootState, input: { aligned: boolean, names: string[], newick: string }) {
         state.allResults_ska.alignResults[0] = {
             aligned: input.aligned,
             names: input.names,
@@ -126,7 +177,7 @@ export default {
     },
 
     // SKETCHLIB
-    saveIDResults(state: RootState, input : {probs : number[], names : string[], metadata : string[]} ) {
+    saveIDResults(state: RootState, input: { probs: number[], names: string[], metadata: string[] }) {
         console.log("Storing results in allResults_sketchlib");
         // console.log(input.probs);
         state.allResults_sketchlib.idProbs = input.probs;
@@ -148,28 +199,28 @@ export default {
     },
 
     // ORPHOS
-    saveGeneCallingResults(state: RootState, input : {output_file : string, gene_count : number, sequence_count : number} ) {
-        console.log("Storing results in allResults_orphos");
-        state.allResults_orphos.outputFile      = input.output_file;
-        state.allResults_orphos.geneCount       = input.gene_count;
-        state.allResults_orphos.sequenceCount   = input.sequence_count;
-        state.allResults_orphos.callingGenes    = false;
-    },
+//    saveGeneCallingResults(state: RootState, input : {output_file : string, gene_count : number, sequence_count : number} ) {
+//        console.log("Storing results in allResults_orphos");
+//        state.allResults_orphos.outputFile      = input.output_file;
+//        state.allResults_orphos.geneCount       = input.gene_count;
+//        state.allResults_orphos.sequenceCount   = input.sequence_count;
+//        state.allResults_orphos.callingGenes    = false;
+//    },
 
-    setCallingGenes(state: RootState) {
-        state.allResults_orphos.callingGenes    = true;
-    },
+//    setCallingGenes(state: RootState) {
+//        state.allResults_orphos.callingGenes    = true;
+//    },
 
-    resetAllResults_orphos(state: RootState) {
-        state.allResults_orphos = {
-            outputFile: null,
-            geneCount: null,
-            sequenceCount: null,
-            callingGenes: false
-        };
+//    resetAllResults_orphos(state: RootState) {
+//        state.allResults_orphos = {
+//            outputFile: null,
+//            geneCount: null,
+//            sequenceCount: null,
+//            callingGenes: false
+//        };
 
-        if (state.workerState.worker_orphos) {
-            state.workerState.worker_orphos.postMessage({reset: true});
-        }
-    }
+//        if (state.workerState.worker_orphos) {
+//            state.workerState.worker_orphos.postMessage({reset: true});
+//        }
+//    }
 };

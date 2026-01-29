@@ -1,23 +1,23 @@
-import { RootState } from "@/store/state";
+import {RootState} from "@/store/state";
 
 export const emptyState = (): RootState => ({
-    readsFileNames : null,
-    errors         : "",
-    min_count      : 0,
-    refSet         : null,
+    readsFileNames: null,
+    errors: "",
+    min_count: 0,
+    refSet: null,
 
     readsPreprocessing: {
-        nKmers : null,
-        histo  : [],
-        used_min_count : null,
+        nKmers: null,
+        histo: [],
+        used_min_count: null,
     },
 
     allResults: {
-        nContigs    : null,
-        fastaOutput : "",
-        dotOutput   : "",
-        gfaOutput   : "",
-        gfav2Output : "",
+        nContigs: null,
+        fastaOutput: "",
+        dotOutput: "",
+        gfaOutput: "",
+        gfav2Output: "",
     },
 
     allResults_ska: {
@@ -32,17 +32,27 @@ export const emptyState = (): RootState => ({
         idMetadata: null,
     },
 
-    allResults_orphos: {
-        outputFile: null,
-        geneCount: null,
-        sequenceCount: null,
-        callingGenes: false,
-    },
+//    allResults_orphos: {
+//        outputFile: null,
+//        geneCount: null,
+//        sequenceCount: null,
+//        callingGenes: false,
+//    },
 
     workerState: {
         worker: null,
         worker_ska: null,
         worker_sketchlib: null,
         worker_orphos: null
+    },
+
+    processingState: {
+        isPreprocessing: false,
+        isAssembling: false,
+        isIndexingRef: false,
+        isMapping: false,
+        isMappingFiles: new Set<string>(),
+        isAligning: false,
+        isIdentifying: false,
     },
 });

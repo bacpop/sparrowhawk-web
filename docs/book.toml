@@ -1,0 +1,7 @@
+[book]
+title = "Sparrowhawk documentation"
+authors = ["vrbouza"]
+language = "en"
+
+[output.html]
+mathjax-support = true

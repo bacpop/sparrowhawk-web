@@ -1,0 +1,63 @@
+interface IdentifyResult {
+    probs: number[];
+    names: string[];
+    metadata: string[];
+}
+
+interface SketchlibData {
+    query(file1: File, file2: File | null): Promise<void>;
+    get_probs(top_n: number): string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type WasmModuleAny = any;
+
+export class Sketcher {
+    worker: Worker;
+    wasm: WasmModuleAny | null;
+    SketchlibData: SketchlibData | null;
+    wasmPromise: Promise<WasmModuleAny>;
+
+    constructor(worker: Worker) {
+        this.worker = worker;
+        this.SketchlibData = null;
+        this.wasm = null;
+        this.wasmPromise = new Promise((resolve) => {
+            import("@/pkg_sketchlib")
+                .then((w) => {
+                    this.wasm = w;
+                    resolve(w);
+                });
+        });
+    }
+
+    waitForWasm(): Promise<WasmModuleAny> {
+        return this.wasm ? Promise.resolve(this.wasm) : this.wasmPromise;
+    }
+
+    async identifyThisFile(file1: File, file2: File | null): Promise<void> {
+        console.log("Starting identification...");
+        await this.waitForWasm();
+
+        if (this.SketchlibData === null) {
+            const response = await fetch('/inverted_k_17_ss_10.ski');
+            const invertedindex = await response.blob();
+
+            this.SketchlibData = await this.wasm.SketchlibData.new(invertedindex);
+        }
+
+        await this.SketchlibData!.query(file1, file2);
+
+        const results: IdentifyResult = JSON.parse(this.SketchlibData!.get_probs(3));
+
+        this.worker.postMessage({
+            probs: results.probs,
+            names: results.names,
+            metadata: results.metadata
+        });
+    }
+
+    resetAll(): void {
+        this.SketchlibData = null;
+    }
+}
