@@ -244,50 +244,91 @@ export default {
     async identifyFiles(context: ActionContext<RootState, RootState>, payload: { acceptFiles: Array<File> }) {
         const {commit, state} = context;
         console.log("Uploaded file(s) for taxonomic identification");
-        if (state.workerState.worker_sketchlib) {
-            if (payload.acceptFiles.length > 2) {
-                console.log("More than two files uploaded. This case is not supported.");
-                commit("resetAllResults_sketchlib");
-            } else {
-                // Set identifying state
-                commit("setIdentifyingState", true);
+        if (!state.workerState.worker_sketchlib) {
+            return;
+        }
 
-                if (payload.acceptFiles.length == 1) {
-                    console.log("One file uploaded (fasta/q). Identifying...");
-                    state.workerState.worker_sketchlib.postMessage({
-                        identify: true,
-                        file1: payload.acceptFiles[0],
-                        file2: null,
+        // Helper to find paired-end read file
+        const findReadPair = (fileName: string, files: Array<File>): {
+            pairFile: File | undefined,
+            sampleName: string
+        } => {
+            const baseName = fileName.replace(/(_1.fastq.gz|_1.fq.gz)$/, '');
+            const pairNameFastq = baseName + '_2.fastq.gz';
+            const pairNameFq = baseName + '_2.fq.gz';
+            const pairFile = files.find(file => file.name === pairNameFastq || file.name === pairNameFq);
+            return {pairFile, sampleName: baseName};
+        };
+
+        // Build list of samples to process
+        interface SampleToProcess {
+            sampleName: string;
+            file1: File;
+            file2: File | null;
+        }
+        const samplesToProcess: SampleToProcess[] = [];
+
+        payload.acceptFiles.forEach((file: File) => {
+            // Check if it's a paired-end read file
+            if (/(_1|_2)(.fastq.gz|.fq.gz)$/.test(file.name)) {
+                // Only process _1 files (to avoid duplicates)
+                if (/_1(.fastq.gz|.fq.gz)$/.test(file.name)) {
+                    const {pairFile, sampleName} = findReadPair(file.name, payload.acceptFiles);
+                    if (pairFile) {
+                        samplesToProcess.push({sampleName, file1: file, file2: pairFile});
+                    } else {
+                        console.log(file.name + ": only one fastq found, skipping");
+                    }
+                }
+                // Skip _2 files - they're handled with their _1 pair
+            } else {
+                // Single file (FASTA or single FASTQ)
+                const sampleName = file.name.replace(/(.fasta|.fasta.gz|.fa|.fa.gz|.fq|.fq.gz|.fastq|.fastq.gz)$/, '');
+                samplesToProcess.push({sampleName, file1: file, file2: null});
+            }
+        });
+
+        if (samplesToProcess.length === 0) {
+            console.log("No valid samples found to process");
+            return;
+        }
+
+        // Set up message handler once
+        state.workerState.worker_sketchlib.onmessage = (messageData) => {
+            if (messageData.data instanceof Object) {
+                if ("probs" in messageData.data && "sampleName" in messageData.data) {
+                    const sampleName = messageData.data.sampleName;
+                    console.log("Saving results for sample: " + sampleName);
+
+                    // Remove from identifying set
+                    commit("removeIdentifyingFile", sampleName);
+
+                    commit("saveIDResults", {
+                        sampleName: sampleName,
+                        probs: messageData.data.probs,
+                        names: messageData.data.names,
+                        metadata: messageData.data.metadata
                     });
                 } else {
-                    console.log("Two files uploaded (fastq, reads). Identifying...");
-                    state.workerState.worker_sketchlib.postMessage({
-                        identify: true,
-                        file1: payload.acceptFiles[0],
-                        file2: payload.acceptFiles[1],
-                    });
+                    // Something wrong has happened
+                    console.log("Error found during processing");
                 }
-
-                state.workerState.worker_sketchlib.onmessage = (messageData) => {
-                    // Clear identifying state
-                    commit("setIdentifyingState", false);
-
-                    if (messageData.data instanceof Object) {
-                        if ("probs" in messageData.data) {
-                            console.log("Saving results...");
-                            commit("saveIDResults", {
-                                probs: messageData.data.probs,
-                                names: messageData.data.names,
-                                metadata: messageData.data.metadata
-                            });
-                        } else {
-                            // Something wrong has happened
-                            console.log("Error found during processing, resetting results.");
-                            commit("resetAllResults_sketchlib");
-                        }
-                    }
-                };
             }
+        };
+
+        // Process each sample sequentially (worker processes one at a time)
+        for (const sample of samplesToProcess) {
+            console.log("Queuing identification for sample: " + sample.sampleName);
+
+            // Track this sample as being identified
+            commit("addIdentifyingFile", sample.sampleName);
+
+            state.workerState.worker_sketchlib.postMessage({
+                identify: true,
+                file1: sample.file1,
+                file2: sample.file2,
+                sampleName: sample.sampleName,
+            });
         }
     },
 

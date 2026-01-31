@@ -33,10 +33,14 @@ export interface AllResultsSka {
     ref: string[]
 }
 
+export interface SampleIdentifyResult {
+    idProbs: number[]
+    idSpecies: string[]
+    idMetadata: string[]
+}
+
 export interface AllResultsSketchlib {
-    idProbs: number[] | null
-    idSpecies: string[] | null
-    idMetadata: string[] | null
+    results: Dict<SampleIdentifyResult>
 }
 
 export interface ReadsPreprocessing {
@@ -53,4 +57,5 @@ export interface ProcessingState {
     isMappingFiles: Set<string>;  // Track which files are being mapped
     isAligning: boolean;
     isIdentifying: boolean;
+    isIdentifyingFiles: Set<string>;  // Track which files are being identified
 }
