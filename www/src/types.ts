@@ -4,7 +4,7 @@ export interface WorkerState {
     worker: Worker | null;
     worker_ska: Worker | null;
     worker_sketchlib: Worker | null;
-    worker_orphos:    Worker | null;
+    worker_orphos: Worker | null;
 }
 
 export interface AllResults {
@@ -41,7 +41,7 @@ export interface AllResultsSketchlib {
 }
 
 export interface AllResultsOrphos {
-    outputFile: string | null
+    outputFile: string
     geneCount: number | null
     sequenceCount: number | null
     callingGenes: boolean

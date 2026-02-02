@@ -1,45 +1,52 @@
 <template>
-    <div>
-        <button @click="downloadGFF" id="Download">Download gene calls as .gff</button>
-    </div>
+  <div class="flex flex-col gap-2">
+    Download gene calls
+    <Button class="max-w-fit cursor-pointer" variant="outline" size="sm" @click="downloadGFF">
+    .gff
+    </Button>
+  </div>
 </template>
 
-<script>
-    import { useState } from "vuex-composition-helpers";
 
-    export default {
-        name: 'DownloadButtonOrphos',
-        setup() {
-            const { allResults_orphos } = useState(["allResults_orphos"]);
+<script lang="ts">
+import {defineComponent, Ref} from "vue";
+import {useState} from "vuex-composition-helpers";
+import type {AllResultsOrphos} from "@/types";
+import {Button} from "@/components/ui/button";
 
-            return {
-                allResults_orphos
-            }
-        },
-        methods: {
-            downloadGFF() {
-                console.log(this.allResults_orphos.outputFile);
+export default defineComponent({
+  name: 'DownloadButtonOrphos',
+  setup() {
+    const {allResults_orphos} = useState(["allResults_orphos"]) as { allResults_orphos: Ref<AllResultsOrphos> };
 
-                let filename = 'genecalls.gff';
-                let element = document.createElement('a');
-                element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(this.allResults_orphos.outputFile));
-                element.setAttribute('download', filename);
-
-                element.style.display = 'none';
-                document.body.appendChild(element);
-
-                element.click();
-                document.body.removeChild(element);
-            },
-        }
+    return {
+      allResults_orphos
     }
+  },
+  components: {
+    Button
+  },
+  methods: {
+    downloadGFF() {
+        console.log(this.allResults_orphos.outputFile);
+
+        const filename = 'genecalls.gff';
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(this.allResults_orphos.outputFile));
+        element.setAttribute('download', filename);
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+        document.body.removeChild(element);
+    },
+  }
+});
 </script>
 
 <style scoped>
-    #Download {
-        float: left;
-    }
-    button {
-      font-family: 'IBM Plex sans';
-    }
+#Download {
+  float: left;
+}
 </style>

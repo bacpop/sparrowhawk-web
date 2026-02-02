@@ -32,12 +32,12 @@ export const emptyState = (): RootState => ({
         idMetadata: null,
     },
 
-//    allResults_orphos: {
-//        outputFile: null,
-//        geneCount: null,
-//        sequenceCount: null,
-//        callingGenes: false,
-//    },
+    allResults_orphos: {
+        outputFile: "",
+        geneCount: null,
+        sequenceCount: null,
+        callingGenes: false,
+    },
 
     workerState: {
         worker: null,

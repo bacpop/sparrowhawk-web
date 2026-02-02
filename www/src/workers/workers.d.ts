@@ -13,3 +13,8 @@ declare module '@/workers/Sketcher.worker' {
     const WorkerFactory: new () => Worker;
     export default WorkerFactory;
 }
+
+declare module '@/workers/Caller.worker' {
+    const WorkerFactory: new () => Worker;
+    export default WorkerFactory;
+}

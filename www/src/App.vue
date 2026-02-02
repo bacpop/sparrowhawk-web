@@ -9,7 +9,7 @@
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem v-for="item in tabs"
-                               :key="item.title"
+                               :key="item.label"
                                :class="item.id === tabName ? 'bg-white rounded-sm shadow-sm' : ''"
                                class="py-2 px-3 cursor-pointer">
                 <SidebarMenuButton @click="changeTab(item.id)" class="p-0 hover:bg-transparent cursor-pointer">
@@ -61,6 +61,10 @@
         </MappingAlignmentPage>
       </div>
 
+      <div v-else-if="tabName === 'GeneCalling'">
+        <GeneCallingPage :tabName="tabName"/>
+      </div>
+
       <div v-else-if="tabName === 'faq'">
         <FaqPage/>
       </div>
@@ -72,17 +76,19 @@
 import {defineComponent} from 'vue';
 import {useStore} from 'vuex';
 // eslint-disable-next-line
-import {Codesandbox, Map, ScanFace, Spline} from "lucide-vue-next";
+import {Codesandbox, Map, ScanFace, Spline, Dna} from "lucide-vue-next";
 
 import AssemblyPage from './components/pages/AssemblyPage.vue';
 import MappingAlignmentPage from './components/pages/MappingAlignmentPage.vue';
 import TaxonomicIDPage from './components/pages/TaxonomicIDPage.vue';
+import GeneCallingPage from "./components/pages/GeneCallingPage.vue";
 import ResultsDisplayMapping from './components/ResultsDisplayMapping.vue';
 import ResultsDisplayAlignment from './components/ResultsDisplayAlignment.vue';
 import KmerHistogram from './components/KmerHistogram.vue';
 import WorkerAssembler from '@/workers/Assembler.worker';
 import WorkerMapper from '@/workers/Mapper.worker';
 import WorkerSketcher from '@/workers/Sketcher.worker';
+import WorkerCaller from '@/workers/Caller.worker';
 import "@fontsource/ibm-plex-sans";
 import {
   SidebarContent,
@@ -121,12 +127,14 @@ export default defineComponent({
     SidebarProvider,
     SidebarTrigger,
     Codesandbox,
+    Dna,
     Map,
     Spline,
     ScanFace,
     AssemblyPage,
     MappingAlignmentPage,
     TaxonomicIDPage,
+    GeneCallingPage,
     KmerHistogram,
     ResultsDisplayMapping,
     ResultsDisplayAlignment,
@@ -145,7 +153,8 @@ export default defineComponent({
         {id: 'Assembly', label: 'Assembly', icon: 'Codesandbox'},
         {id: 'Mapping', label: 'Mapping', icon: 'Map'},
         {id: 'Alignment', label: 'Alignment', icon: 'Spline'},
-        {id: 'TaxonomicID', label: 'Taxonomic ID', icon: 'ScanFace'}
+        {id: 'TaxonomicID', label: 'Taxonomic ID', icon: 'ScanFace'},
+        {id: 'GeneCalling', label: 'Gene calling', icon: 'Dna'},
       ] as Tab[]
     }
   },
@@ -194,6 +203,15 @@ export default defineComponent({
           if (window.Worker) {
             const worker = new WorkerSketcher();
             this.store.commit('SET_WORKER_SKETCHLIB', worker);
+          } else {
+            throw new Error("WebWorkers are not supported by this web browser.");
+          }
+        });
+    import("@/pkg_orphos-bridge")
+        .then(() => {
+          if (window.Worker) {
+            const worker = new WorkerCaller();
+            this.store.commit('SET_WORKER_ORPHOS', worker);
           } else {
             throw new Error("WebWorkers are not supported by this web browser.");
           }

@@ -199,28 +199,28 @@ export default {
     },
 
     // ORPHOS
-//    saveGeneCallingResults(state: RootState, input : {output_file : string, gene_count : number, sequence_count : number} ) {
-//        console.log("Storing results in allResults_orphos");
-//        state.allResults_orphos.outputFile      = input.output_file;
-//        state.allResults_orphos.geneCount       = input.gene_count;
-//        state.allResults_orphos.sequenceCount   = input.sequence_count;
-//        state.allResults_orphos.callingGenes    = false;
-//    },
+   saveGeneCallingResults(state: RootState, input : {output_file : string, gene_count : number, sequence_count : number} ) {
+       console.log("Storing results in allResults_orphos");
+       state.allResults_orphos.outputFile = input.output_file;
+       state.allResults_orphos.geneCount = input.gene_count;
+       state.allResults_orphos.sequenceCount = input.sequence_count;
+       state.allResults_orphos.callingGenes = false;
+   },
 
-//    setCallingGenes(state: RootState) {
-//        state.allResults_orphos.callingGenes    = true;
-//    },
+   setCallingGenes(state: RootState) {
+       state.allResults_orphos.callingGenes = true;
+   },
 
-//    resetAllResults_orphos(state: RootState) {
-//        state.allResults_orphos = {
-//            outputFile: null,
-//            geneCount: null,
-//            sequenceCount: null,
-//            callingGenes: false
-//        };
+   resetAllResults_orphos(state: RootState) {
+       state.allResults_orphos = {
+           outputFile: "",
+           geneCount: null,
+           sequenceCount: null,
+           callingGenes: false
+       };
 
-//        if (state.workerState.worker_orphos) {
-//            state.workerState.worker_orphos.postMessage({reset: true});
-//        }
-//    }
+       if (state.workerState.worker_orphos) {
+           state.workerState.worker_orphos.postMessage({reset: true});
+       }
+   }
 };

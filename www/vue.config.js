@@ -93,6 +93,20 @@ module.exports = defineConfig({
                     })
             )
             .end()
+            
+            config
+            .plugin("wasm-pack_orphos-bridge")
+            .use(WasmPackPlugin)
+            .init(
+                (Plugin) =>
+                    new Plugin({
+                        crateDirectory: path.resolve(__dirname, "../rust/orphos-bridge"),
+                        outDir: path.resolve(__dirname, "./src/pkg_orphos-bridge"),
+                        // forceMode: "development",
+                        forceMode: "production",
+                    })
+            )
+            .end()
 
         config.module
             .rule("js")

@@ -297,19 +297,23 @@ export default {
     },
 
     // ORPHOS
-    async callGenes(context: ActionContext<RootState, RootState>, payload: { acceptFiles: Array<File>}) {
+    async callGenes(context: ActionContext<RootState, RootState>, payload: { acceptFiles: Array<File> }) {
         const { commit, state } = context;
         console.log("Action callGenes: Uploaded file for gene calling")
 
         if (state.workerState.worker_orphos) {
             if (payload.acceptFiles.length == 1) {
+                console.log("File name: " + payload.acceptFiles[0].name);
                 commit("setCallingGenes");
-                state.workerState.worker_orphos.postMessage({call: true, input_file: payload.acceptFiles[0]});
+                state.workerState.worker_orphos.postMessage({
+                    call: true,
+                    input_file: payload.acceptFiles[0],
+                });
 
                 state.workerState.worker_orphos.onmessage = (messageData) => {
                     console.log(payload.acceptFiles[0].name + " genes have been called.");
-                    commit("saveGeneCallingResults", 
-                        {name:          payload.acceptFiles[0].name, 
+                    commit("saveGeneCallingResults",
+                        {name:          payload.acceptFiles[0].name,
                         output_file:    messageData.data.output_file,
                         gene_count:     messageData.data.gene_count,
                         sequence_count: messageData.data.sequence_count,});
