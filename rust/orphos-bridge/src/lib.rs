@@ -13,7 +13,7 @@ use crate::fastx_wasm::open_fasta;
 use seq_io::fasta::Record;
 use json;
 
-const MIN_NT_CONTIG : usize = 15000;
+const MIN_NT_CONTIG : usize = 96;
 
 #[wasm_bindgen]
 extern {
