@@ -11,7 +11,6 @@ extern crate console_error_panic_hook;
 
 use crate::fastx_wasm::open_fasta;
 use seq_io::fasta::Record;
-use json;
 
 const MIN_NT_CONTIG : usize = 96; // Taken from Orphos code, I guess also from Prodigal?
 
@@ -23,8 +22,8 @@ extern {
 
 /// Logging wrapper function for WebAssembly
 pub fn logw(text : &str, typ : Option<&str>) {
-    if typ.is_some() {
-        log((String::from("orphos-bridge::") + typ.unwrap() + "::" + text).as_str());
+    if let Some(thetyp) = typ {
+        log((String::from("orphos-bridge::") + thetyp + "::" + text).as_str());
     } else {
         log(text);
     }
@@ -102,7 +101,7 @@ impl OrphosData {
             force_non_sd: self.force_non_sd,
             quiet: true,
             output_format: self.format,
-            translation_table: if (self.translation_table == 0) {None} else {Some(self.translation_table)},
+            translation_table: if self.translation_table == 0 {None} else {Some(self.translation_table)},
             num_threads: None,
         };
 
@@ -138,7 +137,6 @@ impl OrphosData {
                     tmpid,
                     tmpdesc
                 ).expect("Error analysing FASTA record.");
-            logw(format!("after analysis").as_str(), None);
 
             all_results.push(tmpres);
         }
@@ -146,8 +144,6 @@ impl OrphosData {
         self.gene_count     = Some(all_results.iter().map(|r| r.genes.len()).sum::<usize>());
         self.sequence_count = Some(all_results.len());
         self.results        = Some(all_results);
-        
-        return;
     }
 
 
@@ -174,7 +170,7 @@ impl OrphosData {
         results["gene_count"]       = json::JsonValue::Number(self.gene_count.unwrap().into());
         results["sequence_count"]   = json::JsonValue::Number(self.sequence_count.unwrap().into());
 
-        return results.dump();
+        results.dump()
     }
 }
 
