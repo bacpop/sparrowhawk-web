@@ -3,6 +3,11 @@ import { Caller } from './Caller';
 interface CallMessage {
     call: boolean;
     input_file: File;
+    metag: boolean;
+    closed_ends: boolean;
+    mask: boolean;
+    tt: number;
+    non_sd: boolean;
 }
 
 interface ResetMessage {
@@ -18,7 +23,7 @@ ctx.onmessage = (evt: MessageEvent<WorkerMessage>) => {
     if (evt.data instanceof Object) {
         if ('call' in evt.data && evt.data.call) {
             const data = evt.data as CallMessage;
-            caller.callGenes(data.input_file);
+            caller.callGenes(data.input_file, data.metag, data.closed_ends, data.mask, data.tt, data.non_sd);
         } else if ('reset' in evt.data && evt.data.reset) {
             caller.resetAll();
         } else {

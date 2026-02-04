@@ -8,8 +8,9 @@
 
       <GeneCallingHelpCollapsible />
 
-      <!-- <TooltipProvider>
+      <TooltipProvider>
         <div class="flex flex-col gap-4">
+          
           <div>
             <p class="flex items-center gap-1">
               <Tooltip>
@@ -17,54 +18,104 @@
                   <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p class="max-w-xs">Controls the size of the subsequences (k-mers) used to process the reads. Maximum value is 63 for this mode.</p>
+                  <p class="max-w-xs">You can select a different translation table if you prefer from NCBI ones.</p>
                 </TooltipContent>
               </Tooltip>
-              k
+              Translation table
             </p>
             <div class="flex flex-row items-center w-full gap-2">
-              <VueSlider class="flex-grow"
-                         v-model="k"
-                         :lazy="true"
-                         :min="5"
-                         :max="63"
-                         :interval="2"
-                         :disabled="isCalling"
+              <VueSelect class="flex-grow"
+                         v-model="tt"
+                         :options="[
+                          { label: 'Default/Auto', value: 0},
+                          { label: '1. Standard', value: 1},
+                          { label: '2. Vertebrate mitochondrial', value: 2},
+                          { label: '3. Yeast mitochondrial', value: 3},
+                          { label: '4. Mold, protozoan, coelenterate mitochondrial, and mycoplasma/spiroplasma', value: 4},
+                          { label: '5. Invertebrate mitochondrial', value: 5},
+                          { label: '6. Ciliate, dasycladacean, and hexamita nuclear', value: 6},
+                          { label: '9. Echinoderm, and flatworm mitochondrial', value: 9},
+                          { label: '10. Euplotid nuclear', value: 10},
+                          { label: '11. Bacterial, archaeal, and plant plastid', value: 11},
+                          { label: '12. Alternative yeast nuclear', value: 12},
+                          { label: '13. Ascidian mitochondrial', value: 13},
+                          { label: '14. Alternative flatworm mitochondrial', value: 14},
+                          { label: '15. Blepharisma nuclear', value: 15},
+                          { label: '16. Chlorophycean mitochondrial', value: 16},
+                          { label: '21. Trematode mitochondrial', value: 21},
+                          { label: '22. Scenedesmus obliquus mitochondrial', value: 22},
+                          { label: '23. Thraustochytrium mitochondrial', value: 23},
+                          { label: '24. Rhabdopleuridate mitochondrial', value: 24},
+                          { label: '25. Candidate division SR1 and gracilibacteria', value: 25},
+                         ]"
+                         :isDisabled="callingGenes"
               />
-              <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
-                {{ k }}
-              </span>
             </div>
           </div>
 
-          <div>
-            <p class="flex items-center gap-1">
-              <Tooltip>
-                <TooltipTrigger as-child>
-                  <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p class="max-w-xs">A real number between 0 and 1 that controls what proportion of reads to use for processing.</p>
-                </TooltipContent>
-              </Tooltip>
-              Proportion of reads
-            </p>
-            <div class="flex flex-row items-center w-full gap-2">
-              <VueSlider class="flex-grow"
-                         v-model="proportion_reads"
-                         :lazy="true"
-                         :min="0"
-                         :max="1"
-                         :interval="0.05"
-                         :disabled="isCalling"
-              />
-              <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
-                {{ proportion_reads }}
-              </span>
-            </div>
+
+          <div class="flex flex-row items-center w-full gap-2">
+            <input id="metag" type="checkbox" v-model="metag" :disabled="callingGenes"/>
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p class="max-w-xs">Recommended for FASTA files with lots of short sequences, not necessarily related between them.</p>
+              </TooltipContent>
+            </Tooltip>
+            <label for="metag">
+              Use metagenomic mode
+            </label>
           </div>
+
+          <div class="flex flex-row items-center w-full gap-2">
+            <input id="closed_ends" type="checkbox" v-model="closed_ends" :disabled="callingGenes"/>
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p class="max-w-xs">Ignores any gene that might have run off the edge of a contig</p>
+              </TooltipContent>
+            </Tooltip>
+            <label for="closed_ends">
+              Ignore truncated genes
+            </label>
+          </div>
+
+          <div class="flex flex-row items-center w-full gap-2">
+            <input id="mask" type="checkbox" v-model="mask" :disabled="callingGenes"/>
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p class="max-w-xs">When finding a gap, or set of unknown (N) nucleotides, we will not bridge over them to call a gene.</p>
+              </TooltipContent>
+            </Tooltip>
+            <label for="mask">
+              Break calling on N subsequences
+            </label>
+          </div>
+
+          <div class="flex flex-row items-center w-full gap-2">
+            <input id="non_sd" type="checkbox" v-model="non_sd" :disabled="callingGenes"/>
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p class="max-w-xs">Force the algorithm to not use Shine-Dalgarno sequences for calling genes</p>
+              </TooltipContent>
+            </Tooltip>
+            <label for="non_sd">
+              Ignore Shine-Dalgarno sequences
+            </label>
+          </div>
+
         </div>
-      </TooltipProvider> -->
+      </TooltipProvider>
     </div>
 
     <div class="w-2/3 pt-12">
@@ -83,7 +134,7 @@
             Drop files here ...
           </p>
           <p v-else>
-            Drop or click to upload your <b>sample fasta file(s)</b>
+            Drop or click to upload your <b>sample fasta file</b>
           </p>
         </div>
 
@@ -116,12 +167,12 @@
 <script lang="ts">
 import { defineComponent, ref, Ref } from "vue";
 import { useStore } from "vuex";
+import VueSelect from "vue3-select-component";
+import "vue3-select-component/styles";
 import { useDropzone } from "vue3-dropzone";
 import { useActions, useState } from "vuex-composition-helpers";
-// import VueSlider from 'vue-3-slider-component';
-// import { Check, FileUp, Loader2, Info, Dna } from "lucide-vue-next";
-import { Check, FileUp, Loader2, Dna } from "lucide-vue-next";
-// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Check, FileUp, Loader2, Info, Dna } from "lucide-vue-next";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import GeneCallingHelpCollapsible from "@/components/help/GeneCallingHelpCollapsible.vue";
 import DownloadButtonOrphos from "@/components/DownloadButtonOrphos.vue";
 
@@ -134,37 +185,52 @@ export default defineComponent({
     }
   },
   components: {
-    // VueSlider,
     Check,
     FileUp,
     Loader2,
-    // Info,
+    Info,
     Dna,
-    // Tooltip,
-    // TooltipContent,
-    // TooltipProvider,
-    // TooltipTrigger,
+    VueSelect,
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
     GeneCallingHelpCollapsible,
     DownloadButtonOrphos
   },
   setup() {
     const store = useStore();
+    const metag: Ref<boolean> = ref(false);
+    const closed_ends: Ref<boolean> = ref(false);
+    const mask: Ref<boolean> = ref(false);
+    const non_sd: Ref<boolean> = ref(false);
+    const tt: Ref<number> = ref(0);
     const uploadedFileNames: Ref<string[]> = ref([]);
 
     const { callGenes, resetAllResults_orphos } = useActions(["callGenes", "resetAllResults_orphos"]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { allResults_orphos } = useState(["allResults_orphos"]) as any;
 
-    function onDropGenome(acceptFiles: File[]): void {
-      uploadedFileNames.value = acceptFiles.map(f => f.name);
-      callGenes({ acceptFiles: acceptFiles });
-    }
-
     function resetAll(): void {
       uploadedFileNames.value = [];
       resetAllResults_orphos();
     }
     
+    function onDropGenome(acceptFiles: File[]): void {
+      if (store.getters.genesCalled) {
+        resetAll();
+      }
+      uploadedFileNames.value = acceptFiles.map(f => f.name);
+      callGenes({ 
+        acceptFiles: acceptFiles, 
+        metag: metag.value,
+        closed_ends: closed_ends.value,
+        mask: mask.value,
+        tt: tt.value,
+        non_sd: non_sd.value,
+      });
+    }
+
     const {
       getRootProps: getRootPropsGenome,
       getInputProps: getInputPropsGenome,
@@ -172,11 +238,16 @@ export default defineComponent({
       ...restGenome
     } = useDropzone({
       onDrop: onDropGenome,
-      accept: [".fa", ".fasta", ".gz"],
+      accept: [".fa", ".fasta", "fa.gz", "fasta.gz"],
       multiple: false
     });
 
     return {
+      metag,
+      closed_ends,
+      mask,
+      non_sd,
+      tt,
       uploadedFileNames,
       resetAll,
       getRootPropsGenome,

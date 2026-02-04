@@ -297,7 +297,15 @@ export default {
     },
 
     // ORPHOS
-    async callGenes(context: ActionContext<RootState, RootState>, payload: { acceptFiles: Array<File> }) {
+    async callGenes(context: ActionContext<RootState, RootState>, 
+        payload: { 
+            acceptFiles: Array<File>,
+            metag: boolean,
+            closed_ends: boolean,
+            mask: boolean,
+            tt: number,
+            non_sd: boolean
+        }) {
         const { commit, state } = context;
         console.log("Action callGenes: Uploaded file for gene calling")
 
@@ -308,6 +316,11 @@ export default {
                 state.workerState.worker_orphos.postMessage({
                     call: true,
                     input_file: payload.acceptFiles[0],
+                    metag: payload.metag,
+                    closed_ends: payload.closed_ends, 
+                    mask: payload.mask, 
+                    tt: payload.tt,
+                    non_sd: payload.non_sd,
                 });
 
                 state.workerState.worker_orphos.onmessage = (messageData) => {

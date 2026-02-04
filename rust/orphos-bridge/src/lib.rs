@@ -13,7 +13,7 @@ use crate::fastx_wasm::open_fasta;
 use seq_io::fasta::Record;
 use json;
 
-const MIN_NT_CONTIG : usize = 96;
+const MIN_NT_CONTIG : usize = 96; // Taken from Orphos code, I guess also from Prodigal?
 
 #[wasm_bindgen]
 extern {
@@ -38,12 +38,12 @@ pub fn init_panic_hook() {
 #[wasm_bindgen]
 /// Struct to interact with JS when working with WebAssembly
 pub struct OrphosData {
-    mode: String,                  // "single" or "meta"
+    metag: bool,                   // If false, set "single" mode, else "meta"
     format: OutputFormat,          // "gbk", "gff", "sco", "gca"
     closed_ends: bool,             // Closed ends (no genes off edges)
     mask_n_runs: bool,             // Mask runs of N's
     force_non_sd: bool,            // Force non-Shine-Dalgarno
-    translation_table: Option<u8>, // Translation table (1-25)
+    translation_table: u8,         // Translation table (1-25). 0 = default/none set
     results: Option<Vec<OrphosResults>>,
     gene_count: Option<usize>,
     sequence_count: Option<usize>
@@ -53,22 +53,20 @@ pub struct OrphosData {
 #[wasm_bindgen]
 impl OrphosData {
     /// Constructor
-    pub fn new( mode: String, 
+    pub fn new( metag: bool, 
                 format: String, 
                 closed_ends: bool, 
                 mask_n_runs: bool, 
                 force_non_sd: bool, 
-                translation_table: Option<u8>
+                translation_table: u8,
     ) -> Self {
         if cfg!(debug_assertions) {
             init_panic_hook();
         }
 
         // Validate translation table
-        if let Some(tt) = translation_table {
-            if !(1..=25).contains(&tt) || tt == 7 || tt == 8 || (17..=20).contains(&tt) {
-                panic!("Invalid translation table specified");
-            }
+        if !(0..=25).contains(&translation_table) || translation_table == 7 || translation_table == 8 || (17..=20).contains(&translation_table) {
+            panic!("Invalid translation table specified");
         }
         // Get proper output format  // TODO: remove?
         let output_format = match format.as_str() {
@@ -80,7 +78,7 @@ impl OrphosData {
         };
 
         OrphosData {
-            mode,
+            metag,
             format: output_format, // TODO
             closed_ends,
             mask_n_runs,
@@ -98,13 +96,13 @@ impl OrphosData {
 
         // Get an OrphosConfig struct to properly interact with Orphos
         let orphosconfig = OrphosConfig {
-            metagenomic: self.mode == "meta",
+            metagenomic: self.metag,
             closed_ends: self.closed_ends,
             mask_n_runs: self.mask_n_runs,
             force_non_sd: self.force_non_sd,
             quiet: true,
             output_format: self.format,
-            translation_table: self.translation_table,
+            translation_table: if (self.translation_table == 0) {None} else {Some(self.translation_table)},
             num_threads: None,
         };
 

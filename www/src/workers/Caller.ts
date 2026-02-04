@@ -35,13 +35,13 @@ export class Caller {
         return this.wasm ? Promise.resolve(this.wasm) : this.wasmPromise;
     }
 
-    async callGenes(input_file: File): Promise<void> {
+    async callGenes(input_file: File, metag: boolean, closed_ends: boolean, mask: boolean, tt: number, non_sd: boolean): Promise<void> {
         console.log("Starting gene calling...");
         await this.waitForWasm();
 
         if (this.OrphosData === null) {
-            // This is temporal, eventually we'd want to put all parameters
-            this.OrphosData = await this.wasm.OrphosData.new("single", "gff", false, false, false, null);
+            // TODO: output formats
+            this.OrphosData = await this.wasm.OrphosData.new(metag, "gff", closed_ends, mask, non_sd, tt);
         }
 
         await this.OrphosData!.analyse_genome(input_file);
