@@ -7,15 +7,16 @@ interface MapResult {
 interface AlignResult {
     names: string[];
     newick: string;
+    alignment: string;
 }
 
 interface SkaData {
     get_reference(): string;
-    map(file: File, revReadFile: File | null, proportion_reads: number): string;
+    map(file: File, revReadFile: File | null, proportion_reads: number, min_count: number, min_qual: number, qual_filter: number): string;
 }
 
 interface AlignData {
-    align(files: File[], proportion_reads: number): string;
+    align(files: File[], proportion_reads: number, min_count: number, min_qual: number, qual_filter: number): string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,11 +47,11 @@ export class Mapper {
         return this.wasm ? Promise.resolve(this.wasm) : this.wasmPromise;
     }
 
-    async set_ref(file: File, k: number): Promise<void> {
+    async set_ref(file: File, k: number, rc: boolean, ambig_mask: boolean, repeat_mask: boolean): Promise<void> {
         await this.waitForWasm();
 
         if (this.SkaData === null) {
-            this.SkaData = this.wasm.SkaData.new(file, k);
+            this.SkaData = this.wasm.SkaData.new(file, k, rc, ambig_mask, repeat_mask);
         }
         this.worker.postMessage({
             ref: file,
@@ -58,13 +59,13 @@ export class Mapper {
         });
     }
 
-    map(file: File, revReadFile: File | null, proportion_reads: number): void {
+    map(file: File, revReadFile: File | null, proportion_reads: number, min_count: number, min_qual: number, qual_filter: number): void {
         console.log("Mapping reads to reference with proportion_reads: " + proportion_reads);
         if (this.SkaData === null) {
             throw new Error("SkaRef::map - reference does not exist yet.");
         }
 
-        const results: MapResult = JSON.parse(this.SkaData.map(file, revReadFile, proportion_reads));
+        const results: MapResult = JSON.parse(this.SkaData.map(file, revReadFile, proportion_reads, min_count, min_qual, qual_filter));
 
         this.worker.postMessage({
             nb_variants: results["Number of variants"],
@@ -74,19 +75,20 @@ export class Mapper {
         });
     }
 
-    align(files: File[], proportion_reads: number, k: number): void {
+    align(files: File[], proportion_reads: number, rc: boolean, k: number, min_count: number, min_qual: number, qual_filter: number): void {
         console.log("Processing uploaded fastX files with proportion_reads: " + proportion_reads + " and k: " + k);
 
         if (this.AlignData === null) {
-            this.AlignData = this.wasm.AlignData.new(k);
+            this.AlignData = this.wasm.AlignData.new(k, rc);
         }
 
-        const results: AlignResult = JSON.parse(this.AlignData!.align(files, proportion_reads));
+        const results: AlignResult = JSON.parse(this.AlignData!.align(files, proportion_reads, min_count, min_qual, qual_filter));
 
         this.worker.postMessage({
             aligned: true,
             names: results.names,
             newick: results.newick,
+            alignment: results.alignment
         });
     }
 

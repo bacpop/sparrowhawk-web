@@ -19,7 +19,7 @@
                   <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p class="max-w-xs">Controls the size of the subsequences (k-mers) used to process the reads. Maximum value is 63 for this mode.</p>
+                  <p class="max-w-xs">Controls the size of the subsequences (k-mers) used to process the reads. Maximum value is 63 for this mode. You can only set it before uploading any file.</p>
                 </TooltipContent>
               </Tooltip>
               k
@@ -31,13 +31,69 @@
                          :min="5"
                          :max="63"
                          :interval="2"
-                         :disabled="isProcessingAny"
+                         :disabled="refProcessed || hasAlignmentResults || isProcessingAny"
               />
               <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
                 {{ k }}
               </span>
             </div>
           </div>
+
+          <div>
+            <p class="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p class="max-w-xs">Controls the filtering of nucleotides depending on the sequencing error information.</p>
+                </TooltipContent>
+              </Tooltip>
+              Min Illumina read quality
+            </p>
+            <div class="flex flex-row items-center w-full gap-2">
+              <VueSlider class="flex-grow"
+                         v-model="min_qual"
+                         :lazy="true"
+                         :min="0"
+                         :max="33"
+                         :interval="1"
+                         :disabled="isProcessingAny"
+              />
+              <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
+                {{ min_qual }}
+              </span>
+            </div>
+          </div>
+          
+          <!-- TODO: implement properly minimum count for allele frequency, like in Ska you can do -->
+          
+          <!-- <div>
+            <p class="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p class="max-w-xs">Only k-mers appearing more than this value will be used.</p>
+                </TooltipContent>
+              </Tooltip>
+              Min counts for k-mer filtering
+            </p>
+            <div class="flex flex-row items-center w-full gap-2">
+              <VueSlider class="flex-grow"
+                         v-model="min_count"
+                         :lazy="true"
+                         :min="0"
+                         :max="30"
+                         :interval="1"
+                         :disabled="isProcessingAny"
+              />
+              <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
+                {{ min_count }}
+              </span>
+            </div>
+          </div> -->
 
           <div>
             <p class="flex items-center gap-1">
@@ -65,6 +121,78 @@
               </span>
             </div>
           </div>
+
+          <div>
+            <p class="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p class="max-w-xs">Either no filtering, filter only the middle base of split k-mers, or any nucleotide in a k-mer.</p>
+                </TooltipContent>
+              </Tooltip>
+              Quality filter type
+            </p>
+            <div class="flex flex-row items-center w-full gap-2">
+              <VueSelect class="flex-grow"
+                         v-model="qual_filter"
+                         :options="[
+                          { label: 'No filter', value: 0},
+                          { label: 'Middle base', value: 1},
+                          { label: 'All bases', value: 2},
+                         ]"
+                         :isDisabled="isProcessingAny"
+                         :isClearable=false
+              />
+            </div>
+          </div>
+
+          <div class="flex flex-row items-center w-full gap-2">
+            <input id="rc" type="checkbox" v-model="rc" :disabled="refProcessed || hasAlignmentResults"/>
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p class="max-w-xs">Recommended to activate when using reads. You can only set it before uploading any file.</p>
+              </TooltipContent>
+            </Tooltip>
+            <label for="rc">
+              Use canonical k-mers
+            </label>
+          </div>
+
+          <div class="flex flex-row items-center w-full gap-2" v-if="tabName=='Mapping'">
+            <input id="ambig_mask" type="checkbox" v-model="ambig_mask" :disabled="refProcessed || hasAlignmentResults"/>
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p class="max-w-xs">Replace amiguous bases in the alignment with "N".</p>
+              </TooltipContent>
+            </Tooltip>
+            <label for="ambig_mask">
+              Mask ambiguous bases
+            </label>
+          </div>
+
+          <div class="flex flex-row items-center w-full gap-2" v-if="tabName=='Mapping'">
+            <input id="repeat_mask" type="checkbox" v-model="repeat_mask" :disabled="refProcessed || hasAlignmentResults"/>
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p class="max-w-xs">Mask any repeats in the alignment with "N".</p>
+              </TooltipContent>
+            </Tooltip>
+            <label for="repeat_mask">
+              Mask repeats
+            </label>
+          </div>
+
         </div>
       </TooltipProvider>
     </div>
@@ -116,6 +244,7 @@
             <DownloadButtonSka />
           </div>
         </div>
+        
 
         <!-- Reset button -->
         <Button v-if="uploadedFiles.length > 0" @click="resetAll" class="mx-6 mt-4" variant="outline" size="sm">
@@ -172,6 +301,16 @@
           </div>
         </div>
 
+
+        <div v-if="hasAlignmentResults" class="w-1/2 flex-grow px-8">
+          <DownloadButtonSkaAlignment />
+        </div>
+
+        <!-- Reset button -->
+        <Button v-if="uploadedAlignmentFiles.length > 0 && !isProcessingAny" @click="resetAll" class="mx-6 mt-4" variant="outline" size="sm">
+          Reset and start over
+        </Button>
+
         <slot name="alignment"/>
       </div>
     </div>
@@ -184,12 +323,15 @@ import { useDropzone } from "vue3-dropzone";
 import { useActions, useState } from "vuex-composition-helpers";
 import { useStore } from "vuex";
 import VueSlider from 'vue-3-slider-component';
+import VueSelect from "vue3-select-component";
+import "vue3-select-component/styles";
 import { Check, FileUp, Loader2, Info, Map, Spline } from "lucide-vue-next";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import MappingHelpCollapsible from "@/components/help/MappingHelpCollapsible.vue";
 import AlignmentHelpCollapsible from "@/components/help/AlignmentHelpCollapsible.vue";
 import DownloadButtonSka from "@/components/SequenceViewer/DownloadButtonSka.vue";
+import DownloadButtonSkaAlignment from "@/components/SequenceViewer/DownloadButtonSkaAlignment.vue";
 import { MSAViewer } from "@/components/MSAViewer";
 
 interface UploadedFile {
@@ -207,6 +349,7 @@ export default defineComponent({
   },
   components: {
     VueSlider,
+    VueSelect,
     FileUp,
     Loader2,
     Check,
@@ -221,12 +364,19 @@ export default defineComponent({
     MappingHelpCollapsible,
     AlignmentHelpCollapsible,
     DownloadButtonSka,
+    DownloadButtonSkaAlignment,
     MSAViewer
   },
   setup() {
     const store = useStore();
     const k: Ref<number> = ref(31);
+    const min_qual: Ref<number> = ref(20);
+    const min_count: Ref<number> = ref(0);
     const proportion_reads: Ref<number> = ref(1);
+    const qual_filter: Ref<number> = ref(2);
+    const rc: Ref<boolean> = ref(false);
+    const ambig_mask: Ref<boolean> = ref(false);
+    const repeat_mask: Ref<boolean> = ref(false);
     const uploadedFiles: Ref<UploadedFile[]> = ref([]);
     const uploadedAlignmentFiles: Ref<string[]> = ref([]);
 
@@ -248,18 +398,37 @@ export default defineComponent({
       if (!refProcessed.value && !isIndexingRef.value) {
         // First upload is reference
         uploadedFiles.value = [{ name: acceptFiles[0].name, type: 'reference' }];
-        processRef({ acceptFiles: acceptFiles, k: k.value });
+        processRef({
+          acceptFiles: acceptFiles,
+          k: k.value, 
+          rc: rc.value,
+          ambig_mask: ambig_mask.value,
+          repeat_mask: repeat_mask.value,
+        });
       } else if (refProcessed.value && !isMapping.value) {
         // Subsequent uploads are query files
         const newFiles = acceptFiles.map(f => ({ name: f.name, type: 'query' as const }));
         uploadedFiles.value = [...uploadedFiles.value, ...newFiles];
-        processQueryMap({ acceptFiles: acceptFiles, proportion_reads: proportion_reads.value });
+        processQueryMap({ 
+          acceptFiles: acceptFiles, 
+          proportion_reads: proportion_reads.value,
+          min_count: min_count.value,
+          min_qual: min_qual.value,
+          qual_filter: qual_filter.value, });
       }
     }
 
     function onDropQueryAlign(acceptFiles: File[]): void {
       uploadedAlignmentFiles.value = acceptFiles.map(f => f.name);
-      processQueryAlign({ acceptFiles: acceptFiles, k: k.value, proportion_reads: proportion_reads.value });
+      processQueryAlign({
+        acceptFiles: acceptFiles,
+        k: k.value,
+        proportion_reads: proportion_reads.value,
+        rc: rc.value,
+        min_count: min_count.value,
+        min_qual: min_qual.value,
+        qual_filter: qual_filter.value,
+      });
     }
 
     function resetAll(): void {
@@ -290,7 +459,13 @@ export default defineComponent({
     return {
       store,
       k,
+      min_qual,
+      min_count,
       proportion_reads,
+      qual_filter,
+      rc,
+      ambig_mask,
+      repeat_mask,
       resetAll,
       uploadedFiles,
       uploadedAlignmentFiles,

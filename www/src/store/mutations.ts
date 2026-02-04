@@ -155,11 +155,12 @@ export default {
         state.allResults_ska.mapResults[input.name].mapped_sequences = input.mapped_sequences
     },
 
-    setAligned(state: RootState, input: { aligned: boolean, names: string[], newick: string }) {
+    setAligned(state: RootState, input: { aligned: boolean, names: string[], newick: string, alignment: string }) {
         state.allResults_ska.alignResults[0] = {
             aligned: input.aligned,
             names: input.names,
-            newick: input.newick
+            newick: input.newick,
+            alignment: input.alignment
         }
     },
 

@@ -4,6 +4,9 @@ interface RefMessage {
     ref: boolean;
     file: File;
     k: number;
+    rc: boolean;
+    ambig_mask: boolean;
+    repeat_mask: boolean;
 }
 
 interface MapMessage {
@@ -11,6 +14,9 @@ interface MapMessage {
     file: File;
     revReads: File | null;
     proportion_reads: number;
+    min_count: number;
+    min_qual: number;
+    qual_filter: number;
 }
 
 interface AlignMessage {
@@ -18,6 +24,10 @@ interface AlignMessage {
     files: File[];
     proportion_reads: number;
     k: number;
+    rc: boolean;
+    min_count: number;
+    min_qual: number;
+    qual_filter: number;
 }
 
 interface ResetMessage {
@@ -33,13 +43,13 @@ ctx.onmessage = (evt: MessageEvent<WorkerMessage>) => {
     if (evt.data instanceof Object) {
         if ('ref' in evt.data && evt.data.ref) {
             const data = evt.data as RefMessage;
-            mapper.set_ref(data.file, data.k);
+            mapper.set_ref(data.file, data.k, data.rc, data.ambig_mask, data.repeat_mask);
         } else if ('map' in evt.data && evt.data.map) {
             const data = evt.data as MapMessage;
-            mapper.map(data.file, data.revReads, data.proportion_reads);
+            mapper.map(data.file, data.revReads, data.proportion_reads, data.min_count, data.min_qual, data.qual_filter);
         } else if ('align' in evt.data && evt.data.align) {
             const data = evt.data as AlignMessage;
-            mapper.align(data.files, data.proportion_reads, data.k);
+            mapper.align(data.files, data.proportion_reads, data.rc, data.k, data.min_count, data.min_qual, data.qual_filter);
         } else if ('reset' in evt.data && evt.data.reset) {
             mapper.resetAll();
         } else {

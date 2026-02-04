@@ -116,7 +116,16 @@ export default {
         commit("removeErrors");
     },
 
-    async processRef(context: ActionContext<RootState, RootState>, payload: { acceptFiles: Array<File>, k: number }) {
+    async processRef(context: ActionContext<RootState, RootState>, payload: { 
+        acceptFiles: Array<File>, 
+        k: number, 
+        rc: boolean, 
+        ambig_mask: boolean,
+        repeat_mask: boolean,
+        min_count: number,
+        min_qual: number,
+        qual_filter: number
+    }) {
         const {commit, state} = context;
         console.log("Ref file uploaded, k = " + payload.k)
 
@@ -125,7 +134,17 @@ export default {
 
         payload.acceptFiles.forEach((file: File) => {
             if (state.workerState.worker_ska) {
-                state.workerState.worker_ska.postMessage({ref: true, file, k: payload.k});
+                state.workerState.worker_ska.postMessage({
+                    ref: true, 
+                    file, 
+                    k: payload.k, 
+                    rc: payload.rc,
+                    ambig_mask: payload.ambig_mask,
+                    repeat_mask: payload.repeat_mask,
+                    min_count: payload.min_count,
+                    min_qual: payload.min_qual,
+                    qual_filter: payload.qual_filter
+                });
                 state.workerState.worker_ska.onmessage = (messageData) => {
                     // Clear indexing state
                     commit("setIndexingRefState", false);
@@ -207,7 +226,11 @@ export default {
     async processQueryAlign(context: ActionContext<RootState, RootState>, payload: {
         acceptFiles: Array<File>,
         k: number,
-        proportion_reads: number
+        proportion_reads: number,
+        rc: boolean,
+        min_count: number,
+        min_qual: number,
+        qual_filter: number,
     }) {
         const {commit, state} = context;
         console.log("Processing query of uploaded files for alignment...")
@@ -222,7 +245,11 @@ export default {
             align: true,
             files: payload.acceptFiles,
             k: payload.k,
-            proportion_reads: payload.proportion_reads
+            proportion_reads: payload.proportion_reads,
+            rc: payload.rc,
+            min_count: payload.min_count,
+            min_qual: payload.min_qual,
+            qual_filter: payload.qual_filter,
         };
 
         if (state.workerState.worker_ska) {

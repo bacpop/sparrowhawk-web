@@ -26,6 +26,7 @@ export interface Alignment {
     aligned: boolean
     names?: string[]
     newick?: string
+    alignment: string
 }
 
 export interface AllResultsSka {

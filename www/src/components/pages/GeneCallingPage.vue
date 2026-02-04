@@ -49,6 +49,7 @@
                           { label: '25. Candidate division SR1 and gracilibacteria', value: 25},
                          ]"
                          :isDisabled="callingGenes"
+                         :isClearable=false
               />
             </div>
           </div>
