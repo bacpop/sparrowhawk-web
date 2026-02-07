@@ -275,8 +275,9 @@ export default defineComponent({
       ...restMapping
     } = useDropzone({
       onDrop: onDropMapping,
-      accept: [".fa", ".fasta", ".gz", ".fastq", ".fq"]
+      accept: [".fa", ".fasta", ".gz", ".fastq"]
     });
+
     const {
       getRootProps: getRootPropsQueryAlign,
       getInputProps: getInputPropsQueryAlign,
