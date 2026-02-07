@@ -60,8 +60,7 @@
 
     <h3 class="mt-2 mb-2 font-medium">Where can I find information on what parameters to use?</h3>
     <p class="text-sm">
-      You can hover over the parameters and get a small description of each one. For a more detailed explanation, you
-      can check the website's documentation here (ADD LINK).
+      You can hover over the parameters and get a small description of each one.
     </p>
 
     <h3 class="mt-2 mb-2 font-medium">Where can I find the code of each method and the website's?</h3>
