@@ -47,6 +47,12 @@ export default {
                 });
 
                 state.workerState.worker.onmessage = (messageData) => {
+                    // Handle state progress messages from Sparrowhawk wasm
+                    if (messageData.data instanceof Object && "assemblyState" in messageData.data) {
+                        console.log("[Sparrowhawk] State:", messageData.data.assemblyState);
+                        return;
+                    }
+
                     // Clear processing state
                     commit("setPreprocessingState", false);
 
@@ -92,6 +98,12 @@ export default {
 
 
             state.workerState.worker.onmessage = (messageData) => {
+                // Handle state progress messages from WASM
+                if ("assemblyState" in messageData.data) {
+                    console.log("[Sparrowhawk] Assembly state:", messageData.data.assemblyState);
+                    return;
+                }
+
                 // Clear assembling state
                 commit("setAssemblingState", false);
 
