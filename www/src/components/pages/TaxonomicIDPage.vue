@@ -109,14 +109,9 @@
           </div>
         </div>
 
-        <!-- Show results for each sample -->
+        <!-- Show results as DataTable -->
         <div v-if="sampleIdentified" class="mx-6 mt-4">
-          <div v-for="sampleName in identifiedSampleNames" :key="sampleName" class="p-4 bg-gray-50 rounded-lg mb-4">
-            <h3 class="font-semibold text-gray-700 mb-3">{{ sampleName }}</h3>
-            <p class="text-sm text-gray-600 mt-1">{{ getResultLineForSample(sampleName, 0) }}</p>
-            <p class="text-sm text-gray-600 mt-1">{{ getResultLineForSample(sampleName, 1) }}</p>
-            <p class="text-sm text-gray-600 mt-1">{{ getResultLineForSample(sampleName, 2) }}</p>
-          </div>
+          <DataTable :columns="tableColumns" :data="tableData" />
         </div>
       </div>
     </div>
@@ -132,6 +127,8 @@ import VueSlider from 'vue-3-slider-component';
 import { Check, FileUp, Loader2, Info, ScanFace } from "lucide-vue-next";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import TaxonomicIDHelpCollapsible from "@/components/help/TaxonomicIDHelpCollapsible.vue";
+import DataTable from "@/components/pages/taxonomic-id/DataTable.vue";
+import { columns, TaxonomicIDRow } from "@/components/pages/taxonomic-id/columns";
 import { SampleIdentifyResult } from "@/types";
 
 export default defineComponent({
@@ -153,7 +150,8 @@ export default defineComponent({
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
-    TaxonomicIDHelpCollapsible
+    TaxonomicIDHelpCollapsible,
+    DataTable
   },
   setup() {
     const store = useStore();
@@ -183,17 +181,24 @@ export default defineComponent({
       return fileName.replace(/(.fasta|.fasta.gz|.fa|.fa.gz|.fq|.fq.gz|.fastq|.fastq.gz)$/, '');
     }
 
-    function getResultLineForSample(sampleName: string, idres: number): string {
-      const results = allResults_sketchlib.value.results as Record<string, SampleIdentifyResult>;
-      const sampleResult = results[sampleName];
-      if (!sampleResult || !sampleResult.idSpecies) {
-        return "";
-      }
-      return sampleResult.idSpecies[idres] + " : " + (sampleResult.idProbs[idres] * 100).toFixed() + " % - " + sampleResult.idMetadata[idres];
-    }
+    const tableColumns = columns;
 
-    const identifiedSampleNames = computed(() => {
-      return Object.keys(allResults_sketchlib.value.results || {});
+    const tableData = computed<TaxonomicIDRow[]>(() => {
+      const results = allResults_sketchlib.value.results as Record<string, SampleIdentifyResult>;
+      const rows: TaxonomicIDRow[] = [];
+      for (const [sampleName, sampleResult] of Object.entries(results || {})) {
+        if (!sampleResult?.idSpecies) continue;
+        for (let i = 0; i < sampleResult.idSpecies.length; i++) {
+          rows.push({
+            sample: sampleName,
+            rank: i + 1,
+            species: sampleResult.idSpecies[i],
+            probability: sampleResult.idProbs[i],
+            metadata: sampleResult.idMetadata[i],
+          });
+        }
+      }
+      return rows;
     });
 
     const {
@@ -216,9 +221,9 @@ export default defineComponent({
       getInputPropsSample,
       isDragActiveSample,
       onDropSample,
-      getResultLineForSample,
       getSampleNameFromFile,
-      identifiedSampleNames,
+      tableColumns,
+      tableData,
       allResults_sketchlib,
       store,
       ...restSample,
