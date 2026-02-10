@@ -12,6 +12,7 @@
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/ibm-plex-sans": "^5.2.8",
     "@tanstack/vue-virtual": "^3.5.0",
+    "@tanstack/vue-table": "^8.21.3",
     "@vueuse/core": "^14.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
