@@ -27,9 +27,7 @@ export const emptyState = (): RootState => ({
     },
 
     allResults_sketchlib: {
-        idProbs: null,
-        idSpecies: null,
-        idMetadata: null,
+        results: {},
     },
 
     workerState: {
@@ -46,5 +44,6 @@ export const emptyState = (): RootState => ({
         isMappingFiles: new Set<string>(),
         isAligning: false,
         isIdentifying: false,
+        isIdentifyingFiles: new Set<string>(),
     },
 });

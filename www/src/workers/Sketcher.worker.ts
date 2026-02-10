@@ -4,6 +4,7 @@ interface IdentifyMessage {
     identify: boolean;
     file1: File;
     file2: File | null;
+    sampleName: string;
 }
 
 interface ResetMessage {
@@ -19,7 +20,7 @@ ctx.onmessage = (evt: MessageEvent<WorkerMessage>) => {
     if (evt.data instanceof Object) {
         if ('identify' in evt.data && evt.data.identify) {
             const data = evt.data as IdentifyMessage;
-            sketcher.identifyThisFile(data.file1, data.file2);
+            sketcher.identifyThisFile(data.file1, data.file2, data.sampleName);
         } else if ('reset' in evt.data && evt.data.reset) {
             sketcher.resetAll();
         } else {

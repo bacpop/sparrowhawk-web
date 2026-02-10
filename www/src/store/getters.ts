@@ -70,6 +70,12 @@ export const getters: GetterTree<RootState, RootState> = {
 
     // SKETCHLIB
     sampleIdentified(state: RootState) {
-        return state.allResults_sketchlib.idProbs != null;
+        return Object.keys(state.allResults_sketchlib.results).length > 0;
+    },
+    isIdentifyingFiles(state: RootState): Set<string> {
+        return state.processingState.isIdentifyingFiles;
+    },
+    sketchlibResults(state: RootState) {
+        return state.allResults_sketchlib.results;
     }
 }
