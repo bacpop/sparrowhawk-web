@@ -11,12 +11,12 @@ interface PreprocessMessage {
     csize: number;
     do_bloom: boolean;
     do_fit: boolean;
+    no_bubble_collapse: boolean;
+    no_dead_end_removal: boolean;
 }
 
 interface AssembleMessage {
     assemble: boolean;
-    no_bubble_collapse: boolean;
-    no_dead_end_removal: boolean;
 }
 
 interface ResetMessage {
@@ -42,12 +42,14 @@ ctx.onmessage = (evt: MessageEvent<WorkerMessage>) => {
                 data.min_qual,
                 data.csize,
                 data.do_bloom,
-                data.do_fit
+                data.do_fit,
+                data.no_bubble_collapse,
+                data.no_dead_end_removal
             );
         } else if ('assemble' in evt.data && evt.data.assemble) {
             console.log("Trying to assemble!");
             const data = evt.data as AssembleMessage;
-            assembler.assemble(data.no_bubble_collapse, data.no_dead_end_removal);
+            assembler.assemble();
         } else if ('reset' in evt.data && evt.data.reset) {
             console.log("Trying to reset!");
             assembler.resetAll();

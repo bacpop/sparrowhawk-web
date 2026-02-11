@@ -80,7 +80,7 @@
               <VueSlider class="flex-grow"
                          v-model="min_count"
                          :lazy="true"
-                         :min="0"
+                         :min="infimumMinCount"
                          :max="30"
                          :interval="1"
                          :disabled="isProcessingAny || do_fit"
@@ -320,15 +320,14 @@ export default defineComponent({
         csize: csize.value,
         do_bloom: do_bloom.value,
         do_fit: do_fit.value,
+        no_bubble_collapse: no_bubble.value,
+        no_dead_end_removal: no_deadend.value
       });
     }
 
     function doAss(): void {
       assemblying.value = true;
-      doTheAssembly({
-        no_bubble_collapse: no_bubble.value,
-        no_dead_end_removal: no_deadend.value
-      });
+      doTheAssembly();
     }
 
     function resetAll(): void {
@@ -345,7 +344,7 @@ export default defineComponent({
       ...restReads
     } = useDropzone({
       onDrop: onDropReads,
-      accept: [".gz", ".fastq", ".fq"],
+      accept: ["fq.gz", "fastq.gz", ".fastq", ".fq"],
       multiple: true
     });
 
@@ -400,6 +399,9 @@ export default defineComponent({
     },
     isProcessingAny(): boolean {
       return this.store.getters.isPreprocessing || this.store.getters.isAssembling;
+    },
+    infimumMinCount() {
+      return this.do_bloom ? 3 : 0
     }
   },
 
@@ -407,6 +409,11 @@ export default defineComponent({
     readsPreprocessed(newVal: boolean) {
       if (newVal) {
         this.doAss();
+      }
+    },
+    do_bloom(newVal: boolean) {
+      if (newVal && this.min_count < 3) {
+        this.min_count = 3;
       }
     }
   },

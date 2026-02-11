@@ -10,6 +10,8 @@ export default {
         csize: number,
         do_bloom: boolean,
         do_fit: boolean,
+        no_bubble_collapse: boolean,
+        no_dead_end_removal: boolean
     }) {
         const {commit, state} = context;
         console.log("Going to upload reads and assemble with k = " + payload.k + " min_count = " + payload.min_count + " min_qual = " + payload.min_qual + " csize = " + payload.csize + " do_bloom = " + payload.do_bloom)
@@ -44,6 +46,8 @@ export default {
                     csize: payload.csize,
                     do_bloom: payload.do_bloom,
                     do_fit: payload.do_fit,
+                    no_bubble_collapse: payload.no_bubble_collapse,
+                    no_dead_end_removal: payload.no_dead_end_removal
                 });
 
                 state.workerState.worker.onmessage = (messageData) => {
@@ -78,10 +82,7 @@ export default {
         }
     },
 
-    async doTheAssembly(context: ActionContext<RootState, RootState>, payload: {
-        no_bubble_collapse: boolean,
-        no_dead_end_removal: boolean,
-    }) {
+    async doTheAssembly(context: ActionContext<RootState, RootState>) {
         const {commit, state} = context;
         console.log("Assemblying reads...")
         if (state.workerState.worker) {
@@ -92,8 +93,6 @@ export default {
 
             state.workerState.worker.postMessage({
                 assemble: true,
-                no_bubble_collapse: payload.no_bubble_collapse,
-                no_dead_end_removal: payload.no_dead_end_removal,
             });
 
 
