@@ -45,5 +45,6 @@ export const emptyState = (): RootState => ({
         isAligning: false,
         isIdentifying: false,
         isIdentifyingFiles: new Set<string>(),
+        assemblyState: '',
     },
 });

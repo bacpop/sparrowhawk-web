@@ -58,4 +58,5 @@ export interface ProcessingState {
     isAligning: boolean;
     isIdentifying: boolean;
     isIdentifyingFiles: Set<string>;  // Track which files are being identified
+    assemblyState: string;  // Current state from Sparrowhawk assembly
 }

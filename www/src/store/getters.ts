@@ -32,6 +32,9 @@ export const getters: GetterTree<RootState, RootState> = {
             state.processingState.isAligning ||
             state.processingState.isIdentifying;
     },
+    assemblyState(state: RootState): string {
+        return state.processingState.assemblyState;
+    },
     readsProcessing(state: RootState) {
         return (state.readsFileNames != null && state.allResults.nContigs == null);
     },

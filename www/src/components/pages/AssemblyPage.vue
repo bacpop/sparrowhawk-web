@@ -207,12 +207,24 @@
 
         </div>
 
-        <p v-if="isPreprocessingActive" class="mx-6 mt-4 text-sm text-gray-500">
-          Pre-processing...
-        </p>
-        <p v-else-if="isAssemblingActive" class="mx-6 mt-4 text-sm text-gray-500">
-          Assembling...
-        </p>
+        <!-- Processing status with detailed state -->
+        <div v-if="isPreprocessingActive || isAssemblingActive" class="mx-6 mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+          <div class="flex items-center gap-2 text-sm">
+            <Loader2 v-if="isPreprocessingActive" class="w-4 h-4 text-blue-500 animate-spin"/>
+            <Loader2 v-else-if="isAssemblingActive" class="w-4 h-4 text-orange-500 animate-spin"/>
+            <span class="font-semibold text-gray-800">
+              {{ assemblyPhaseTitle }}
+            </span>
+          </div>
+          <div v-if="assemblyStepDetails.step" class="mt-2 ml-6">
+            <div class="text-xs font-medium text-gray-700">
+              {{ assemblyStepDetails.step }}
+            </div>
+            <div v-if="assemblyStepDetails.detail" class="text-xs text-gray-600 mt-0.5">
+              {{ assemblyStepDetails.detail }}
+            </div>
+          </div>
+        </div>
 
         <!-- File list with status -->
         <div class="flex flex-row gap-2 w-full mt-4">
@@ -402,6 +414,162 @@ export default defineComponent({
     },
     infimumMinCount() {
       return this.do_bloom ? 3 : 0
+    },
+    currentAssemblyState(): string {
+      return this.store.getters.assemblyState;
+    },
+    assemblyPhaseTitle(): string {
+      if (this.isPreprocessingActive) return 'Pre-processing';
+      if (this.isAssemblingActive) return 'Assembling';
+      return '';
+    },
+    assemblyStepDetails(): { step: string; detail: string } {
+      const state = this.currentAssemblyState;
+      if (!state) return { step: '', detail: '' };
+
+      // Parse preprocessing states
+      if (state.startsWith('preprocess:')) {
+        // Initialization
+        if (state === 'preprocess:start') {
+          return { step: 'Initialising', detail: 'Setting up preprocessing pipeline' };
+        }
+
+        // Bloom filter preprocessing
+        if (state.includes('bloom')) {
+          if (state === 'preprocess:bloom:start') {
+            return { step: 'Bloom Filter Setup', detail: 'Initialising Bloom filter' };
+          }
+          if (state === 'preprocess:bloom:loop:start') {
+            return { step: 'Reading FASTQ Files', detail: 'Processing paired-end reads with Bloom filter' };
+          }
+          
+          // Progress messages
+          if (state.includes('preprocess:bloom:loop:')) {
+            const parts = state.split(':');
+            if (parts.length >= 4) {
+              const numReads = parts[3];
+              const percentage = parts[4];
+              
+              if (percentage) {
+                return { 
+                  step: 'Reading FASTQ Files',
+                  detail: `Processed ${parseInt(numReads).toLocaleString()} reads (${percentage}% complete)` 
+                };
+              } else {
+                return { 
+                  step: 'Reading FASTQ Files',
+                  detail: `Processed ${parseInt(numReads).toLocaleString()} reads` 
+                };
+              }
+            }
+          }
+          
+          if (state === 'preprocess:bloom:loop:end') {
+            return { step: 'Reading FASTQ Files', detail: 'All reads processed successfully' };
+          }
+          if (state === 'preprocess:bloom:fitting') {
+            return { step: 'Optimising Parameters', detail: 'Fitting k-mer count threshold' };
+          }
+          if (state === 'preprocess:bloom:filtering') {
+            return { step: 'Filtering K-mers', detail: 'Filtering k-mers from dataset' };
+          }
+        }
+        
+        // Bulk (no chunk, no bloom) preprocessing
+        else if (state.includes('bulk')) {
+          if (state === 'preprocess:bulk:start') {
+            return { step: 'Bulk Processing Setup', detail: 'Initialising' };
+          }
+          if (state === 'preprocess:bulk:loop:start') {
+            return { step: 'Reading FASTQ Files', detail: 'Processing paired-end reads' };
+          }
+          
+          // Progress messages
+          if (state.includes('preprocess:bulk:loop:')) {
+            const parts = state.split(':');
+            if (parts.length >= 4) {
+              const numReads = parts[3];
+              const percentage = parts[4];
+              
+              if (percentage) {
+                return { 
+                  step: 'Reading FASTQ Files',
+                  detail: `Processed ${parseInt(numReads).toLocaleString()} reads (${percentage}% complete)` 
+                };
+              } else {
+                return { 
+                  step: 'Reading FASTQ Files',
+                  detail: `Processed ${parseInt(numReads).toLocaleString()} reads` 
+                };
+              }
+            }
+          }
+          
+          if (state === 'preprocess:bulk:loop:end') {
+            return { step: 'Reading FASTQ Files', detail: 'All reads processed successfully' };
+          }
+          if (state === 'preprocess:bulk:sorting') {
+            return { step: 'Sorting K-mers', detail: 'Organising k-mers for efficient filtering' };
+          }
+          if (state === 'preprocess:bulk:fitting') {
+            return { step: 'Optimising Parameters', detail: 'Automatically fitting k-mer count threshold' };
+          }
+          if (state === 'preprocess:bulk:filtering') {
+            return { step: 'Filtering K-mers', detail: 'Removing low-quality k-mers from dataset' };
+          }
+        }
+        
+        // Chunked preprocessing
+        else if (state.includes('chunked')) {
+          if (state === 'preprocess:chunked:start') {
+            return { step: 'Chunked Processing Setup', detail: 'Initialising memory-optimised chunked mode' };
+          }
+          if (state === 'preprocess:chunked:fitting') {
+            return { step: 'Optimising Parameters', detail: 'Automatically fitting k-mer count threshold across chunks' };
+          }
+          if (state === 'preprocess:chunked:filtering') {
+            return { step: 'Filtering K-mers', detail: 'Removing low-quality k-mers from chunked dataset' };
+          }
+        }
+        
+        // Common preprocessing states
+        if (state === 'preprocess:saving') {
+          return { step: 'Saving Data', detail: 'Writing preprocessed k-mers to memory' };
+        }
+        if (state === 'preprocess:end') {
+          return { step: 'Complete', detail: 'Preprocessing finished successfully' };
+        }
+      }
+      
+      // Parse assembly states
+      if (state.startsWith('assembly:')) {
+        if (state === 'assembly:start') {
+          return { step: 'Starting Assembly', detail: 'Initialising assembly pipeline' };
+        }
+        if (state === 'assembly:create_graph') {
+          return { step: 'Building Graph', detail: 'Creating de Bruijn graph' };
+        }
+        if (state === 'assembly:correct_graph') {
+          return { step: 'Correcting Graph', detail: 'Processing' };
+        }
+        if (state === 'assembly:collapse_graph') {
+          return { step: 'Collapsing Graph', detail: 'Processing' };
+        }
+        if (state === 'assembly:saving') {
+          return { step: 'Saving Results', detail: 'Saving to FASTA format' };
+        }
+        if (state === 'assembly:end') {
+          return { step: 'Complete', detail: 'Assembly finished successfully' };
+        }
+      }
+      
+      // Initialization
+      if (state === 'initialised') {
+        return { step: 'Initialised', detail: 'System ready' };
+      }
+      
+      // Fallback to raw state if no match
+      return { step: state, detail: '' };
     }
   },
 

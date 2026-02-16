@@ -54,11 +54,13 @@ export default {
                     // Handle state progress messages from Sparrowhawk wasm
                     if (messageData.data instanceof Object && "assemblyState" in messageData.data) {
                         console.log("[Sparrowhawk] State:", messageData.data.assemblyState);
+                        commit("setAssemblyState", messageData.data.assemblyState);
                         return;
                     }
 
                     // Clear processing state
                     commit("setPreprocessingState", false);
+                    commit("setAssemblyState", "");
 
                     if (messageData.data instanceof Object) {
                         if ("nKmers" in messageData.data) {
@@ -100,11 +102,13 @@ export default {
                 // Handle state progress messages from WASM
                 if ("assemblyState" in messageData.data) {
                     console.log("[Sparrowhawk] Assembly state:", messageData.data.assemblyState);
+                    commit("setAssemblyState", messageData.data.assemblyState);
                     return;
                 }
 
                 // Clear assembling state
                 commit("setAssemblingState", false);
+                commit("setAssemblyState", "");
 
                 commit("setAssembly", {
                     ncontigs: messageData.data.ncontigs,

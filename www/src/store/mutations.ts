@@ -29,6 +29,9 @@ export default {
     setIdentifyingState(state: RootState, isIdentifying: boolean) {
         state.processingState.isIdentifying = isIdentifying;
     },
+    setAssemblyState(state: RootState, assemblyState: string) {
+        state.processingState.assemblyState = assemblyState;
+    },
     resetProcessingState(state: RootState) {
         state.processingState = {
             isPreprocessing: false,
@@ -39,6 +42,7 @@ export default {
             isAligning: false,
             isIdentifying: false,
             isIdentifyingFiles: new Set<string>(),
+            assemblyState: '',
         };
     },
 
