@@ -453,12 +453,12 @@ export default defineComponent({
               if (percentage) {
                 return { 
                   step: 'Reading FASTQ Files',
-                  detail: `Processed ${parseInt(numReads).toLocaleString()} reads (${percentage}% complete)` 
+                  detail: `Processed ${numReads.toLocaleString()} reads (${percentage}% complete)`
                 };
               } else {
                 return { 
                   step: 'Reading FASTQ Files',
-                  detail: `Processed ${parseInt(numReads).toLocaleString()} reads` 
+                  detail: `Processed ${numReads.toLocaleString()} reads`
                 };
               }
             }
@@ -488,18 +488,18 @@ export default defineComponent({
           if (state.includes('preprocess:bulk:loop:')) {
             const parts = state.split(':');
             if (parts.length >= 4) {
-              const numReads = isNaN(Number(parts[3])) ? 0 : Number(parts[3]);
+              const numReads = (isNaN(Number(parts[3])) ? 0 : Number(parts[3]));
               const percentage = parts[4];
               
               if (percentage) {
                 return { 
                   step: 'Reading FASTQ Files',
-                  detail: `Processed ${parseInt(numReads).toLocaleString()} reads (${percentage}% complete)` 
+                  detail: `Processed ${numReads.toLocaleString()} reads (${percentage}% complete)`
                 };
               } else {
                 return { 
                   step: 'Reading FASTQ Files',
-                  detail: `Processed ${parseInt(numReads).toLocaleString()} reads` 
+                  detail: `Processed ${numReads.toLocaleString()} reads`
                 };
               }
             }
@@ -541,12 +541,12 @@ export default defineComponent({
               if (percentage) {
                 return {
                   step: 'Reading FASTQ Files',
-                  detail: `Processed ${parseInt(numReads).toLocaleString()} reads (${percentage}% complete)`
+                  detail: `Processed ${numReads.toLocaleString()} reads (${percentage}% complete)`
                 };
               } else {
                 return {
                   step: 'Reading FASTQ Files',
-                  detail: `Processed ${parseInt(numReads).toLocaleString()} reads`
+                  detail: `Processed ${numReads.toLocaleString()} reads`
                 };
               }
             }
