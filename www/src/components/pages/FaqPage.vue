@@ -1,5 +1,5 @@
 <template>
-  <div class="w-1/3">
+  <div class="w-1/3 max-w-[350px]">
     <h1 class="text-2xl font-medium mb-4">
       FAQ
     </h1>

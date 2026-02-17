@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-row">
-    <div class="w-1/3">
+    <div class="w-1/3 max-w-[350px]">
       <h1 class="text-2xl font-medium flex items-center gap-2 mb-4">
         <Codesandbox class="w-6 h-6" />
         {{ tabName }}
@@ -178,7 +178,7 @@
       </TooltipProvider>
     </div>
 
-    <div class="w-2/3 pt-12">
+    <div class="w-full pt-12">
       <h5 class="memory_error_message" v-if="errorInProcessing">
         Error found while processing! It is most surely a memory issue: try increasing the chunking, or using a Bloom
         filter
@@ -190,7 +190,7 @@
         <!-- Dropzone for file upload - always visible -->
         <div v-bind='getRootPropsReads()'
              :class="[
-               'p-6 mx-6 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
+               'p-6 mx-6 mr-0 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
                isProcessingAny ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-gray-400'
              ]">
 
@@ -208,7 +208,7 @@
         </div>
 
         <!-- Processing status with detailed state -->
-        <div v-if="isPreprocessingActive || isAssemblingActive" class="mx-6 mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+        <div v-if="isPreprocessingActive || isAssemblingActive" class="mx-6 mr-0 mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
           <div class="flex items-center gap-2 text-sm">
             <Loader2 v-if="isPreprocessingActive" class="w-4 h-4 text-blue-500 animate-spin"/>
             <Loader2 v-else-if="isAssemblingActive" class="w-4 h-4 text-orange-500 animate-spin"/>
@@ -447,7 +447,7 @@ export default defineComponent({
           if (state.includes('preprocess:bloom:loop:')) {
             const parts = state.split(':');
             if (parts.length >= 4) {
-              const numReads = parts[3];
+              const numReads = isNaN(Number(parts[3])) ? 0 : Number(parts[3]);
               const percentage = parts[4];
               
               if (percentage) {
@@ -488,7 +488,7 @@ export default defineComponent({
           if (state.includes('preprocess:bulk:loop:')) {
             const parts = state.split(':');
             if (parts.length >= 4) {
-              const numReads = parts[3];
+              const numReads = isNaN(Number(parts[3])) ? 0 : Number(parts[3]);
               const percentage = parts[4];
               
               if (percentage) {
@@ -535,7 +535,7 @@ export default defineComponent({
           if (state.includes('preprocess:chunked:loop:')) {
             const parts = state.split(':');
             if (parts.length >= 4) {
-              const numReads = parts[3];
+              const numReads = isNaN(Number(parts[3])) ? 0 : Number(parts[3]);
               const percentage = parts[4];
 
               if (percentage) {

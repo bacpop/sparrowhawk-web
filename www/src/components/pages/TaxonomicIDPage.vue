@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-row">
-    <div class="w-1/3">
+    <div class="w-1/3 max-w-[350px]">
       <h1 class="text-2xl font-medium mb-4 flex items-center gap-2">
         <ScanFace class="w-6 h-6" />
         Taxonomic ID
@@ -67,14 +67,14 @@
       </TooltipProvider>
     </div>
 
-    <div class="w-2/3 pt-12">
+    <div class="w-full pt-12">
       <div v-if="tabName=='TaxonomicID'">
 
         <!-- Upload dropbox - always visible when not identifying -->
         <div v-if="!isIdentifying"
              v-bind='getRootPropsSample()'
              :class="[
-               'p-6 mx-6 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
+               'p-6 mx-6 mr-0 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
                'cursor-pointer hover:border-gray-400'
              ]">
           <input v-bind='getInputPropsSample()' />
@@ -98,7 +98,7 @@
         </div>
 
         <!-- Show uploaded files with per-file status -->
-        <div v-if="uploadedFileNames.length > 0" class="mx-6 mt-4">
+        <div v-if="uploadedFileNames.length > 0" class="mx-6 mr-0 mt-4">
           <div v-for="fileName in uploadedFileNames" :key="fileName"
                class="flex items-center gap-2 py-2 px-3 bg-gray-50 rounded-md mb-2">
             <Check v-if="isFileIdentified(fileName)" class="w-4 h-4 text-green-500"/>
@@ -110,7 +110,7 @@
         </div>
 
         <!-- Show results as one DataTable per sample -->
-        <div v-if="sampleIdentified" class="mx-6 mt-4 flex flex-col gap-6">
+        <div v-if="sampleIdentified" class="mx-6 mr-0 mt-4 flex flex-col gap-6">
           <div v-for="[sampleName, rows] in tableDataBySample" :key="sampleName">
             <h3 class="text-sm font-semibold text-gray-700 font-mono mb-2">{{ sampleName }}</h3>
             <DataTable :columns="tableColumns" :data="rows" />
