@@ -4,11 +4,12 @@ import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 
 export interface TaxonomicIDRow {
-    sample: string
     rank: number
     species: string
     probability: number
-    metadata: string
+    metaSpecies: string
+    metaGemsparcl: string
+    metaGtdb: string
 }
 
 function sortableHeader(label: string, align?: 'right') {
@@ -24,11 +25,6 @@ function sortableHeader(label: string, align?: 'right') {
 }
 
 export const columns: ColumnDef<TaxonomicIDRow>[] = [
-    {
-        accessorKey: 'sample',
-        header: sortableHeader('Sample'),
-        cell: ({ row }) => h('div', { class: 'font-medium' }, row.getValue('sample')),
-    },
     {
         accessorKey: 'rank',
         header: sortableHeader('Rank'),
@@ -48,7 +44,15 @@ export const columns: ColumnDef<TaxonomicIDRow>[] = [
         },
     },
     {
-        accessorKey: 'metadata',
-        header: 'Metadata',
+        accessorKey: 'metaSpecies',
+        header: 'Species',
+    },
+    {
+        accessorKey: 'metaGemsparcl',
+        header: 'Gemsparcl ID',
+    },
+    {
+        accessorKey: 'metaGtdb',
+        header: 'GTDB species composition',
     },
 ]

@@ -109,9 +109,12 @@
           </div>
         </div>
 
-        <!-- Show results as DataTable -->
-        <div v-if="sampleIdentified" class="mx-6 mt-4">
-          <DataTable :columns="tableColumns" :data="tableData" />
+        <!-- Show results as one DataTable per sample -->
+        <div v-if="sampleIdentified" class="mx-6 mt-4 flex flex-col gap-6">
+          <div v-for="[sampleName, rows] in tableDataBySample" :key="sampleName">
+            <h3 class="text-sm font-semibold text-gray-700 font-mono mb-2">{{ sampleName }}</h3>
+            <DataTable :columns="tableColumns" :data="rows" />
+          </div>
         </div>
       </div>
     </div>
@@ -183,22 +186,26 @@ export default defineComponent({
 
     const tableColumns = columns;
 
-    const tableData = computed<TaxonomicIDRow[]>(() => {
+    const tableDataBySample = computed<Map<string, TaxonomicIDRow[]>>(() => {
       const results = allResults_sketchlib.value.results as Record<string, SampleIdentifyResult>;
-      const rows: TaxonomicIDRow[] = [];
+      const map = new Map<string, TaxonomicIDRow[]>();
       for (const [sampleName, sampleResult] of Object.entries(results || {})) {
         if (!sampleResult?.idSpecies) continue;
+        const rows: TaxonomicIDRow[] = [];
         for (let i = 0; i < sampleResult.idSpecies.length; i++) {
+          const parts = (sampleResult.idMetadata[i] ?? '').split('|');
           rows.push({
-            sample: sampleName,
             rank: i + 1,
             species: sampleResult.idSpecies[i],
             probability: sampleResult.idProbs[i],
-            metadata: sampleResult.idMetadata[i],
+            metaSpecies: parts[0]?.trim() ?? '',
+            metaGemsparcl: parts[1]?.trim() ?? '',
+            metaGtdb: parts[2]?.trim() ?? '',
           });
         }
+        map.set(sampleName, rows);
       }
-      return rows;
+      return map;
     });
 
     const {
@@ -223,7 +230,7 @@ export default defineComponent({
       onDropSample,
       getSampleNameFromFile,
       tableColumns,
-      tableData,
+      tableDataBySample,
       allResults_sketchlib,
       store,
       ...restSample,
