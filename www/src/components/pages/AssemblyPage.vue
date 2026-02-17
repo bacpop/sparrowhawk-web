@@ -530,6 +530,27 @@ export default defineComponent({
           if (state === 'preprocess:chunked:filtering') {
             return { step: 'Filtering K-mers', detail: 'Removing low-quality k-mers from chunked dataset' };
           }
+
+          // Progress messages
+          if (state.includes('preprocess:chunked:loop:')) {
+            const parts = state.split(':');
+            if (parts.length >= 4) {
+              const numReads = parts[3];
+              const percentage = parts[4];
+
+              if (percentage) {
+                return {
+                  step: 'Reading FASTQ Files',
+                  detail: `Processed ${parseInt(numReads).toLocaleString()} reads (${percentage}% complete)`
+                };
+              } else {
+                return {
+                  step: 'Reading FASTQ Files',
+                  detail: `Processed ${parseInt(numReads).toLocaleString()} reads`
+                };
+              }
+            }
+          }
         }
         
         // Common preprocessing states
