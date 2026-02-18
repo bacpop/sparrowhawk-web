@@ -82,7 +82,6 @@ import ResultsDisplayAlignment from './components/ResultsDisplayAlignment.vue';
 import KmerHistogram from './components/KmerHistogram.vue';
 import WorkerAssembler from '@/workers/Assembler.worker';
 import WorkerMapper from '@/workers/Mapper.worker';
-import WorkerSketcher from '@/workers/Sketcher.worker';
 import "@fontsource/ibm-plex-sans";
 import {
   SidebarContent,
@@ -189,15 +188,14 @@ export default defineComponent({
             throw new Error("WebWorkers are not supported by this web browser.");
           }
         });
-    import("@/pkg_sketchlib")
-        .then(() => {
-          if (window.Worker) {
-            const worker = new WorkerSketcher();
-            this.store.commit('SET_WORKER_SKETCHLIB', worker);
-          } else {
-            throw new Error("WebWorkers are not supported by this web browser.");
-          }
-        });
+        import("@/pkg_sketchlib")
+            .then(() => {
+              if (window.Worker) {
+                this.store.dispatch('initSketchlibWorkers', 4);
+              } else {
+                throw new Error("WebWorkers are not supported by this web browser.");
+              }
+            });
   },
 
   methods: {

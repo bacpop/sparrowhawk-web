@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-row">
-    <div class="w-1/3 w-[350px]">
+    <div class="w-[350px] shrink-0">
       <h1 class="text-2xl font-medium flex items-center gap-2 mb-4">
         <Codesandbox class="w-6 h-6" />
         {{ tabName }}
@@ -178,7 +178,7 @@
       </TooltipProvider>
     </div>
 
-    <div class="w-full pt-12">
+    <div class="min-w-0 flex-1 pt-12">
       <h5 class="memory_error_message" v-if="errorInProcessing">
         Error found while processing! It is most surely a memory issue: try increasing the chunking, or using a Bloom
         filter

@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-row">
-    <div class="w-1/3 w-[350px]">
+    <div class="w-[350px] shrink-0">
       <h1 class="text-2xl font-medium mb-4 flex items-center gap-2">
         <Map v-if="tabName === 'Mapping'" class="w-6 h-6" />
         <Spline v-else-if="tabName === 'Alignment'" class="w-6 h-6" />
@@ -69,7 +69,7 @@
       </TooltipProvider>
     </div>
 
-    <div class="w-full pt-12">
+    <div class="min-w-0 flex-1 pt-12">
       <!-- Mapping tab -->
       <div v-if="tabName=='Mapping'">
 

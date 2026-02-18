@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-row">
-    <div class="w-1/4 w-[350px]">
+    <div class="w-[350px] shrink-0">
       <h1 class="text-2xl font-medium mb-4 flex items-center gap-2">
         <ScanFace class="w-6 h-6" />
         Taxonomic ID
@@ -60,6 +60,34 @@
               />
               <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
                 {{ proportion_reads }}
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <p class="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p class="max-w-xs">Number of parallel workers used to process samples simultaneously. Higher values speed up processing of multiple files but use more memory.</p>
+                </TooltipContent>
+              </Tooltip>
+              Workers
+            </p>
+            <div class="flex flex-row items-center w-full gap-2">
+              <VueSlider class="flex-grow"
+                         v-model="numWorkers"
+                         :lazy="true"
+                         :min="1"
+                         :max="8"
+                         :interval="1"
+                         :disabled="isIdentifying"
+                         @change="onNumWorkersChange"
+              />
+              <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
+                {{ numWorkers }}
               </span>
             </div>
           </div>
@@ -159,9 +187,15 @@ export default defineComponent({
     const proportion_reads: Ref<number> = ref(1);
     const uploadedFileNames: Ref<string[]> = ref([]);
 
-    const { identifyFiles, resetAllResults_sketchlib } = useActions(["identifyFiles", "resetAllResults_sketchlib"]);
+    const { identifyFiles, resetAllResults_sketchlib, initSketchlibWorkers } = useActions(["identifyFiles", "resetAllResults_sketchlib", "initSketchlibWorkers"]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { allResults_sketchlib } = useState(["allResults_sketchlib"]) as any;
+
+    const numWorkers: Ref<number> = ref(4);
+
+    function onNumWorkersChange(value: number): void {
+      initSketchlibWorkers(value);
+    }
 
     function onDropSample(acceptFiles: File[]): void {
       uploadedFileNames.value = acceptFiles.map(f => f.name);
@@ -224,6 +258,8 @@ export default defineComponent({
     return {
       k,
       proportion_reads,
+      numWorkers,
+      onNumWorkersChange,
       uploadedFileNames,
       resetAll,
       getRootPropsSample,
