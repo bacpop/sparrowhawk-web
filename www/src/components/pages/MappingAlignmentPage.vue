@@ -69,7 +69,7 @@
       </TooltipProvider>
     </div>
 
-    <div class="min-w-0 flex-1 pt-12">
+    <div class="min-w-0 flex-1 overflow-hidden pt-12">
       <!-- Mapping tab -->
       <div v-if="tabName=='Mapping'">
 

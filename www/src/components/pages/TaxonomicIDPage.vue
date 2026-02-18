@@ -95,7 +95,7 @@
       </TooltipProvider>
     </div>
 
-    <div class="min-w-0 flex-1 pt-12">
+    <div class="min-w-0 flex-1 overflow-hidden pt-12">
       <div v-if="tabName=='TaxonomicID'">
 
         <!-- Upload dropbox - always visible when not identifying -->
@@ -138,8 +138,10 @@
         </div>
 
         <!-- Show results as a single table with expandable rows per sample -->
-        <div v-if="sampleIdentified" class="mx-6 mr-0 mt-4">
-          <DataTable :columns="tableColumns" :data="tableData" />
+        <div v-if="sampleIdentified" class="px-6 mt-4">
+          <div class="overflow-x-auto">
+            <DataTable :columns="tableColumns" :data="tableData" />
+          </div>
         </div>
       </div>
     </div>

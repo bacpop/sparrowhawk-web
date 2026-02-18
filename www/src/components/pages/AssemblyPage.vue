@@ -178,7 +178,7 @@
       </TooltipProvider>
     </div>
 
-    <div class="min-w-0 flex-1 pt-12">
+    <div class="min-w-0 flex-1 overflow-hidden pt-12">
       <h5 class="memory_error_message" v-if="errorInProcessing">
         Error found while processing! It is most surely a memory issue: try increasing the chunking, or using a Bloom
         filter
