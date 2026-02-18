@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-row">
-    <div class="w-1/3 max-w-[350px]">
+    <div class="w-1/4 w-[350px]">
       <h1 class="text-2xl font-medium mb-4 flex items-center gap-2">
         <ScanFace class="w-6 h-6" />
         Taxonomic ID
@@ -67,7 +67,7 @@
       </TooltipProvider>
     </div>
 
-    <div class="w-full pt-12">
+    <div class="min-w-0 flex-1 pt-12">
       <div v-if="tabName=='TaxonomicID'">
 
         <!-- Upload dropbox - always visible when not identifying -->
@@ -109,12 +109,9 @@
           </div>
         </div>
 
-        <!-- Show results as one DataTable per sample -->
-        <div v-if="sampleIdentified" class="mx-6 mr-0 mt-4 flex flex-col gap-6">
-          <div v-for="[sampleName, rows] in tableDataBySample" :key="sampleName">
-            <h3 class="text-sm font-semibold text-gray-700 font-mono mb-2">{{ sampleName }}</h3>
-            <DataTable :columns="tableColumns" :data="rows" />
-          </div>
+        <!-- Show results as a single table with expandable rows per sample -->
+        <div v-if="sampleIdentified" class="mx-6 mr-0 mt-4">
+          <DataTable :columns="tableColumns" :data="tableData" />
         </div>
       </div>
     </div>
@@ -186,26 +183,31 @@ export default defineComponent({
 
     const tableColumns = columns;
 
-    const tableDataBySample = computed<Map<string, TaxonomicIDRow[]>>(() => {
+    const tableData = computed<TaxonomicIDRow[]>(() => {
       const results = allResults_sketchlib.value.results as Record<string, SampleIdentifyResult>;
-      const map = new Map<string, TaxonomicIDRow[]>();
+      const topLevelRows: TaxonomicIDRow[] = [];
       for (const [sampleName, sampleResult] of Object.entries(results || {})) {
-        if (!sampleResult?.idSpecies) continue;
-        const rows: TaxonomicIDRow[] = [];
-        for (let i = 0; i < sampleResult.idSpecies.length; i++) {
+        if (!sampleResult?.idSpecies?.length) continue;
+
+        const allRows: TaxonomicIDRow[] = sampleResult.idSpecies.map((species, i) => {
           const parts = (sampleResult.idMetadata[i] ?? '').split('|');
-          rows.push({
+          return {
+            sample: sampleName,
             rank: i + 1,
-            species: sampleResult.idSpecies[i],
+            species,
             probability: sampleResult.idProbs[i],
             metaSpecies: parts[0]?.trim() ?? '',
             metaGemsparcl: parts[1]?.trim() ?? '',
             metaGtdb: parts[2]?.trim() ?? '',
-          });
-        }
-        map.set(sampleName, rows);
+          };
+        });
+
+        topLevelRows.push({
+          ...allRows[0],
+          subRows: allRows.length > 1 ? allRows.slice(1) : undefined,
+        });
       }
-      return map;
+      return topLevelRows;
     });
 
     const {
@@ -230,7 +232,7 @@ export default defineComponent({
       onDropSample,
       getSampleNameFromFile,
       tableColumns,
-      tableDataBySample,
+      tableData,
       allResults_sketchlib,
       store,
       ...restSample,

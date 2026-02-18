@@ -1,9 +1,10 @@
 <script setup lang="ts" generic="TData, TValue">
-import type { ColumnDef, SortingState } from '@tanstack/vue-table'
+import type { ColumnDef, SortingState, ExpandedState } from '@tanstack/vue-table'
 import {
     FlexRender,
     getCoreRowModel,
     getSortedRowModel,
+    getExpandedRowModel,
     useVueTable,
 } from '@tanstack/vue-table'
 import { ref } from 'vue'
@@ -23,21 +24,26 @@ const props = defineProps<{
 }>()
 
 const sorting = ref<SortingState>([])
+const expanded = ref<ExpandedState>({})
 
 const table = useVueTable({
     get data() { return props.data },
     get columns() { return props.columns },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getSubRows: (row: TData) => (row as { subRows?: TData[] }).subRows,
     onSortingChange: updaterOrValue => valueUpdater(updaterOrValue, sorting),
+    onExpandedChange: updaterOrValue => valueUpdater(updaterOrValue, expanded),
     state: {
         get sorting() { return sorting.value },
+        get expanded() { return expanded.value },
     },
 })
 </script>
 
 <template>
-    <div class="rounded-md border">
+    <div class="rounded-md border overflow-hidden">
         <Table>
             <TableHeader>
                 <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
@@ -53,9 +59,9 @@ const table = useVueTable({
             <TableBody>
                 <template v-if="table.getRowModel().rows?.length">
                     <TableRow
-                        v-for="(row, index) in table.getRowModel().rows"
+                        v-for="row in table.getRowModel().rows"
                         :key="row.id"
-                        :class="index % 2 === 1 ? 'bg-muted/50' : ''"
+                        :class="row.depth > 0 ? 'bg-muted/40 text-muted-foreground' : ''"
                     >
                         <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
                             <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />

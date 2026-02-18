@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-row">
-    <div class="w-1/3 max-w-[350px]">
+    <div class="w-1/3 w-[350px]">
       <h1 class="text-2xl font-medium flex items-center gap-2 mb-4">
         <Codesandbox class="w-6 h-6" />
         {{ tabName }}

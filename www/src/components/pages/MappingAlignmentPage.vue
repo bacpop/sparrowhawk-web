@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-row">
-    <div class="w-1/3 max-w-[350px]">
+    <div class="w-1/3 w-[350px]">
       <h1 class="text-2xl font-medium mb-4 flex items-center gap-2">
         <Map v-if="tabName === 'Mapping'" class="w-6 h-6" />
         <Spline v-else-if="tabName === 'Alignment'" class="w-6 h-6" />
