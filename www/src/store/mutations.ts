@@ -29,6 +29,9 @@ export default {
     setIdentifyingState(state: RootState, isIdentifying: boolean) {
         state.processingState.isIdentifying = isIdentifying;
     },
+    setAssemblyState(state: RootState, assemblyState: string) {
+        state.processingState.assemblyState = assemblyState;
+    },
     resetProcessingState(state: RootState) {
         state.processingState = {
             isPreprocessing: false,
@@ -39,6 +42,7 @@ export default {
             isAligning: false,
             isIdentifying: false,
             isIdentifyingFiles: new Set<string>(),
+            assemblyState: '',
         };
     },
 
@@ -48,8 +52,8 @@ export default {
     SET_WORKER_SKA(state: RootState, worker: Worker | null) {
         state.workerState.worker_ska = worker;
     },
-    SET_WORKER_SKETCHLIB(state: RootState, worker: Worker | null) {
-        state.workerState.worker_sketchlib = worker;
+    SET_WORKERS_SKETCHLIB(state: RootState, workers: Worker[]) {
+        state.workerState.workers_sketchlib = workers;
     },
 
     setPreprocessing(state: RootState, input: { nKmers: number, histo: [], used_min_count: number }) {
@@ -199,8 +203,8 @@ export default {
             results: {},
         };
 
-        if (state.workerState.worker_sketchlib) {
-            state.workerState.worker_sketchlib.postMessage({reset: true});
+        for (const worker of state.workerState.workers_sketchlib) {
+            worker.postMessage({reset: true});
         }
     }
 

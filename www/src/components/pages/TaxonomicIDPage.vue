@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-row">
-    <div class="w-1/3">
+    <div class="w-[350px] shrink-0">
       <h1 class="text-2xl font-medium mb-4 flex items-center gap-2">
         <ScanFace class="w-6 h-6" />
         Taxonomic ID
@@ -63,18 +63,46 @@
               </span>
             </div>
           </div>
+
+          <div>
+            <p class="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p class="max-w-xs">Number of parallel workers used to process samples simultaneously. Higher values speed up processing of multiple files but use more memory.</p>
+                </TooltipContent>
+              </Tooltip>
+              Workers
+            </p>
+            <div class="flex flex-row items-center w-full gap-2">
+              <VueSlider class="flex-grow"
+                         v-model="numWorkers"
+                         :lazy="true"
+                         :min="1"
+                         :max="8"
+                         :interval="1"
+                         :disabled="isIdentifying"
+                         @change="onNumWorkersChange"
+              />
+              <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
+                {{ numWorkers }}
+              </span>
+            </div>
+          </div>
         </div>
       </TooltipProvider>
     </div>
 
-    <div class="w-2/3 pt-12">
+    <div class="min-w-0 flex-1 overflow-hidden pt-12">
       <div v-if="tabName=='TaxonomicID'">
 
         <!-- Upload dropbox - always visible when not identifying -->
         <div v-if="!isIdentifying"
              v-bind='getRootPropsSample()'
              :class="[
-               'p-6 mx-6 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
+               'p-6 mx-6 mr-0 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
                'cursor-pointer hover:border-gray-400'
              ]">
           <input v-bind='getInputPropsSample()' />
@@ -98,7 +126,7 @@
         </div>
 
         <!-- Show uploaded files with per-file status -->
-        <div v-if="uploadedFileNames.length > 0" class="mx-6 mt-4">
+        <div v-if="uploadedFileNames.length > 0" class="mx-6 mr-0 mt-4">
           <div v-for="fileName in uploadedFileNames" :key="fileName"
                class="flex items-center gap-2 py-2 px-3 bg-gray-50 rounded-md mb-2">
             <Check v-if="isFileIdentified(fileName)" class="w-4 h-4 text-green-500"/>
@@ -109,9 +137,11 @@
           </div>
         </div>
 
-        <!-- Show results as DataTable -->
-        <div v-if="sampleIdentified" class="mx-6 mt-4">
-          <DataTable :columns="tableColumns" :data="tableData" />
+        <!-- Show results as a single table with expandable rows per sample -->
+        <div v-if="sampleIdentified" class="px-6 mt-4">
+          <div class="overflow-x-auto">
+            <DataTable :columns="tableColumns" :data="tableData" />
+          </div>
         </div>
       </div>
     </div>
@@ -159,9 +189,15 @@ export default defineComponent({
     const proportion_reads: Ref<number> = ref(1);
     const uploadedFileNames: Ref<string[]> = ref([]);
 
-    const { identifyFiles, resetAllResults_sketchlib } = useActions(["identifyFiles", "resetAllResults_sketchlib"]);
+    const { identifyFiles, resetAllResults_sketchlib, initSketchlibWorkers } = useActions(["identifyFiles", "resetAllResults_sketchlib", "initSketchlibWorkers"]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { allResults_sketchlib } = useState(["allResults_sketchlib"]) as any;
+
+    const numWorkers: Ref<number> = ref(4);
+
+    function onNumWorkersChange(value: number): void {
+      initSketchlibWorkers(value);
+    }
 
     function onDropSample(acceptFiles: File[]): void {
       uploadedFileNames.value = acceptFiles.map(f => f.name);
@@ -185,20 +221,29 @@ export default defineComponent({
 
     const tableData = computed<TaxonomicIDRow[]>(() => {
       const results = allResults_sketchlib.value.results as Record<string, SampleIdentifyResult>;
-      const rows: TaxonomicIDRow[] = [];
+      const topLevelRows: TaxonomicIDRow[] = [];
       for (const [sampleName, sampleResult] of Object.entries(results || {})) {
-        if (!sampleResult?.idSpecies) continue;
-        for (let i = 0; i < sampleResult.idSpecies.length; i++) {
-          rows.push({
+        if (!sampleResult?.idSpecies?.length) continue;
+
+        const allRows: TaxonomicIDRow[] = sampleResult.idSpecies.map((species, i) => {
+          const parts = (sampleResult.idMetadata[i] ?? '').split('|');
+          return {
             sample: sampleName,
             rank: i + 1,
-            species: sampleResult.idSpecies[i],
+            species,
             probability: sampleResult.idProbs[i],
-            metadata: sampleResult.idMetadata[i],
-          });
-        }
+            metaSpecies: parts[0]?.trim() ?? '',
+            metaGemsparcl: parts[1]?.trim() ?? '',
+            metaGtdb: parts[2]?.trim() ?? '',
+          };
+        });
+
+        topLevelRows.push({
+          ...allRows[0],
+          subRows: allRows.length > 1 ? allRows.slice(1) : undefined,
+        });
       }
-      return rows;
+      return topLevelRows;
     });
 
     const {
@@ -215,6 +260,8 @@ export default defineComponent({
     return {
       k,
       proportion_reads,
+      numWorkers,
+      onNumWorkersChange,
       uploadedFileNames,
       resetAll,
       getRootPropsSample,

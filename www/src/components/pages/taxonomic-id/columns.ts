@@ -1,6 +1,6 @@
 import { h } from 'vue'
-import type { ColumnDef } from '@tanstack/vue-table'
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-vue-next'
+import type { ColumnDef, Row } from '@tanstack/vue-table'
+import { ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 
 export interface TaxonomicIDRow {
@@ -8,7 +8,10 @@ export interface TaxonomicIDRow {
     rank: number
     species: string
     probability: number
-    metadata: string
+    metaSpecies: string
+    metaGemsparcl: string
+    metaGtdb: string
+    subRows?: TaxonomicIDRow[]
 }
 
 function sortableHeader(label: string, align?: 'right') {
@@ -27,7 +30,21 @@ export const columns: ColumnDef<TaxonomicIDRow>[] = [
     {
         accessorKey: 'sample',
         header: sortableHeader('Sample'),
-        cell: ({ row }) => h('div', { class: 'font-medium' }, row.getValue('sample')),
+        cell: ({ row }: { row: Row<TaxonomicIDRow> }) => {
+            const canExpand = row.getCanExpand()
+            const isExpanded = row.getIsExpanded()
+            return h('div', { class: 'flex items-center gap-1' }, [
+                canExpand
+                    ? h(Button, {
+                        variant: 'ghost',
+                        size: 'sm',
+                        class: 'h-5 w-5 p-0 text-gray-400 hover:text-gray-700',
+                        onClick: row.getToggleExpandedHandler(),
+                    }, () => h(isExpanded ? ChevronDown : ChevronRight, { class: 'h-3.5 w-3.5' }))
+                    : h('span', { class: 'w-5' }),
+                h('span', { class: 'font-medium font-mono truncate' }, row.getValue('sample')),
+            ])
+        },
     },
     {
         accessorKey: 'rank',
@@ -48,7 +65,15 @@ export const columns: ColumnDef<TaxonomicIDRow>[] = [
         },
     },
     {
-        accessorKey: 'metadata',
-        header: 'Metadata',
+        accessorKey: 'metaSpecies',
+        header: 'Species',
+    },
+    {
+        accessorKey: 'metaGemsparcl',
+        header: 'Gemsparcl ID',
+    },
+    {
+        accessorKey: 'metaGtdb',
+        header: 'GTDB species composition',
     },
 ]

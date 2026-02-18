@@ -1,5 +1,6 @@
 import {ActionContext} from "vuex";
 import {RootState} from "@/store/state";
+import WorkerSketcher from '@/workers/Sketcher.worker';
 
 export default {
     async processReads(context: ActionContext<RootState, RootState>, payload: {
@@ -54,11 +55,13 @@ export default {
                     // Handle state progress messages from Sparrowhawk wasm
                     if (messageData.data instanceof Object && "assemblyState" in messageData.data) {
                         console.log("[Sparrowhawk] State:", messageData.data.assemblyState);
+                        commit("setAssemblyState", messageData.data.assemblyState);
                         return;
                     }
 
                     // Clear processing state
                     commit("setPreprocessingState", false);
+                    commit("setAssemblyState", "");
 
                     if (messageData.data instanceof Object) {
                         if ("nKmers" in messageData.data) {
@@ -100,11 +103,13 @@ export default {
                 // Handle state progress messages from WASM
                 if ("assemblyState" in messageData.data) {
                     console.log("[Sparrowhawk] Assembly state:", messageData.data.assemblyState);
+                    commit("setAssemblyState", messageData.data.assemblyState);
                     return;
                 }
 
                 // Clear assembling state
                 commit("setAssemblingState", false);
+                commit("setAssemblyState", "");
 
                 commit("setAssembly", {
                     ncontigs: messageData.data.ncontigs,
@@ -255,7 +260,10 @@ export default {
     async identifyFiles(context: ActionContext<RootState, RootState>, payload: { acceptFiles: Array<File> }) {
         const {commit, state} = context;
         console.log("Uploaded file(s) for taxonomic identification");
-        if (!state.workerState.worker_sketchlib) {
+
+        const pool = state.workerState.workers_sketchlib;
+        if (!pool.length) {
+            console.log("No sketchlib workers available");
             return;
         }
 
@@ -280,9 +288,7 @@ export default {
         const samplesToProcess: SampleToProcess[] = [];
 
         payload.acceptFiles.forEach((file: File) => {
-            // Check if it's a paired-end read file
             if (/(_1|_2)(.fastq.gz|.fq.gz)$/.test(file.name)) {
-                // Only process _1 files (to avoid duplicates)
                 if (/_1(.fastq.gz|.fq.gz)$/.test(file.name)) {
                     const {pairFile, sampleName} = findReadPair(file.name, payload.acceptFiles);
                     if (pairFile) {
@@ -291,9 +297,7 @@ export default {
                         console.log(file.name + ": only one fastq found, skipping");
                     }
                 }
-                // Skip _2 files - they're handled with their _1 pair
             } else {
-                // Single file (FASTA or single FASTQ)
                 const sampleName = file.name.replace(/(.fasta|.fasta.gz|.fa|.fa.gz|.fq|.fq.gz|.fastq|.fastq.gz)$/, '');
                 samplesToProcess.push({sampleName, file1: file, file2: null});
             }
@@ -304,43 +308,54 @@ export default {
             return;
         }
 
-        // Set up message handler once
-        state.workerState.worker_sketchlib.onmessage = (messageData) => {
-            if (messageData.data instanceof Object) {
-                if ("probs" in messageData.data && "sampleName" in messageData.data) {
-                    const sampleName = messageData.data.sampleName;
-                    console.log("Saving results for sample: " + sampleName);
-
-                    // Remove from identifying set
-                    commit("removeIdentifyingFile", sampleName);
-
-                    commit("saveIDResults", {
-                        sampleName: sampleName,
-                        probs: messageData.data.probs,
-                        names: messageData.data.names,
-                        metadata: messageData.data.metadata
-                    });
-                } else {
-                    // Something wrong has happened
-                    console.log("Error found during processing");
+        // Attach a result handler to each worker in the pool
+        pool.forEach((worker) => {
+            worker.onmessage = (messageData) => {
+                if (messageData.data instanceof Object) {
+                    if ("probs" in messageData.data && "sampleName" in messageData.data) {
+                        const sampleName = messageData.data.sampleName;
+                        console.log("Saving results for sample: " + sampleName);
+                        commit("removeIdentifyingFile", sampleName);
+                        commit("saveIDResults", {
+                            sampleName: sampleName,
+                            probs: messageData.data.probs,
+                            names: messageData.data.names,
+                            metadata: messageData.data.metadata
+                        });
+                    } else {
+                        console.log("Error found during processing");
+                    }
                 }
-            }
-        };
+            };
+        });
 
-        // Process each sample sequentially (worker processes one at a time)
-        for (const sample of samplesToProcess) {
-            console.log("Queuing identification for sample: " + sample.sampleName);
-
-            // Track this sample as being identified
+        // Distribute samples across the pool via round-robin
+        samplesToProcess.forEach((sample, index) => {
+            const worker = pool[index % pool.length];
+            console.log(`Queuing identification for sample: ${sample.sampleName} on worker ${index % pool.length}`);
             commit("addIdentifyingFile", sample.sampleName);
-
-            state.workerState.worker_sketchlib.postMessage({
+            worker.postMessage({
                 identify: true,
                 file1: sample.file1,
                 file2: sample.file2,
                 sampleName: sample.sampleName,
             });
+        });
+    },
+
+    async initSketchlibWorkers(context: ActionContext<RootState, RootState>, numWorkers: number) {
+        const {commit, state} = context;
+        // Terminate existing workers
+        for (const worker of state.workerState.workers_sketchlib) {
+            worker.terminate();
         }
+        // Spawn new pool
+        const pool: Worker[] = [];
+        for (let i = 0; i < numWorkers; i++) {
+            pool.push(new WorkerSketcher());
+        }
+        console.log(`Spawned ${numWorkers} sketchlib worker(s)`);
+        commit("SET_WORKERS_SKETCHLIB", pool);
     },
 
     async resetAllResults_sketchlib(context: ActionContext<RootState, RootState>) {

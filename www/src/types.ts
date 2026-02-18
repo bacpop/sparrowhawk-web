@@ -3,7 +3,7 @@ export type Dict<T> = Record<string, T>
 export interface WorkerState {
     worker: Worker | null;
     worker_ska: Worker | null;
-    worker_sketchlib: Worker | null;
+    workers_sketchlib: Worker[];
 }
 
 export interface AllResults {
@@ -58,4 +58,5 @@ export interface ProcessingState {
     isAligning: boolean;
     isIdentifying: boolean;
     isIdentifyingFiles: Set<string>;  // Track which files are being identified
+    assemblyState: string;  // Current state from Sparrowhawk assembly
 }

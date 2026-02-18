@@ -33,7 +33,7 @@ export const emptyState = (): RootState => ({
     workerState: {
         worker: null,
         worker_ska: null,
-        worker_sketchlib: null,
+        workers_sketchlib: [],
     },
 
     processingState: {
@@ -45,5 +45,6 @@ export const emptyState = (): RootState => ({
         isAligning: false,
         isIdentifying: false,
         isIdentifyingFiles: new Set<string>(),
+        assemblyState: '',
     },
 });
