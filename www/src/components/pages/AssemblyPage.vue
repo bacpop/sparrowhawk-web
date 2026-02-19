@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-row">
-    <div class="w-1/3">
+    <div class="w-[350px] shrink-0">
       <h1 class="text-2xl font-medium flex items-center gap-2 mb-4">
         <Codesandbox class="w-6 h-6" />
         {{ tabName }}
@@ -80,7 +80,7 @@
               <VueSlider class="flex-grow"
                          v-model="min_count"
                          :lazy="true"
-                         :min="0"
+                         :min="infimumMinCount"
                          :max="30"
                          :interval="1"
                          :disabled="isProcessingAny || do_fit"
@@ -178,7 +178,7 @@
       </TooltipProvider>
     </div>
 
-    <div class="w-2/3 pt-12">
+    <div class="min-w-0 flex-1 overflow-hidden pt-12">
       <h5 class="memory_error_message" v-if="errorInProcessing">
         Error found while processing! It is most surely a memory issue: try increasing the chunking, or using a Bloom
         filter
@@ -190,7 +190,7 @@
         <!-- Dropzone for file upload - always visible -->
         <div v-bind='getRootPropsReads()'
              :class="[
-               'p-6 mx-6 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
+               'p-6 mx-6 mr-0 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
                isProcessingAny ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-gray-400'
              ]">
 
@@ -207,12 +207,24 @@
 
         </div>
 
-        <p v-if="isPreprocessingActive" class="mx-6 mt-4 text-sm text-gray-500">
-          Pre-processing...
-        </p>
-        <p v-else-if="isAssemblingActive" class="mx-6 mt-4 text-sm text-gray-500">
-          Assembling...
-        </p>
+        <!-- Processing status with detailed state -->
+        <div v-if="isPreprocessingActive || isAssemblingActive" class="mx-6 mr-0 mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+          <div class="flex items-center gap-2 text-sm">
+            <Loader2 v-if="isPreprocessingActive" class="w-4 h-4 text-blue-500 animate-spin"/>
+            <Loader2 v-else-if="isAssemblingActive" class="w-4 h-4 text-orange-500 animate-spin"/>
+            <span class="font-semibold text-gray-800">
+              {{ assemblyPhaseTitle }}
+            </span>
+          </div>
+          <div v-if="assemblyStepDetails.step" class="mt-2 ml-6">
+            <div class="text-xs font-medium text-gray-700">
+              {{ assemblyStepDetails.step }}
+            </div>
+            <div v-if="assemblyStepDetails.detail" class="text-xs text-gray-600 mt-0.5">
+              {{ assemblyStepDetails.detail }}
+            </div>
+          </div>
+        </div>
 
         <!-- File list with status -->
         <div class="flex flex-row gap-2 w-full mt-4">
@@ -320,15 +332,14 @@ export default defineComponent({
         csize: csize.value,
         do_bloom: do_bloom.value,
         do_fit: do_fit.value,
+        no_bubble_collapse: no_bubble.value,
+        no_dead_end_removal: no_deadend.value
       });
     }
 
     function doAss(): void {
       assemblying.value = true;
-      doTheAssembly({
-        no_bubble_collapse: no_bubble.value,
-        no_dead_end_removal: no_deadend.value
-      });
+      doTheAssembly();
     }
 
     function resetAll(): void {
@@ -345,7 +356,7 @@ export default defineComponent({
       ...restReads
     } = useDropzone({
       onDrop: onDropReads,
-      accept: [".gz", ".fastq", ".fq"],
+      accept: ["fq.gz", "fastq.gz", ".fastq", ".fq"],
       multiple: true
     });
 
@@ -400,6 +411,186 @@ export default defineComponent({
     },
     isProcessingAny(): boolean {
       return this.store.getters.isPreprocessing || this.store.getters.isAssembling;
+    },
+    infimumMinCount() {
+      return this.do_bloom ? 3 : 0
+    },
+    currentAssemblyState(): string {
+      return this.store.getters.assemblyState;
+    },
+    assemblyPhaseTitle(): string {
+      if (this.isPreprocessingActive) return 'Pre-processing';
+      if (this.isAssemblingActive) return 'Assembling';
+      return '';
+    },
+    assemblyStepDetails(): { step: string; detail: string } {
+      const state = this.currentAssemblyState;
+      if (!state) return { step: '', detail: '' };
+
+      // Parse preprocessing states
+      if (state.startsWith('preprocess:')) {
+        // Initialization
+        if (state === 'preprocess:start') {
+          return { step: 'Initialising', detail: 'Setting up preprocessing pipeline' };
+        }
+
+        // Bloom filter preprocessing
+        if (state.includes('bloom')) {
+          if (state === 'preprocess:bloom:start') {
+            return { step: 'Bloom Filter Setup', detail: 'Initialising Bloom filter' };
+          }
+          if (state === 'preprocess:bloom:loop:start') {
+            return { step: 'Reading FASTQ Files', detail: 'Processing paired-end reads with Bloom filter' };
+          }
+          
+          // Progress messages
+          if (state.includes('preprocess:bloom:loop:')) {
+            const parts = state.split(':');
+            if (parts.length >= 4) {
+              const numReads = isNaN(Number(parts[3])) ? 0 : Number(parts[3]);
+              const percentage = parts[4];
+              
+              if (percentage) {
+                return { 
+                  step: 'Reading FASTQ Files',
+                  detail: `Processed ${numReads.toLocaleString()} reads (${percentage}% complete)`
+                };
+              } else {
+                return { 
+                  step: 'Reading FASTQ Files',
+                  detail: `Processed ${numReads.toLocaleString()} reads`
+                };
+              }
+            }
+          }
+          
+          if (state === 'preprocess:bloom:loop:end') {
+            return { step: 'Reading FASTQ Files', detail: 'All reads processed successfully' };
+          }
+          if (state === 'preprocess:bloom:fitting') {
+            return { step: 'Optimising Parameters', detail: 'Fitting k-mer count threshold' };
+          }
+          if (state === 'preprocess:bloom:filtering') {
+            return { step: 'Filtering K-mers', detail: 'Filtering k-mers from dataset' };
+          }
+        }
+        
+        // Bulk (no chunk, no bloom) preprocessing
+        else if (state.includes('bulk')) {
+          if (state === 'preprocess:bulk:start') {
+            return { step: 'Bulk Processing Setup', detail: 'Initialising' };
+          }
+          if (state === 'preprocess:bulk:loop:start') {
+            return { step: 'Reading FASTQ Files', detail: 'Processing paired-end reads' };
+          }
+          
+          // Progress messages
+          if (state.includes('preprocess:bulk:loop:')) {
+            const parts = state.split(':');
+            if (parts.length >= 4) {
+              const numReads = (isNaN(Number(parts[3])) ? 0 : Number(parts[3]));
+              const percentage = parts[4];
+              
+              if (percentage) {
+                return { 
+                  step: 'Reading FASTQ Files',
+                  detail: `Processed ${numReads.toLocaleString()} reads (${percentage}% complete)`
+                };
+              } else {
+                return { 
+                  step: 'Reading FASTQ Files',
+                  detail: `Processed ${numReads.toLocaleString()} reads`
+                };
+              }
+            }
+          }
+          
+          if (state === 'preprocess:bulk:loop:end') {
+            return { step: 'Reading FASTQ Files', detail: 'All reads processed successfully' };
+          }
+          if (state === 'preprocess:bulk:sorting') {
+            return { step: 'Sorting K-mers', detail: 'Organising k-mers for efficient filtering' };
+          }
+          if (state === 'preprocess:bulk:fitting') {
+            return { step: 'Optimising Parameters', detail: 'Automatically fitting k-mer count threshold' };
+          }
+          if (state === 'preprocess:bulk:filtering') {
+            return { step: 'Filtering K-mers', detail: 'Removing low-quality k-mers from dataset' };
+          }
+        }
+        
+        // Chunked preprocessing
+        else if (state.includes('chunked')) {
+          if (state === 'preprocess:chunked:start') {
+            return { step: 'Chunked Processing Setup', detail: 'Initialising memory-optimised chunked mode' };
+          }
+          if (state === 'preprocess:chunked:fitting') {
+            return { step: 'Optimising Parameters', detail: 'Automatically fitting k-mer count threshold across chunks' };
+          }
+          if (state === 'preprocess:chunked:filtering') {
+            return { step: 'Filtering K-mers', detail: 'Removing low-quality k-mers from chunked dataset' };
+          }
+
+          // Progress messages
+          if (state.includes('preprocess:chunked:loop:')) {
+            const parts = state.split(':');
+            if (parts.length >= 4) {
+              const numReads = isNaN(Number(parts[3])) ? 0 : Number(parts[3]);
+              const percentage = parts[4];
+
+              if (percentage) {
+                return {
+                  step: 'Reading FASTQ Files',
+                  detail: `Processed ${numReads.toLocaleString()} reads (${percentage}% complete)`
+                };
+              } else {
+                return {
+                  step: 'Reading FASTQ Files',
+                  detail: `Processed ${numReads.toLocaleString()} reads`
+                };
+              }
+            }
+          }
+        }
+        
+        // Common preprocessing states
+        if (state === 'preprocess:saving') {
+          return { step: 'Saving Data', detail: 'Writing preprocessed k-mers to memory' };
+        }
+        if (state === 'preprocess:end') {
+          return { step: 'Complete', detail: 'Preprocessing finished successfully' };
+        }
+      }
+      
+      // Parse assembly states
+      if (state.startsWith('assembly:')) {
+        if (state === 'assembly:start') {
+          return { step: 'Starting Assembly', detail: 'Initialising assembly pipeline' };
+        }
+        if (state === 'assembly:create_graph') {
+          return { step: 'Building Graph', detail: 'Creating de Bruijn graph' };
+        }
+        if (state === 'assembly:correct_graph') {
+          return { step: 'Correcting Graph', detail: 'Processing' };
+        }
+        if (state === 'assembly:collapse_graph') {
+          return { step: 'Collapsing Graph', detail: 'Processing' };
+        }
+        if (state === 'assembly:saving') {
+          return { step: 'Saving Results', detail: 'Saving to FASTA format' };
+        }
+        if (state === 'assembly:end') {
+          return { step: 'Complete', detail: 'Assembly finished successfully' };
+        }
+      }
+      
+      // Initialization
+      if (state === 'initialised') {
+        return { step: 'Initialised', detail: 'System ready' };
+      }
+      
+      // Fallback to raw state if no match
+      return { step: state, detail: '' };
     }
   },
 
@@ -407,6 +598,11 @@ export default defineComponent({
     readsPreprocessed(newVal: boolean) {
       if (newVal) {
         this.doAss();
+      }
+    },
+    do_bloom(newVal: boolean) {
+      if (newVal && this.min_count < 3) {
+        this.min_count = 3;
       }
     }
   },

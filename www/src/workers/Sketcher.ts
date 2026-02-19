@@ -35,8 +35,8 @@ export class Sketcher {
         return this.wasm ? Promise.resolve(this.wasm) : this.wasmPromise;
     }
 
-    async identifyThisFile(file1: File, file2: File | null): Promise<void> {
-        console.log("Starting identification...");
+    async identifyThisFile(file1: File, file2: File | null, sampleName: string): Promise<void> {
+        console.log("Starting identification for sample: " + sampleName);
         await this.waitForWasm();
 
         if (this.SketchlibData === null) {
@@ -51,6 +51,7 @@ export class Sketcher {
         const results: IdentifyResult = JSON.parse(this.SketchlibData!.get_probs(3));
 
         this.worker.postMessage({
+            sampleName: sampleName,
             probs: results.probs,
             names: results.names,
             metadata: results.metadata

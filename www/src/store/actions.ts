@@ -1,5 +1,6 @@
 import {ActionContext} from "vuex";
 import {RootState} from "@/store/state";
+import WorkerSketcher from '@/workers/Sketcher.worker';
 
 export default {
     async processReads(context: ActionContext<RootState, RootState>, payload: {
@@ -10,6 +11,8 @@ export default {
         csize: number,
         do_bloom: boolean,
         do_fit: boolean,
+        no_bubble_collapse: boolean,
+        no_dead_end_removal: boolean
     }) {
         const {commit, state} = context;
         console.log("Going to upload reads and assemble with k = " + payload.k + " min_count = " + payload.min_count + " min_qual = " + payload.min_qual + " csize = " + payload.csize + " do_bloom = " + payload.do_bloom)
@@ -44,11 +47,21 @@ export default {
                     csize: payload.csize,
                     do_bloom: payload.do_bloom,
                     do_fit: payload.do_fit,
+                    no_bubble_collapse: payload.no_bubble_collapse,
+                    no_dead_end_removal: payload.no_dead_end_removal
                 });
 
                 state.workerState.worker.onmessage = (messageData) => {
+                    // Handle state progress messages from Sparrowhawk wasm
+                    if (messageData.data instanceof Object && "assemblyState" in messageData.data) {
+                        console.log("[Sparrowhawk] State:", messageData.data.assemblyState);
+                        commit("setAssemblyState", messageData.data.assemblyState);
+                        return;
+                    }
+
                     // Clear processing state
                     commit("setPreprocessingState", false);
+                    commit("setAssemblyState", "");
 
                     if (messageData.data instanceof Object) {
                         if ("nKmers" in messageData.data) {
@@ -72,10 +85,7 @@ export default {
         }
     },
 
-    async doTheAssembly(context: ActionContext<RootState, RootState>, payload: {
-        no_bubble_collapse: boolean,
-        no_dead_end_removal: boolean,
-    }) {
+    async doTheAssembly(context: ActionContext<RootState, RootState>) {
         const {commit, state} = context;
         console.log("Assemblying reads...")
         if (state.workerState.worker) {
@@ -86,14 +96,20 @@ export default {
 
             state.workerState.worker.postMessage({
                 assemble: true,
-                no_bubble_collapse: payload.no_bubble_collapse,
-                no_dead_end_removal: payload.no_dead_end_removal,
             });
 
 
             state.workerState.worker.onmessage = (messageData) => {
+                // Handle state progress messages from WASM
+                if ("assemblyState" in messageData.data) {
+                    console.log("[Sparrowhawk] Assembly state:", messageData.data.assemblyState);
+                    commit("setAssemblyState", messageData.data.assemblyState);
+                    return;
+                }
+
                 // Clear assembling state
                 commit("setAssemblingState", false);
+                commit("setAssemblyState", "");
 
                 commit("setAssembly", {
                     ncontigs: messageData.data.ncontigs,
@@ -271,51 +287,102 @@ export default {
     async identifyFiles(context: ActionContext<RootState, RootState>, payload: { acceptFiles: Array<File> }) {
         const {commit, state} = context;
         console.log("Uploaded file(s) for taxonomic identification");
-        if (state.workerState.worker_sketchlib) {
-            if (payload.acceptFiles.length > 2) {
-                console.log("More than two files uploaded. This case is not supported.");
-                commit("resetAllResults_sketchlib");
-            } else {
-                // Set identifying state
-                commit("setIdentifyingState", true);
 
-                if (payload.acceptFiles.length == 1) {
-                    console.log("One file uploaded (fasta/q). Identifying...");
-                    state.workerState.worker_sketchlib.postMessage({
-                        identify: true,
-                        file1: payload.acceptFiles[0],
-                        file2: null,
-                    });
-                } else {
-                    console.log("Two files uploaded (fastq, reads). Identifying...");
-                    state.workerState.worker_sketchlib.postMessage({
-                        identify: true,
-                        file1: payload.acceptFiles[0],
-                        file2: payload.acceptFiles[1],
-                    });
-                }
-
-                state.workerState.worker_sketchlib.onmessage = (messageData) => {
-                    // Clear identifying state
-                    commit("setIdentifyingState", false);
-
-                    if (messageData.data instanceof Object) {
-                        if ("probs" in messageData.data) {
-                            console.log("Saving results...");
-                            commit("saveIDResults", {
-                                probs: messageData.data.probs,
-                                names: messageData.data.names,
-                                metadata: messageData.data.metadata
-                            });
-                        } else {
-                            // Something wrong has happened
-                            console.log("Error found during processing, resetting results.");
-                            commit("resetAllResults_sketchlib");
-                        }
-                    }
-                };
-            }
+        const pool = state.workerState.workers_sketchlib;
+        if (!pool.length) {
+            console.log("No sketchlib workers available");
+            return;
         }
+
+        // Helper to find paired-end read file
+        const findReadPair = (fileName: string, files: Array<File>): {
+            pairFile: File | undefined,
+            sampleName: string
+        } => {
+            const baseName = fileName.replace(/(_1.fastq.gz|_1.fq.gz)$/, '');
+            const pairNameFastq = baseName + '_2.fastq.gz';
+            const pairNameFq = baseName + '_2.fq.gz';
+            const pairFile = files.find(file => file.name === pairNameFastq || file.name === pairNameFq);
+            return {pairFile, sampleName: baseName};
+        };
+
+        // Build list of samples to process
+        interface SampleToProcess {
+            sampleName: string;
+            file1: File;
+            file2: File | null;
+        }
+        const samplesToProcess: SampleToProcess[] = [];
+
+        payload.acceptFiles.forEach((file: File) => {
+            if (/(_1|_2)(.fastq.gz|.fq.gz)$/.test(file.name)) {
+                if (/_1(.fastq.gz|.fq.gz)$/.test(file.name)) {
+                    const {pairFile, sampleName} = findReadPair(file.name, payload.acceptFiles);
+                    if (pairFile) {
+                        samplesToProcess.push({sampleName, file1: file, file2: pairFile});
+                    } else {
+                        console.log(file.name + ": only one fastq found, skipping");
+                    }
+                }
+            } else {
+                const sampleName = file.name.replace(/(.fasta|.fasta.gz|.fa|.fa.gz|.fq|.fq.gz|.fastq|.fastq.gz)$/, '');
+                samplesToProcess.push({sampleName, file1: file, file2: null});
+            }
+        });
+
+        if (samplesToProcess.length === 0) {
+            console.log("No valid samples found to process");
+            return;
+        }
+
+        // Attach a result handler to each worker in the pool
+        pool.forEach((worker) => {
+            worker.onmessage = (messageData) => {
+                if (messageData.data instanceof Object) {
+                    if ("probs" in messageData.data && "sampleName" in messageData.data) {
+                        const sampleName = messageData.data.sampleName;
+                        console.log("Saving results for sample: " + sampleName);
+                        commit("removeIdentifyingFile", sampleName);
+                        commit("saveIDResults", {
+                            sampleName: sampleName,
+                            probs: messageData.data.probs,
+                            names: messageData.data.names,
+                            metadata: messageData.data.metadata
+                        });
+                    } else {
+                        console.log("Error found during processing");
+                    }
+                }
+            };
+        });
+
+        // Distribute samples across the pool via round-robin
+        samplesToProcess.forEach((sample, index) => {
+            const worker = pool[index % pool.length];
+            console.log(`Queuing identification for sample: ${sample.sampleName} on worker ${index % pool.length}`);
+            commit("addIdentifyingFile", sample.sampleName);
+            worker.postMessage({
+                identify: true,
+                file1: sample.file1,
+                file2: sample.file2,
+                sampleName: sample.sampleName,
+            });
+        });
+    },
+
+    async initSketchlibWorkers(context: ActionContext<RootState, RootState>, numWorkers: number) {
+        const {commit, state} = context;
+        // Terminate existing workers
+        for (const worker of state.workerState.workers_sketchlib) {
+            worker.terminate();
+        }
+        // Spawn new pool
+        const pool: Worker[] = [];
+        for (let i = 0; i < numWorkers; i++) {
+            pool.push(new WorkerSketcher());
+        }
+        console.log(`Spawned ${numWorkers} sketchlib worker(s)`);
+        commit("SET_WORKERS_SKETCHLIB", pool);
     },
 
     async resetAllResults_sketchlib(context: ActionContext<RootState, RootState>) {

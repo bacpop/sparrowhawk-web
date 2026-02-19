@@ -32,6 +32,9 @@ export const getters: GetterTree<RootState, RootState> = {
             state.processingState.isAligning ||
             state.processingState.isIdentifying;
     },
+    assemblyState(state: RootState): string {
+        return state.processingState.assemblyState;
+    },
     readsProcessing(state: RootState) {
         return (state.readsFileNames != null && state.allResults.nContigs == null);
     },
@@ -70,14 +73,20 @@ export const getters: GetterTree<RootState, RootState> = {
 
     // SKETCHLIB
     sampleIdentified(state: RootState) {
-        return state.allResults_sketchlib.idProbs != null;
+        return Object.keys(state.allResults_sketchlib.results).length > 0;
     },
-
+    isIdentifyingFiles(state: RootState): Set<string> {
+        return state.processingState.isIdentifyingFiles;
+    },
+    sketchlibResults(state: RootState) {
+        return state.allResults_sketchlib.results;
+    },
+    
     // ORPHOS
-   genesCalled(state: RootState) {
-      return state.allResults_orphos.geneCount != null;
-   },
-   callingGenes(state: RootState) {
-       return state.allResults_orphos.callingGenes;
-   },
+    genesCalled(state: RootState) {
+       return state.allResults_orphos.geneCount != null;
+    },
+    callingGenes(state: RootState) {
+        return state.allResults_orphos.callingGenes;
+    },
 }

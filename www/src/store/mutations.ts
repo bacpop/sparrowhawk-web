@@ -29,6 +29,9 @@ export default {
     setIdentifyingState(state: RootState, isIdentifying: boolean) {
         state.processingState.isIdentifying = isIdentifying;
     },
+    setAssemblyState(state: RootState, assemblyState: string) {
+        state.processingState.assemblyState = assemblyState;
+    },
     resetProcessingState(state: RootState) {
         state.processingState = {
             isPreprocessing: false,
@@ -38,6 +41,8 @@ export default {
             isMappingFiles: new Set<string>(),
             isAligning: false,
             isIdentifying: false,
+            isIdentifyingFiles: new Set<string>(),
+            assemblyState: '',
         };
     },
 
@@ -47,8 +52,8 @@ export default {
     SET_WORKER_SKA(state: RootState, worker: Worker | null) {
         state.workerState.worker_ska = worker;
     },
-    SET_WORKER_SKETCHLIB(state: RootState, worker: Worker | null) {
-        state.workerState.worker_sketchlib = worker;
+    SET_WORKERS_SKETCHLIB(state: RootState, workers: Worker[]) {
+        state.workerState.workers_sketchlib = workers;
     },
     SET_WORKER_ORPHOS(state: RootState, worker: Worker | null) {
         state.workerState.worker_orphos = worker;
@@ -178,24 +183,32 @@ export default {
     },
 
     // SKETCHLIB
-    saveIDResults(state: RootState, input: { probs: number[], names: string[], metadata: string[] }) {
-        console.log("Storing results in allResults_sketchlib");
-        // console.log(input.probs);
-        state.allResults_sketchlib.idProbs = input.probs;
-        state.allResults_sketchlib.idSpecies = input.names;
-        state.allResults_sketchlib.idMetadata = input.metadata;
-        // console.log(state.allResults_sketchlib.idProbs[0].toString());
+    addIdentifyingFile(state: RootState, sampleName: string) {
+        state.processingState.isIdentifyingFiles.add(sampleName);
+        state.processingState.isIdentifying = true;
+    },
+    removeIdentifyingFile(state: RootState, sampleName: string) {
+        state.processingState.isIdentifyingFiles.delete(sampleName);
+        if (state.processingState.isIdentifyingFiles.size === 0) {
+            state.processingState.isIdentifying = false;
+        }
+    },
+    saveIDResults(state: RootState, input: { sampleName: string, probs: number[], names: string[], metadata: string[] }) {
+        console.log("Storing results for sample: " + input.sampleName);
+        state.allResults_sketchlib.results[input.sampleName] = {
+            idProbs: input.probs,
+            idSpecies: input.names,
+            idMetadata: input.metadata,
+        };
     },
 
     resetAllResults_sketchlib(state: RootState) {
         state.allResults_sketchlib = {
-            idProbs: null,
-            idSpecies: null,
-            idMetadata: null,
+            results: {},
         };
 
-        if (state.workerState.worker_sketchlib) {
-            state.workerState.worker_sketchlib.postMessage({reset: true});
+        for (const worker of state.workerState.workers_sketchlib) {
+            worker.postMessage({reset: true});
         }
     },
 

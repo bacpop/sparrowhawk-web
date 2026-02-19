@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-row">
-    <div class="w-1/3">
+    <div class="w-[350px] shrink-0">
       <h1 class="text-2xl font-medium mb-4 flex items-center gap-2">
         <Map v-if="tabName === 'Mapping'" class="w-6 h-6" />
         <Spline v-else-if="tabName === 'Alignment'" class="w-6 h-6" />
@@ -197,14 +197,14 @@
       </TooltipProvider>
     </div>
 
-    <div class="w-2/3 pt-12">
+    <div class="min-w-0 flex-1 overflow-hidden pt-12">
       <!-- Mapping tab -->
       <div v-if="tabName=='Mapping'">
 
         <!-- Single dropzone - always visible -->
         <div v-bind='getRootPropsMapping()'
              :class="[
-               'p-6 mx-6 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
+               'p-6 mx-6 mr-0 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
                isProcessingAny ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-gray-400'
              ]">
           <input v-bind='getInputPropsMapping()' :disabled="isProcessingAny"/>
@@ -217,10 +217,10 @@
           </p>
         </div>
 
-        <p v-if="isIndexingRef" class="mx-6 mt-4 text-sm text-gray-500">
+        <p v-if="isIndexingRef" class="mx-6 mr-0 mt-4 text-sm text-gray-500">
           Indexing reference...
         </p>
-        <p v-else-if="isMapping" class="mx-6 mt-4 text-sm text-gray-500">
+        <p v-else-if="isMapping" class="mx-6 mr-0 mt-4 text-sm text-gray-500">
           Mapping...
         </p>
 
@@ -247,7 +247,7 @@
         
 
         <!-- Reset button -->
-        <Button v-if="uploadedFiles.length > 0" @click="resetAll" class="mx-6 mt-4" variant="outline" size="sm">
+        <Button v-if="uploadedFiles.length > 0" @click="resetAll" class="mx-6 mr-0 mt-4" variant="outline" size="sm">
           Reset and start over
         </Button>
 
@@ -271,7 +271,7 @@
         <div v-if="!isAligning"
              v-bind='getRootPropsQueryAlign()'
              :class="[
-               'p-6 mx-6 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
+               'p-6 mx-6 mr-0 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
                'cursor-pointer hover:border-gray-400'
              ]">
           <input v-bind='getInputPropsQueryAlign()'/>
@@ -290,7 +290,7 @@
         </div>
 
         <!-- File list with status -->
-        <div v-if="uploadedAlignmentFiles.length > 0" class="mx-6 mt-4">
+        <div v-if="uploadedAlignmentFiles.length > 0" class="mx-6 mr-0 mt-4">
           <div v-for="fileName in uploadedAlignmentFiles" :key="fileName"
                class="flex items-center gap-2 py-2 px-3 bg-gray-50 rounded-md mb-2">
             <Loader2 v-if="isAligning" class="w-4 h-4 text-orange-500 animate-spin"/>
@@ -444,8 +444,9 @@ export default defineComponent({
       ...restMapping
     } = useDropzone({
       onDrop: onDropMapping,
-      accept: [".fa", ".fasta", ".gz", ".fastq", ".fq"]
+      accept: [".fa", ".fasta", ".gz", ".fastq"]
     });
+
     const {
       getRootProps: getRootPropsQueryAlign,
       getInputProps: getInputPropsQueryAlign,

@@ -1,5 +1,5 @@
 <template>
-  <div v-bind:class="queryPreprocessed ? 'isVisible my-6 border-t border-t-gray-200 pt-6' : 'notVisible'">
+  <div v-bind:class="queryPreprocessed && !isAssembling ? 'isVisible my-6 border-t border-t-gray-200 pt-6' : 'notVisible'">
     <div ref="plotElement"
          id="plotElement"
          class="w-full">
@@ -88,6 +88,9 @@ export default defineComponent({
   computed: {
     queryPreprocessed(): boolean {
       return this.store.getters.readsPreprocessed;
+    },
+    isAssembling(): boolean {
+      return this.store.getters.isAssembling;
     },
   },
 

@@ -3,8 +3,8 @@ export type Dict<T> = Record<string, T>
 export interface WorkerState {
     worker: Worker | null;
     worker_ska: Worker | null;
-    worker_sketchlib: Worker | null;
     worker_orphos: Worker | null;
+    workers_sketchlib: Worker[];
 }
 
 export interface AllResults {
@@ -35,10 +35,14 @@ export interface AllResultsSka {
     ref: string[]
 }
 
+export interface SampleIdentifyResult {
+    idProbs: number[]
+    idSpecies: string[]
+    idMetadata: string[]
+}
+
 export interface AllResultsSketchlib {
-    idProbs: number[] | null
-    idSpecies: string[] | null
-    idMetadata: string[] | null
+    results: Dict<SampleIdentifyResult>
 }
 
 export interface AllResultsOrphos {
@@ -62,4 +66,6 @@ export interface ProcessingState {
     isMappingFiles: Set<string>;  // Track which files are being mapped
     isAligning: boolean;
     isIdentifying: boolean;
+    isIdentifyingFiles: Set<string>;  // Track which files are being identified
+    assemblyState: string;  // Current state from Sparrowhawk assembly
 }
