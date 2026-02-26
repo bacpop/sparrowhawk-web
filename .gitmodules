@@ -12,3 +12,7 @@
 	path = rust/sketchlib.rust
 	url  = https://github.com/vrbouza/sketchlib.rust.git
 	branch = main
+[submodule "rust/deacon"]
+	path = rust/deacon
+	url = https://github.com/bede/deacon.git
+	branch = wasm1

@@ -18,3 +18,8 @@ declare module '@/workers/Caller.worker' {
     const WorkerFactory: new () => Worker;
     export default WorkerFactory;
 }
+
+declare module '@/workers/Depleter.worker' {
+    const WorkerFactory: new () => Worker;
+    export default WorkerFactory;
+}

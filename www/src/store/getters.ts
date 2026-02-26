@@ -89,4 +89,10 @@ export const getters: GetterTree<RootState, RootState> = {
     callingGenes(state: RootState) {
         return state.allResults_orphos.callingGenes;
     },
+
+    // DEACON
+    deaconIndexLoaded(state: RootState) { return state.allResults_deacon.indexLoaded; },
+    isFilteringDeacon(state: RootState)  { return state.allResults_deacon.isFiltering; },
+    deaconFiltered(state: RootState)     { return state.allResults_deacon.outputGzip !== null; },
+    isLoadingDeaconIndex(state: RootState) { return state.allResults_deacon.isLoadingIndex; },
 }

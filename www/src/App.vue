@@ -65,6 +65,10 @@
         <GeneCallingPage :tabName="tabName"/>
       </div>
 
+      <div v-else-if="tabName === 'HostDepletion'">
+        <HostDepletionPage :tabName="tabName"/>
+      </div>
+
       <div v-else-if="tabName === 'faq'">
         <FaqPage/>
       </div>
@@ -76,18 +80,20 @@
 import {defineComponent} from 'vue';
 import {useStore} from 'vuex';
 // eslint-disable-next-line
-import {Codesandbox, Map, ScanFace, Spline, Dna} from "lucide-vue-next";
+import {Codesandbox, Map, ScanFace, Spline, Dna, Funnel} from "lucide-vue-next";
 
 import AssemblyPage from './components/pages/AssemblyPage.vue';
 import MappingAlignmentPage from './components/pages/MappingAlignmentPage.vue';
 import TaxonomicIDPage from './components/pages/TaxonomicIDPage.vue';
 import GeneCallingPage from "./components/pages/GeneCallingPage.vue";
+import HostDepletionPage from "./components/pages/HostDepletionPage.vue";
 import ResultsDisplayMapping from './components/ResultsDisplayMapping.vue';
 import ResultsDisplayAlignment from './components/ResultsDisplayAlignment.vue';
 import KmerHistogram from './components/KmerHistogram.vue';
 import WorkerAssembler from '@/workers/Assembler.worker';
 import WorkerMapper from '@/workers/Mapper.worker';
 import WorkerCaller from '@/workers/Caller.worker';
+import WorkerDepleter from '@/workers/Depleter.worker';
 import "@fontsource/ibm-plex-sans";
 import {
   SidebarContent,
@@ -127,6 +133,7 @@ export default defineComponent({
     SidebarTrigger,
     Codesandbox,
     Dna,
+    Funnel,
     Map,
     Spline,
     ScanFace,
@@ -134,6 +141,7 @@ export default defineComponent({
     MappingAlignmentPage,
     TaxonomicIDPage,
     GeneCallingPage,
+    HostDepletionPage,
     KmerHistogram,
     ResultsDisplayMapping,
     ResultsDisplayAlignment,
@@ -154,6 +162,7 @@ export default defineComponent({
         {id: 'Alignment', label: 'Alignment', icon: 'Spline'},
         {id: 'TaxonomicID', label: 'Taxonomic ID', icon: 'ScanFace'},
         {id: 'GeneCalling', label: 'Gene calling', icon: 'Dna'},
+        {id: 'HostDepletion', label: 'Host depletion', icon: 'Funnel'},
       ] as Tab[]
     }
   },
@@ -214,6 +223,15 @@ export default defineComponent({
                 throw new Error("WebWorkers are not supported by this web browser.");
             }
        });
+    import("@/pkg_deacon")
+        .then(() => {
+            if (window.Worker) {
+                const worker = new WorkerDepleter();
+                this.store.commit('SET_WORKER_DEACON', worker);
+            } else {
+                throw new Error("WebWorkers are not supported by this web browser.");
+            }
+        });
   },
 
   methods: {

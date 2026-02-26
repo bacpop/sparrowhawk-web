@@ -58,6 +58,9 @@ export default {
     SET_WORKER_ORPHOS(state: RootState, worker: Worker | null) {
         state.workerState.worker_orphos = worker;
     },
+    SET_WORKER_DEACON(state: RootState, worker: Worker | null) {
+        state.workerState.worker_deacon = worker;
+    },
 
     setPreprocessing(state: RootState, input: { nKmers: number, histo: [], used_min_count: number }) {
         console.log("Preprocessing finished! Saving intermediate information in the state");
@@ -236,5 +239,44 @@ export default {
        if (state.workerState.worker_orphos) {
            state.workerState.worker_orphos.postMessage({reset: true});
        }
-   }
+   },
+
+    // DEACON
+    setLoadingDeaconIndex(state: RootState) {
+        state.allResults_deacon.isLoadingIndex = true;
+    },
+    setDeaconIndexLoaded(state: RootState, input: { fileName: string; info: string }) {
+        state.allResults_deacon.isLoadingIndex = false;
+        state.allResults_deacon.indexLoaded = true;
+        state.allResults_deacon.indexFileName = input.fileName;
+        state.allResults_deacon.indexInfo = input.info;
+    },
+    setFilteringDeacon(state: RootState, readsFileName: string) {
+        state.allResults_deacon.isFiltering = true;
+        state.allResults_deacon.readsFileName = readsFileName;
+    },
+    saveDeaconFilterResults(state: RootState, input: { total: number; outputGzip: Uint8Array }) {
+        state.allResults_deacon.isFiltering = false;
+        state.allResults_deacon.totalReads = input.total;
+        state.allResults_deacon.keptReads = null;
+        state.allResults_deacon.removedReads = null;
+        state.allResults_deacon.outputGzip = input.outputGzip;
+    },
+    resetAllResults_deacon(state: RootState) {
+        state.allResults_deacon = {
+            indexFileName: null,
+            indexInfo: null,
+            indexLoaded: false,
+            isLoadingIndex: false,
+            isFiltering: false,
+            readsFileName: null,
+            totalReads: null,
+            keptReads: null,
+            removedReads: null,
+            outputGzip: null,
+        };
+        if (state.workerState.worker_deacon) {
+            state.workerState.worker_deacon.postMessage({ reset: true });
+        }
+    },
 };

@@ -435,5 +435,39 @@ export default {
     async resetAllResults_orphos(context: ActionContext<RootState, RootState>) {
         const { commit } = context;
         commit("resetAllResults_orphos");
-    }
+    },
+
+    // DEACON
+    async loadDeaconIndex(context: ActionContext<RootState, RootState>, payload: { file: File }) {
+        const { commit, state } = context;
+        if (!state.workerState.worker_deacon) return;
+        commit("setLoadingDeaconIndex");
+        state.workerState.worker_deacon.postMessage({ loadIndex: true, file: payload.file });
+        state.workerState.worker_deacon.onmessage = (msg) => {
+            if (msg.data.indexLoaded) commit("setDeaconIndexLoaded", { fileName: msg.data.fileName, info: msg.data.info });
+        };
+    },
+    async filterDeaconReads(context: ActionContext<RootState, RootState>, payload: { file: File; deplete: boolean; abs_threshold: number; rel_threshold: number }) {
+        const { commit, state } = context;
+        if (!state.workerState.worker_deacon) return;
+        commit("setFilteringDeacon", payload.file.name);
+        state.workerState.worker_deacon.postMessage({
+            filter: true,
+            file: payload.file,
+            deplete: payload.deplete,
+            abs_threshold: payload.abs_threshold,
+            rel_threshold: payload.rel_threshold,
+        });
+        state.workerState.worker_deacon.onmessage = (msg) => {
+            if (msg.data.filtered) {
+                commit("saveDeaconFilterResults", {
+                    total: msg.data.total,
+                    outputGzip: msg.data.outputGzip,
+                });
+            }
+        };
+    },
+    async resetAllResults_deacon(context: ActionContext<RootState, RootState>) {
+        context.commit("resetAllResults_deacon");
+    },
 };

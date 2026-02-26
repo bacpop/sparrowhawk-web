@@ -4,6 +4,7 @@ export interface WorkerState {
     worker: Worker | null;
     worker_ska: Worker | null;
     worker_orphos: Worker | null;
+    worker_deacon: Worker | null;
     workers_sketchlib: Worker[];
 }
 
@@ -50,6 +51,19 @@ export interface AllResultsOrphos {
     geneCount: number | null
     sequenceCount: number | null
     callingGenes: boolean
+}
+
+export interface AllResultsDeacon {
+    indexFileName: string | null;
+    indexInfo: string | null;
+    indexLoaded: boolean;
+    isLoadingIndex: boolean;
+    isFiltering: boolean;
+    readsFileName: string | null;
+    totalReads: number | null;
+    keptReads: number | null;
+    removedReads: number | null;
+    outputGzip: Uint8Array | null;
 }
 
 export interface ReadsPreprocessing {

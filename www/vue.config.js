@@ -108,6 +108,19 @@ module.exports = defineConfig({
             )
             .end()
 
+        config
+            .plugin("wasm-pack_deacon")
+            .use(WasmPackPlugin)
+            .init(
+                (Plugin) =>
+                    new Plugin({
+                        crateDirectory: path.resolve(__dirname, "../rust/deacon/deacon-web"),
+                        outDir: path.resolve(__dirname, "./src/pkg_deacon"),
+                        forceMode: "production",
+                    })
+            )
+            .end()
+
         config.module
             .rule("js")
             .exclude

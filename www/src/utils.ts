@@ -37,10 +37,24 @@ export const emptyState = (): RootState => ({
         callingGenes: false,
     },
 
+    allResults_deacon: {
+        indexFileName: null,
+        indexInfo: null,
+        indexLoaded: false,
+        isLoadingIndex: false,
+        isFiltering: false,
+        readsFileName: null,
+        totalReads: null,
+        keptReads: null,
+        removedReads: null,
+        outputGzip: null,
+    },
+
     workerState: {
         worker: null,
         worker_ska: null,
         worker_orphos: null,
+        worker_deacon: null,
         workers_sketchlib: [],
     },
 
