@@ -251,16 +251,18 @@ export default {
         state.allResults_deacon.indexFileName = input.fileName;
         state.allResults_deacon.indexInfo = input.info;
     },
-    setFilteringDeacon(state: RootState, readsFileName: string) {
+    setFilteringDeacon(state: RootState, input: { fileName: string; fileName2: string | null }) {
         state.allResults_deacon.isFiltering = true;
-        state.allResults_deacon.readsFileName = readsFileName;
+        state.allResults_deacon.readsFileName = input.fileName;
+        state.allResults_deacon.readsFileName2 = input.fileName2;
     },
-    saveDeaconFilterResults(state: RootState, input: { total: number; outputGzip: Uint8Array }) {
+    saveDeaconFilterResults(state: RootState, input: { total: number; outputGzip: Uint8Array; outputGzip2?: Uint8Array | null }) {
         state.allResults_deacon.isFiltering = false;
         state.allResults_deacon.totalReads = input.total;
         state.allResults_deacon.keptReads = null;
         state.allResults_deacon.removedReads = null;
         state.allResults_deacon.outputGzip = input.outputGzip;
+        state.allResults_deacon.outputGzip2 = input.outputGzip2 ?? null;
     },
     resetAllResults_deacon(state: RootState) {
         state.allResults_deacon = {
@@ -270,10 +272,12 @@ export default {
             isLoadingIndex: false,
             isFiltering: false,
             readsFileName: null,
+            readsFileName2: null,
             totalReads: null,
             keptReads: null,
             removedReads: null,
             outputGzip: null,
+            outputGzip2: null,
         };
         if (state.workerState.worker_deacon) {
             state.workerState.worker_deacon.postMessage({ reset: true });

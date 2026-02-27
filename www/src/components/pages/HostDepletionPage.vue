@@ -221,7 +221,7 @@ export default defineComponent({
     function onDropReads(acceptFiles: File[]): void {
       if (acceptFiles.length === 0) return;
       filterDeaconReads({
-        file: acceptFiles[0],
+        files: acceptFiles,
         deplete: deplete.value,
         abs_threshold: abs_threshold.value,
         rel_threshold: rel_threshold.value,
@@ -245,7 +245,7 @@ export default defineComponent({
     } = useDropzone({
       onDrop: onDropReads,
       accept: [".fastq", ".fq", ".fastq.gz", ".fq.gz"],
-      multiple: false,
+      multiple: true,
     });
 
     return {

@@ -1,6 +1,7 @@
 import {ActionContext} from "vuex";
 import {RootState} from "@/store/state";
 import WorkerSketcher from '@/workers/Sketcher.worker';
+import {findReadPair, regExpWithTwoNumbers, regExpWithOneOnly, regExpForAnyFastx} from "@/utils";
 
 export default {
     async processReads(context: ActionContext<RootState, RootState>, payload: {
@@ -174,24 +175,16 @@ export default {
 
     async processQueryMap(context: ActionContext<RootState, RootState>, payload: {
         acceptFiles: Array<File>,
-        proportion_reads: number
+        proportion_reads: number,
+        min_count: number,
+        min_qual: number,
+        qual_filter: number
     }) {
         const {commit, state} = context;
         console.log("Query files uploaded mapping")
-        const findReadPair = (fileName: string, files: Array<File>): {
-            pairFile: File | undefined,
-            sampleName: string
-        } => {
-            const baseName = fileName.replace(/(_1.fastq.gz|_1.fq.gz)$/, '');
-            const pairNameFastq = baseName + '_2.fastq.gz';
-            const pairNameFq = baseName + '_2.fq.gz';
-            const pairFile = files.find(file => file.name === pairNameFastq || file.name === pairNameFq);
-            return {pairFile, sampleName: baseName};
-        };
 
         // Set mapping state
         commit("setMappingState", true);
-
         payload.acceptFiles.forEach((file: File) => {
             let sendJob: boolean = false;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -200,9 +193,12 @@ export default {
                 file,
                 revReads: null,
                 sampleName: null,
-                proportion_reads: payload.proportion_reads
+                proportion_reads: payload.proportion_reads,
+                min_count: payload.min_count,
+                min_qual: payload.min_qual,
+                qual_filter: payload.qual_filter
             };
-            if (/(_1|_2)(.fastq.gz|.fq.gz)$/.test(file.name)) {
+            if (regExpWithTwoNumbers.test(file.name)) {
                 const {pairFile, sampleName} = findReadPair(file.name, payload.acceptFiles);
                 messageData.sampleName = sampleName;
                 if (pairFile) {
@@ -210,12 +206,12 @@ export default {
                     sendJob = true;
                 } else {
                     // Triggers on _2 input file too
-                    if (/_1(.fastq.gz|.fq.gz)$/.test(file.name)) {
+                    if (regExpWithOneOnly.test(file.name)) {
                         console.log(file.name + ": only one fastq found")
                     }
                 }
             } else {
-                messageData.sampleName = file.name.replace(/(.fasta|.fasta.gz|.fa|.fa.gz|.fq|.fastq)$/, '');
+                messageData.sampleName = file.name.replace(regExpForAnyFastx, '');
                 sendJob = true;
             }
 
@@ -284,7 +280,7 @@ export default {
         commit("resetAllResults_ska");
     },
 
-    async identifyFiles(context: ActionContext<RootState, RootState>, payload: { acceptFiles: Array<File> }) {
+    async identifyFiles(context: ActionContext<RootState, RootState>, payload: { acceptFiles: Array<File>, proportion_reads: number, min_count: number, min_qual: number }) {
         const {commit, state} = context;
         console.log("Uploaded file(s) for taxonomic identification");
 
@@ -293,18 +289,6 @@ export default {
             console.log("No sketchlib workers available");
             return;
         }
-
-        // Helper to find paired-end read file
-        const findReadPair = (fileName: string, files: Array<File>): {
-            pairFile: File | undefined,
-            sampleName: string
-        } => {
-            const baseName = fileName.replace(/(_1.fastq.gz|_1.fq.gz)$/, '');
-            const pairNameFastq = baseName + '_2.fastq.gz';
-            const pairNameFq = baseName + '_2.fq.gz';
-            const pairFile = files.find(file => file.name === pairNameFastq || file.name === pairNameFq);
-            return {pairFile, sampleName: baseName};
-        };
 
         // Build list of samples to process
         interface SampleToProcess {
@@ -315,8 +299,8 @@ export default {
         const samplesToProcess: SampleToProcess[] = [];
 
         payload.acceptFiles.forEach((file: File) => {
-            if (/(_1|_2)(.fastq.gz|.fq.gz)$/.test(file.name)) {
-                if (/_1(.fastq.gz|.fq.gz)$/.test(file.name)) {
+            if (regExpWithTwoNumbers.test(file.name)) {
+                if (regExpWithOneOnly.test(file.name)) {
                     const {pairFile, sampleName} = findReadPair(file.name, payload.acceptFiles);
                     if (pairFile) {
                         samplesToProcess.push({sampleName, file1: file, file2: pairFile});
@@ -325,7 +309,7 @@ export default {
                     }
                 }
             } else {
-                const sampleName = file.name.replace(/(.fasta|.fasta.gz|.fa|.fa.gz|.fq|.fq.gz|.fastq|.fastq.gz)$/, '');
+                const sampleName = file.name.replace(regExpForAnyFastx, '');
                 samplesToProcess.push({sampleName, file1: file, file2: null});
             }
         });
@@ -366,6 +350,9 @@ export default {
                 file1: sample.file1,
                 file2: sample.file2,
                 sampleName: sample.sampleName,
+                proportion_reads: payload.proportion_reads,
+                min_count: payload.min_count,
+                min_qual: payload.min_qual,
             });
         });
     },
@@ -447,26 +434,65 @@ export default {
             if (msg.data.indexLoaded) commit("setDeaconIndexLoaded", { fileName: msg.data.fileName, info: msg.data.info });
         };
     },
-    async filterDeaconReads(context: ActionContext<RootState, RootState>, payload: { file: File; deplete: boolean; abs_threshold: number; rel_threshold: number }) {
+    async filterDeaconReads(context: ActionContext<RootState, RootState>, payload: { files: Array<File>; deplete: boolean; abs_threshold: number; rel_threshold: number }) {
         const { commit, state } = context;
         if (!state.workerState.worker_deacon) return;
-        commit("setFilteringDeacon", payload.file.name);
-        state.workerState.worker_deacon.postMessage({
-            filter: true,
-            file: payload.file,
-            deplete: payload.deplete,
-            abs_threshold: payload.abs_threshold,
-            rel_threshold: payload.rel_threshold,
-        });
-        state.workerState.worker_deacon.onmessage = (msg) => {
-            if (msg.data.filtered) {
-                commit("saveDeaconFilterResults", {
-                    total: msg.data.total,
-                    outputGzip: msg.data.outputGzip,
-                });
+        const workerDeacon = state.workerState.worker_deacon;
+
+        // Check the input files we've got. Actually, this is here so that we can later parallelise if we want, similarly to tax. ID.
+        if (payload.files.length > 2) {
+            console.log("More than two read files have been uploaded. This case is not supported.");
+            commit("resetAllResults_deacon");
+        }
+
+        payload.files.forEach((file: File) => {
+            let sendJob: boolean = false;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const messageData: any = {
+                filter: true,
+                file: file,
+                revReads: null,
+                deplete: payload.deplete,
+                abs_threshold: payload.abs_threshold,
+                rel_threshold: payload.rel_threshold,
+            };
+
+            if (regExpWithTwoNumbers.test(file.name)) {
+                const {pairFile, sampleName} = findReadPair(file.name, payload.files);
+                messageData.sampleName = sampleName;
+                if (pairFile) {
+                    messageData.revReads = pairFile;
+                    sendJob = true;
+                } else {
+                    // Triggers on _2 input file too
+                    if (regExpWithOneOnly.test(file.name)) {
+                        console.log(file.name + ": only one fastq found")
+                    }
+                }
+            } else {
+                messageData.sampleName = file.name.replace(regExpForAnyFastx, '');
+                sendJob = true;
             }
-        };
+
+            if (sendJob) {
+                commit("setFilteringDeacon", { fileName: messageData.sampleName, fileName2: messageData.revReads?.name ?? null });
+
+                workerDeacon.postMessage(messageData);
+
+                workerDeacon.onmessage = (msg) => {
+                    if (msg.data.filtered) {
+                        commit("saveDeaconFilterResults", {
+                            total: msg.data.total,
+                            outputGzip: msg.data.outputGzip,
+                            outputGzip2: msg.data.outputGzip2 ?? null,
+                        });
+                    }
+                };
+            }
+        });
+
     },
+
     async resetAllResults_deacon(context: ActionContext<RootState, RootState>) {
         context.commit("resetAllResults_deacon");
     },

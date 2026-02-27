@@ -17,16 +17,24 @@ export class Depleter {
         this.worker.postMessage({ indexLoaded: true, fileName: file.name, info: this.index.info() });
     }
 
-    async filterReads(file: File, deplete: boolean, abs_threshold: number, rel_threshold: number): Promise<void> {
+    async filterReads(file: File, revFile: File | null, deplete: boolean, abs_threshold: number, rel_threshold: number): Promise<void> {
         const buf = await file.arrayBuffer();
         const inputBytes = new Uint8Array(buf);
-        const outputGzip: Uint8Array = this.wasm!.filter(this.index!, inputBytes, deplete, abs_threshold, rel_threshold);
-        const lines = new TextDecoder().decode(inputBytes).split('\n').filter(l => l.length > 0);
-        const total = Math.floor(lines.length / 4);
-        this.worker.postMessage(
-            { filtered: true, total, outputGzip, fileName: file.name },
-            [outputGzip.buffer],
+        const total = Math.floor(
+            new TextDecoder().decode(inputBytes).split('\n').filter(l => l.length > 0).length / 4
         );
+        if (revFile) {
+            // Paired filtering not yet implemented; no-op
+            return;
+        } else {
+            const outputGzip: Uint8Array = this.wasm!.filter(
+                this.index!, inputBytes, !deplete, abs_threshold, rel_threshold
+            );
+            this.worker.postMessage(
+                { filtered: true, total, outputGzip },
+                [outputGzip.buffer],
+            );
+        }
     }
 
     resetAll(): void {

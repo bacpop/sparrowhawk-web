@@ -5,7 +5,7 @@ interface IdentifyResult {
 }
 
 interface SketchlibData {
-    query(file1: File, file2: File | null): Promise<void>;
+    query(file1: File, file2: File | null, proportion_reads: number, min_count: number, min_qual: number): Promise<void>;
     get_probs(top_n: number): string;
 }
 
@@ -35,7 +35,7 @@ export class Sketcher {
         return this.wasm ? Promise.resolve(this.wasm) : this.wasmPromise;
     }
 
-    async identifyThisFile(file1: File, file2: File | null, sampleName: string): Promise<void> {
+    async identifyThisFile(file1: File, file2: File | null, sampleName: string, proportion_reads: number, min_count: number, min_qual: number): Promise<void> {
         console.log("Starting identification for sample: " + sampleName);
         await this.waitForWasm();
 
@@ -46,7 +46,7 @@ export class Sketcher {
             this.SketchlibData = await this.wasm.SketchlibData.new(invertedindex);
         }
 
-        await this.SketchlibData!.query(file1, file2);
+        await this.SketchlibData!.query(file1, file2, proportion_reads, min_count, min_qual);
 
         const results: IdentifyResult = JSON.parse(this.SketchlibData!.get_probs(3));
 

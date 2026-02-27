@@ -17,22 +17,49 @@
                   <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p class="max-w-xs">Controls the size of the subsequences (k-mers) used to process the reads. Maximum value is 63 for this mode.</p>
+                  <p class="max-w-xs">Controls the filtering of nucleotides depending on the sequencing error information.</p>
                 </TooltipContent>
               </Tooltip>
-              k
+              Min Illumina read quality
             </p>
             <div class="flex flex-row items-center w-full gap-2">
               <VueSlider class="flex-grow"
-                         v-model="k"
+                         v-model="min_qual"
                          :lazy="true"
-                         :min="5"
-                         :max="63"
-                         :interval="2"
+                         :min="0"
+                         :max="33"
+                         :interval="1"
                          :disabled="isIdentifying"
               />
               <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
-                {{ k }}
+                {{ min_qual }}
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <p class="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <Info class="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p class="max-w-xs">Only k-mers appearing more than this value will be used.</p>
+                </TooltipContent>
+              </Tooltip>
+              Min counts for k-mer filtering
+            </p>
+            <div class="flex flex-row items-center w-full gap-2">
+              <VueSlider class="flex-grow"
+                         v-model="min_count"
+                         :lazy="true"
+                         :min="1"
+                         :max="30"
+                         :interval="1"
+                         :disabled="isIdentifying"
+              />
+              <span class="block w-[40px] text-center border border-gray-300 rounded-md text-sm">
+                {{ min_count }}
               </span>
             </div>
           </div>
@@ -185,8 +212,9 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
-    const k: Ref<number> = ref(31);
     const proportion_reads: Ref<number> = ref(1);
+    const min_qual: Ref<number> = ref(20);
+    const min_count: Ref<number> = ref(5);
     const uploadedFileNames: Ref<string[]> = ref([]);
 
     const { identifyFiles, resetAllResults_sketchlib, initSketchlibWorkers } = useActions(["identifyFiles", "resetAllResults_sketchlib", "initSketchlibWorkers"]);
@@ -201,7 +229,7 @@ export default defineComponent({
 
     function onDropSample(acceptFiles: File[]): void {
       uploadedFileNames.value = acceptFiles.map(f => f.name);
-      identifyFiles({ acceptFiles: acceptFiles, k: k.value, proportion_reads: proportion_reads.value });
+      identifyFiles({ acceptFiles: acceptFiles, proportion_reads: proportion_reads.value, min_count: min_count.value, min_qual: min_qual.value });
     }
     function resetAll(): void {
       uploadedFileNames.value = [];
@@ -258,8 +286,9 @@ export default defineComponent({
     });
 
     return {
-      k,
       proportion_reads,
+      min_qual,
+      min_count,
       numWorkers,
       onNumWorkersChange,
       uploadedFileNames,

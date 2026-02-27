@@ -60,10 +60,12 @@ export interface AllResultsDeacon {
     isLoadingIndex: boolean;
     isFiltering: boolean;
     readsFileName: string | null;
+    readsFileName2: string | null;
     totalReads: number | null;
     keptReads: number | null;
     removedReads: number | null;
     outputGzip: Uint8Array | null;
+    outputGzip2: Uint8Array | null;
 }
 
 export interface ReadsPreprocessing {

@@ -15,15 +15,15 @@ interface AssemblyResult {
 interface WasmModule {
     AssemblyHelper: {
         new(
+            file1: File,
+            file2: File,
             k: number,
             verbose: boolean,
             min_count: number,
             min_qual: number,
-            csize: number,
+            chunk_size: number,
             do_bloom: boolean,
             do_fit: boolean,
-            no_bubble_collapse: boolean,
-            no_dead_end_removal: boolean
         ): AssemblyHelper;
     };
 }
@@ -32,9 +32,8 @@ interface WasmModule {
 type WasmModuleAny = any;
 
 interface AssemblyHelper {
-    preprocess(file1: File, file2: File): void;
     get_preprocessing_info(): string;
-    assemble(): void;
+    assemble(no_bubble_collapse: boolean, no_dead_end_removal: boolean): void;
     get_assembly(): string;
 }
 
@@ -43,6 +42,8 @@ export class Assembler {
     wasm: WasmModuleAny | null;
     helper: AssemblyHelper | null;
     wasmPromise: Promise<WasmModuleAny>;
+    noBubbleCollapse: boolean = false;
+    noDeadEndRemoval: boolean = false;
 
     constructor(worker: Worker) {
         this.worker = worker;
@@ -77,44 +78,39 @@ export class Assembler {
     ): Promise<void> {
         await this.waitForWasm();
 
+        this.noBubbleCollapse = no_bubble_collapse;
+        this.noDeadEndRemoval = no_dead_end_removal;
+
         if (this.helper === null) {
-            this.helper = this.wasm!.AssemblyHelper.new(
-                k,
-                verbose,
-                min_count,
-                min_qual,
-                csize,
-                do_bloom,
-                do_fit,
-                no_bubble_collapse,
-                no_dead_end_removal
-            );
+            try {
+                this.helper = this.wasm!.AssemblyHelper.new(
+                    file1, file2,
+                    k, verbose,
+                    min_count, min_qual,
+                    csize, do_bloom, do_fit
+                );
+            } catch (error) {
+                console.log("Webassembly error found! Most surely, memory issue.");
+                console.error(error);
+                this.worker.postMessage({ reset: true });
+                return;
+            }
         }
 
-        try {
-            this.helper!.preprocess(
-                file1,
-                file2
-            );
-        } catch (error) {
-            console.log("Webassembly error found! Most surely, memory issue.");
-            console.error(error);
-            this.worker.postMessage({ reset: true });
-            return;
-        }
-
-        const resultsjson: PreprocessingResult = JSON.parse(this.helper!.get_preprocessing_info());
+        const resultsjson: PreprocessingResult = JSON.parse(
+            this.helper!.get_preprocessing_info()
+        );
 
         this.worker.postMessage({
-            nKmers: resultsjson.nkmers,
-            histo: resultsjson.histo,
-            used_min_count: resultsjson.used_min_count
+            nKmers:         resultsjson.nkmers,
+            histo:          resultsjson.histo,
+            used_min_count: resultsjson.used_min_count,
         });
     }
 
     async assemble(): Promise<void> {
         console.log("Initiating assembly from worker");
-        this.helper!.assemble();
+        this.helper!.assemble(this.noBubbleCollapse, this.noDeadEndRemoval);
 
         console.log("Assembly finished");
         const resultsjson: AssemblyResult = JSON.parse(this.helper!.get_assembly());
