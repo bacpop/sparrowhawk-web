@@ -12,6 +12,7 @@ ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF ./ ../rust/sparrowhawk
 # values to keep them out of your source repository.
 [context.production.environment]
 NODE_VERSION = "24"
+RUST_VERSION = "stable"
 #NODE_ENV = "development"
 
 # Deploy Preview context: all deploys generated from
