@@ -10,7 +10,7 @@ ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF ./ ../rust/sparrowhawk
 # these settings. You can define environment variables
 # here but we recommend using the Netlify UI for sensitive
 # values to keep them out of your source repository.
-[context.production.environment]
+[build.environment]
 NODE_VERSION = "24"
 RUST_VERSION = "stable"
 #NODE_ENV = "development"
