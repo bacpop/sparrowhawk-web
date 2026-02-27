@@ -1,9 +1,9 @@
 [build]
 base = "www/"
 publish = "dist/"
-command = "npm run build"
+command = "rustup default stable && rustup target add wasm32-unknown-unknown && npm run build"
 
-ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF ./ ../rust/sparrowhawk  ../rust/ska.rust  ../rust/sketchlib.rust"
+ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF ./ ../rust/sparrowhawk  ../rust/ska.rust  ../rust/sketchlib.rust ../rust/deacon"
 
 # Production context: all deploys from the Production branch
 # set in your site’s Branches settings in the UI will inherit
