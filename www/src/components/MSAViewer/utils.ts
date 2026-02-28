@@ -32,7 +32,7 @@ export function parseFasta(content: string): MSASequence[] {
  */
 export function detectFileType(filename: string, text: string): 'alignment' | 'unknown' {
   const lower = filename.toLowerCase();
-  if (/\.(fasta|fas|fa)$/.test(lower)) return 'alignment';
+  if (/\.(fasta|fas|fa|fna)$/.test(lower)) return 'alignment';
 
   const head = text.slice(0, 2000);
   if (/^>\S/m.test(head)) return 'alignment';

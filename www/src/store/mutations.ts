@@ -104,6 +104,13 @@ export default {
 
     },
 
+    setFileCountError(state: RootState) {
+        console.log("Setting file count error in state");
+
+        state.errors = "file_count";
+
+    },
+
     resetAllResults(state: RootState) {
         state.readsFileNames = null;
         state.min_count = 0;
