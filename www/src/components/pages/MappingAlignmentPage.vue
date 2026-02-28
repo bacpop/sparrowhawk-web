@@ -258,7 +258,14 @@ export default defineComponent({
     }
 
     function onDropQueryAlign(acceptFiles: File[]): void {
-      uploadedAlignmentFiles.value = acceptFiles.map(f => f.name);
+      const newNames = acceptFiles.map(f => f.name);
+      // Append new files to the existing list, avoiding duplicates
+      const existingNames = new Set(uploadedAlignmentFiles.value);
+      for (const name of newNames) {
+        if (!existingNames.has(name)) {
+          uploadedAlignmentFiles.value.push(name);
+        }
+      }
       processQueryAlign({ acceptFiles: acceptFiles, k: k.value, proportion_reads: proportion_reads.value });
     }
 
@@ -275,7 +282,7 @@ export default defineComponent({
       ...restMapping
     } = useDropzone({
       onDrop: onDropMapping,
-      accept: [".fa", ".fasta", ".gz", ".fastq"]
+      accept: [".fa", ".fasta", ".fna", ".gz", ".fastq", ".fq"]
     });
 
     const {
@@ -285,7 +292,7 @@ export default defineComponent({
       ...restQueryAlign
     } = useDropzone({
       onDrop: onDropQueryAlign,
-      accept: [".fa", ".fasta", ".gz", ".fastq", ".fq"]
+      accept: [".fa", ".fasta", ".fna", ".gz", ".fastq", ".fq"]
     });
 
     return {

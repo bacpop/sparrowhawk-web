@@ -50,6 +50,9 @@ export const getters: GetterTree<RootState, RootState> = {
     getErrors(state: RootState) {
         return (state.errors != "");
     },
+    getErrorType(state: RootState) {
+        return state.errors;
+    },
     readsName(state: RootState) {
         return state.readsFileNames;
     },
