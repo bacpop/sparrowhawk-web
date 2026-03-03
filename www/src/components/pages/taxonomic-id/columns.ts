@@ -58,7 +58,7 @@ export const columns: ColumnDef<TaxonomicIDRow>[] = [
     },
     {
         accessorKey: 'probability',
-        header: sortableHeader('Probability', 'right'),
+        header: sortableHeader('K-mer matches', 'right'),
         cell: ({ row }) => {
             const prob = row.getValue('probability') as number
             return h('div', { class: 'text-right font-medium' }, `${(prob * 100).toFixed(1)}%`)

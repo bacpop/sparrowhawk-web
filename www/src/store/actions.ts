@@ -82,6 +82,8 @@ export default {
             } else {
                 console.log("No paired-end two files uploaded. This case is not supported.");
                 commit("resetAllResults");
+                commit("removeErrors");
+                commit("setFileCountError");
             }
         }
     },

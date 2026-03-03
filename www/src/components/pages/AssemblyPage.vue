@@ -179,10 +179,14 @@
     </div>
 
     <div class="min-w-0 flex-1 overflow-hidden pt-12">
-      <h5 class="memory_error_message" v-if="errorInProcessing">
-        Error found while processing! It is most surely a memory issue: try increasing the chunking, or using a Bloom
-        filter
-      </h5>
+      <div v-if="errorInProcessing" class="mx-6 mr-0 mb-4 p-3 bg-red-50 border border-red-300 rounded-md text-sm text-red-800">
+        <template v-if="assemblyErrorType === 'file_count'">
+          Assembly requires two paired-end FASTQ files (e.g. <code class="font-mono">sample_1.fastq.gz</code> and <code class="font-mono">sample_2.fastq.gz</code>). Please upload two files and try again.
+        </template>
+        <template v-else>
+          Error found while processing! It is most surely a memory issue: try increasing the chunking, or using a Bloom filter.
+        </template>
+      </div>
 
       <!-- Assembly tab -->
       <div v-if="tabName=='Assembly'">
@@ -399,6 +403,9 @@ export default defineComponent({
     },
     errorInProcessing(): boolean {
       return this.store.getters.getErrors;
+    },
+    assemblyErrorType(): string {
+      return this.store.getters.getErrorType;
     },
     readsName(): string {
       return this.store.getters.readsName;
