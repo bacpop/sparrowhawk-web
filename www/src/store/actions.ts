@@ -81,6 +81,8 @@ export default {
             } else {
                 console.log("No paired-end two files uploaded. This case is not supported.");
                 commit("resetAllResults");
+                commit("removeErrors");
+                commit("setFileCountError");
             }
         }
     },
@@ -196,7 +198,7 @@ export default {
                     }
                 }
             } else {
-                messageData.sampleName = file.name.replace(/(.fasta|.fasta.gz|.fa|.fa.gz|.fq|.fastq)$/, '');
+                messageData.sampleName = file.name.replace(/(.fasta|.fasta.gz|.fna|.fna.gz|.fa|.fa.gz|.fq|.fastq)$/, '');
                 sendJob = true;
             }
 
@@ -298,7 +300,7 @@ export default {
                     }
                 }
             } else {
-                const sampleName = file.name.replace(/(.fasta|.fasta.gz|.fa|.fa.gz|.fq|.fq.gz|.fastq|.fastq.gz)$/, '');
+                const sampleName = file.name.replace(/(.fasta|.fasta.gz|.fna|.fna.gz|.fa|.fa.gz|.fq|.fq.gz|.fastq|.fastq.gz)$/, '');
                 samplesToProcess.push({sampleName, file1: file, file2: null});
             }
         });

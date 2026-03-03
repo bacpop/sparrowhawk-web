@@ -214,7 +214,7 @@ export default defineComponent({
       if (/(_1|_2)(.fastq.gz|.fq.gz)$/.test(fileName)) {
         return fileName.replace(/(_1.fastq.gz|_1.fq.gz|_2.fastq.gz|_2.fq.gz)$/, '');
       }
-      return fileName.replace(/(.fasta|.fasta.gz|.fa|.fa.gz|.fq|.fq.gz|.fastq|.fastq.gz)$/, '');
+      return fileName.replace(/(.fasta|.fasta.gz|.fna|.fna.gz|.fa|.fa.gz|.fq|.fq.gz|.fastq|.fastq.gz)$/, '');
     }
 
     const tableColumns = columns;
@@ -253,7 +253,7 @@ export default defineComponent({
       ...restSample
     } = useDropzone({
       onDrop: onDropSample,
-      accept: [".fa", ".fasta", ".gz", ".fastq", ".fq"],
+      accept: [".fa", ".fasta", ".fna", ".gz", ".fastq", ".fq"],
       multiple: true
     });
 

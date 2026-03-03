@@ -69,7 +69,7 @@ export class Mapper {
         this.worker.postMessage({
             nb_variants: results["Number of variants"],
             coverage: results["Coverage"],
-            name: file.name.replace(/(.fasta|.fasta.gz|.fa|.fa.gz|.fq|.fq.gz|.fastq|.fastq.gz|_1.fq.gz|_1.fastq.gz)$/, ''),
+            name: file.name.replace(/(.fasta|.fasta.gz|.fna|.fna.gz|.fa|.fa.gz|.fq|.fq.gz|.fastq|.fastq.gz|_1.fq.gz|_1.fastq.gz)$/, ''),
             mapped_sequences: results["Mapped sequences"],
         });
     }
