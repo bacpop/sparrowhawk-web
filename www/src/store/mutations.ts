@@ -283,4 +283,8 @@ export default {
             state.workerState.worker_deacon.postMessage({ reset: true });
         }
     },
+
+    setGpuAdapters(state: RootState, adapters: { index: number; name: string }[]) {
+        state.gpuAdapters = adapters;
+    },
 };

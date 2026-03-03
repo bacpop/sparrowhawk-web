@@ -71,6 +71,8 @@ export const emptyState = (): RootState => ({
         isIdentifyingFiles: new Set<string>(),
         assemblyState: '',
     },
+
+    gpuAdapters: [],
 });
 
 export const findReadPair = (fileName: string, files: Array<File>): {
