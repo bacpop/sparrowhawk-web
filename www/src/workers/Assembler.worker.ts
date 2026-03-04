@@ -3,7 +3,7 @@ import { Assembler } from './Assembler';
 interface PreprocessMessage {
     preprocess: boolean;
     file1: File;
-    file2: File;
+    file2: File | null;
     k: number;
     verbose: boolean;
     min_count: number;

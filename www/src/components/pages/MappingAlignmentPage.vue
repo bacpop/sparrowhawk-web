@@ -2,8 +2,8 @@
   <div class="flex flex-row">
     <div class="w-[350px] shrink-0">
       <h1 class="text-2xl font-medium mb-4 flex items-center gap-2">
-        <Map v-if="tabName === 'Mapping'" class="w-6 h-6" />
-        <Spline v-else-if="tabName === 'Alignment'" class="w-6 h-6" />
+        <TextAlignCenter v-if="tabName === 'Mapping'" class="w-6 h-6" />
+        <TreePine v-else-if="tabName === 'Alignment'" class="w-6 h-6" />
         {{ tabName }}
       </h1>
 
@@ -325,7 +325,7 @@ import { useStore } from "vuex";
 import VueSlider from 'vue-3-slider-component';
 import VueSelect from "vue3-select-component";
 import "vue3-select-component/styles";
-import { Check, FileUp, Loader2, Info, Map, Spline } from "lucide-vue-next";
+import { Check, FileUp, Loader2, Info, TextAlignCenter, TreePine } from "lucide-vue-next";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import MappingHelpCollapsible from "@/components/help/MappingHelpCollapsible.vue";
@@ -355,8 +355,8 @@ export default defineComponent({
     Loader2,
     Check,
     Info,
-    Map,
-    Spline,
+    TextAlignCenter,
+    TreePine,
     Tooltip,
     TooltipContent,
     TooltipProvider,

@@ -166,6 +166,12 @@
 
         <!-- Show results as a single table with expandable rows per sample -->
         <div v-if="sampleIdentified" class="px-6 mt-4">
+          <div class="flex justify-start mb-2">
+            <Button variant="outline" size="sm" @click="downloadTsv">
+              <Download class="mr-2 h-4 w-4" />
+              Download TSV
+            </Button>
+          </div>
           <div class="overflow-x-auto">
             <DataTable :columns="tableColumns" :data="tableData" />
           </div>
@@ -181,7 +187,8 @@ import { useStore } from "vuex";
 import { useDropzone } from "vue3-dropzone";
 import { useActions, useState } from "vuex-composition-helpers";
 import VueSlider from 'vue-3-slider-component';
-import { Check, FileUp, Loader2, Info, ScanFace } from "lucide-vue-next";
+import { Check, FileUp, Loader2, Info, ScanFace, Download } from "lucide-vue-next";
+import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import TaxonomicIDHelpCollapsible from "@/components/help/TaxonomicIDHelpCollapsible.vue";
 import DataTable from "@/components/pages/taxonomic-id/DataTable.vue";
@@ -204,6 +211,8 @@ export default defineComponent({
     Loader2,
     Info,
     ScanFace,
+    Download,
+    Button,
     Tooltip,
     TooltipContent,
     TooltipProvider,
@@ -275,6 +284,46 @@ export default defineComponent({
       return topLevelRows;
     });
 
+    function downloadTsv(): void {
+      const headers = [
+        "Sample", "Rank", "Species", "K-mer matches (%)",
+        "Species (metadata)", "Gemsparcl ID", "GTDB species composition",
+      ];
+
+      const rows: string[][] = [];
+      for (const row of tableData.value) {
+        rows.push([
+          row.sample,
+          String(row.rank),
+          row.species,
+          (row.probability * 100).toFixed(2),
+          row.metaSpecies,
+          row.metaGemsparcl,
+          row.metaGtdb,
+        ]);
+        for (const sub of row.subRows ?? []) {
+          rows.push([
+            sub.sample,
+            String(sub.rank),
+            sub.species,
+            (sub.probability * 100).toFixed(2),
+            sub.metaSpecies,
+            sub.metaGemsparcl,
+            sub.metaGtdb,
+          ]);
+        }
+      }
+
+      const tsv = [headers, ...rows].map(r => r.join("\t")).join("\n");
+      const blob = new Blob([tsv], { type: "text/tab-separated-values" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "sparrowhawk_id_results.tsv";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
     const {
       getRootProps: getRootPropsSample,
       getInputProps: getInputPropsSample,
@@ -301,6 +350,7 @@ export default defineComponent({
       getSampleNameFromFile,
       tableColumns,
       tableData,
+      downloadTsv,
       allResults_sketchlib,
       store,
       ...restSample,

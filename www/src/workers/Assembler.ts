@@ -15,8 +15,6 @@ interface AssemblyResult {
 interface WasmModule {
     AssemblyHelper: {
         new(
-            file1: File,
-            file2: File,
             k: number,
             verbose: boolean,
             min_count: number,
@@ -24,6 +22,8 @@ interface WasmModule {
             chunk_size: number,
             do_bloom: boolean,
             do_fit: boolean,
+            no_bubble_collapse: boolean,
+            no_dead_end_removal: boolean,
         ): AssemblyHelper;
     };
 }
@@ -32,8 +32,9 @@ interface WasmModule {
 type WasmModuleAny = any;
 
 interface AssemblyHelper {
+    preprocess(file1: File, file2: File | null): void;
     get_preprocessing_info(): string;
-    assemble(no_bubble_collapse: boolean, no_dead_end_removal: boolean): void;
+    assemble(): void;
     get_assembly(): string;
 }
 
@@ -65,7 +66,7 @@ export class Assembler {
 
     async preprocess(
         file1: File,
-        file2: File,
+        file2: File | null,
         k: number,
         verbose: boolean,
         min_count: number,
@@ -84,11 +85,12 @@ export class Assembler {
         if (this.helper === null) {
             try {
                 this.helper = this.wasm!.AssemblyHelper.new(
-                    file1, file2,
                     k, verbose,
                     min_count, min_qual,
-                    csize, do_bloom, do_fit
+                    csize, do_bloom, do_fit,
+                    no_bubble_collapse, no_dead_end_removal
                 );
+                this.helper!.preprocess(file1, file2);
             } catch (error) {
                 console.log("Webassembly error found! Most surely, memory issue.");
                 console.error(error);
@@ -110,7 +112,7 @@ export class Assembler {
 
     async assemble(): Promise<void> {
         console.log("Initiating assembly from worker");
-        this.helper!.assemble(this.noBubbleCollapse, this.noDeadEndRemoval);
+        this.helper!.assemble();
 
         console.log("Assembly finished");
         const resultsjson: AssemblyResult = JSON.parse(this.helper!.get_assembly());

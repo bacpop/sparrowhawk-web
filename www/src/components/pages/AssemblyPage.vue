@@ -181,7 +181,7 @@
     <div class="min-w-0 flex-1 overflow-hidden pt-12">
       <div v-if="errorInProcessing" class="mx-6 mr-0 mb-4 p-3 bg-red-50 border border-red-300 rounded-md text-sm text-red-800">
         <template v-if="assemblyErrorType === 'file_count'">
-          Assembly requires two paired-end FASTQ files (e.g. <code class="font-mono">sample_1.fastq.gz</code> and <code class="font-mono">sample_2.fastq.gz</code>). Please upload two files and try again.
+          Assembly requires one or two FASTQ files. Please upload between one and two files and try again.
         </template>
         <template v-else>
           Error found while processing! It is most surely a memory issue: try increasing the chunking, or using a Bloom filter.
@@ -206,7 +206,7 @@
             Drop files here ...
           </p>
           <p v-else>
-            Drop or click to upload your <b>paired end fastq read files</b>
+            Drop or click to upload your <b>FASTQ read files</b> (one or two)
           </p>
 
         </div>

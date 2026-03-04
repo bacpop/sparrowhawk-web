@@ -19,16 +19,16 @@ export default {
         console.log("Going to upload reads and assemble with k = " + payload.k + " min_count = " + payload.min_count + " min_qual = " + payload.min_qual + " csize = " + payload.csize + " do_bloom = " + payload.do_bloom)
         console.log("Checking number of uploaded files...")
         if (state.workerState.worker) {
-            if (payload.acceptFiles.length == 2) {
+            if (payload.acceptFiles.length > 0 && payload.acceptFiles.length < 3) {
                 commit("resetAllResults");
 
                 console.log("Removing errors if they are")
                 commit("removeErrors");
 
-                console.log("Two files uploaded. Saving filenames...")
+                console.log("File(s) uploaded. Saving filenames...")
                 commit("setReadsFileNames", {
                     file1: payload.acceptFiles[0].name,
-                    file2: payload.acceptFiles[1].name
+                    file2: payload.acceptFiles[1]?.name ?? null
                 });
 
                 state.min_count = payload.min_count;
@@ -40,7 +40,7 @@ export default {
                 state.workerState.worker.postMessage({
                     preprocess: true,
                     file1: payload.acceptFiles[0],
-                    file2: payload.acceptFiles[1],
+                    file2: payload.acceptFiles[1] ?? null,
                     min_count: payload.min_count,
                     min_qual: payload.min_qual,
                     k: payload.k,
@@ -80,7 +80,7 @@ export default {
                     }
                 };
             } else {
-                console.log("No paired-end two files uploaded. This case is not supported.");
+                console.log("Wrong number of files uploaded (must be 1 or 2).");
                 commit("resetAllResults");
                 commit("removeErrors");
                 commit("setFileCountError");
@@ -421,6 +421,7 @@ export default {
             if (msg.data.indexLoaded) commit("setDeaconIndexLoaded", { fileName: msg.data.fileName, info: msg.data.info });
         };
     },
+
     async filterDeaconReads(context: ActionContext<RootState, RootState>, payload: { files: Array<File>; deplete: boolean; abs_threshold: number; rel_threshold: number }) {
         const { commit, state } = context;
         if (!state.workerState.worker_deacon) return;

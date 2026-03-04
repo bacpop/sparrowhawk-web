@@ -80,7 +80,7 @@
 import {defineComponent} from 'vue';
 import {useStore} from 'vuex';
 // eslint-disable-next-line
-import {Codesandbox, Map, ScanFace, Spline, Dna, Funnel} from "lucide-vue-next";
+import {Codesandbox, ScanFace, TextAlignCenter, TreePine, Dna, Funnel} from "lucide-vue-next";
 
 import AssemblyPage from './components/pages/AssemblyPage.vue';
 import MappingAlignmentPage from './components/pages/MappingAlignmentPage.vue';
@@ -136,8 +136,8 @@ export default defineComponent({
     Codesandbox,
     Dna,
     Funnel,
-    Map,
-    Spline,
+    TextAlignCenter,
+    TreePine,
     ScanFace,
     AssemblyPage,
     MappingAlignmentPage,
@@ -160,8 +160,8 @@ export default defineComponent({
       tabName: 'Assembly' as string,
       tabs: [
         {id: 'Assembly', label: 'Assembly', icon: 'Codesandbox'},
-        {id: 'Mapping', label: 'Mapping', icon: 'Map'},
-        {id: 'Alignment', label: 'Alignment', icon: 'Spline'},
+        {id: 'Mapping', label: 'Mapping', icon: 'TextAlignCenter'},
+        {id: 'Alignment', label: 'Alignment', icon: 'TreePine'},
         {id: 'TaxonomicID', label: 'Taxonomic ID', icon: 'ScanFace'},
         {id: 'GeneCalling', label: 'Gene calling', icon: 'Dna'},
         {id: 'HostDepletion', label: 'Host depletion', icon: 'Funnel'},
