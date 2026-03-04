@@ -31,10 +31,7 @@ export const emptyState = (): RootState => ({
     },
 
     allResults_orphos: {
-        outputFile: "",
-        geneCount: null,
-        sequenceCount: null,
-        callingGenes: false,
+        results: {},
     },
 
     allResults_deacon: {
@@ -55,9 +52,9 @@ export const emptyState = (): RootState => ({
     workerState: {
         worker: null,
         worker_ska: null,
-        worker_orphos: null,
         worker_deacon: null,
         workers_sketchlib: [],
+        workers_orphos: [],
     },
 
     processingState: {
@@ -70,6 +67,8 @@ export const emptyState = (): RootState => ({
         isIdentifying: false,
         isIdentifyingFiles: new Set<string>(),
         assemblyState: '',
+        isCallingGenes: false,
+        isCallingGenesFiles: new Set<string>(),
     },
 });
 

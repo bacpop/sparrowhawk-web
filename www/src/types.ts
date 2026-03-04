@@ -3,9 +3,9 @@ export type Dict<T> = Record<string, T>
 export interface WorkerState {
     worker: Worker | null;
     worker_ska: Worker | null;
-    worker_orphos: Worker | null;
     worker_deacon: Worker | null;
     workers_sketchlib: Worker[];
+    workers_orphos: Worker[];
 }
 
 export interface AllResults {
@@ -46,11 +46,15 @@ export interface AllResultsSketchlib {
     results: Dict<SampleIdentifyResult>
 }
 
+export interface GeneCallResult {
+    fileName: string;
+    outputFile: string;
+    geneCount: number;
+    sequenceCount: number;
+}
+
 export interface AllResultsOrphos {
-    outputFile: string
-    geneCount: number | null
-    sequenceCount: number | null
-    callingGenes: boolean
+    results: Dict<GeneCallResult>;
 }
 
 export interface AllResultsDeacon {
@@ -84,4 +88,6 @@ export interface ProcessingState {
     isIdentifying: boolean;
     isIdentifyingFiles: Set<string>;  // Track which files are being identified
     assemblyState: string;  // Current state from Sparrowhawk assembly
+    isCallingGenes: boolean;
+    isCallingGenesFiles: Set<string>;
 }

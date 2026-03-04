@@ -1,6 +1,7 @@
 import {ActionContext} from "vuex";
 import {RootState} from "@/store/state";
 import WorkerSketcher from '@/workers/Sketcher.worker';
+import WorkerCaller from '@/workers/Caller.worker';
 import {findReadPair, regExpWithTwoNumbers, regExpWithOneOnly, regExpForAnyFastx, getFilesToProcess} from "@/utils";
 
 export default {
@@ -277,31 +278,9 @@ export default {
             return;
         }
 
-        // Build list of samples to process
-        interface SampleToProcess {
-            sampleName: string;
-            file1: File;
-            file2: File | null;
-        }
-        const samplesToProcess: SampleToProcess[] = [];
+        const indxlist = getFilesToProcess(payload.acceptFiles);
 
-        payload.acceptFiles.forEach((file: File) => {
-            if (regExpWithTwoNumbers.test(file.name)) {
-                if (regExpWithOneOnly.test(file.name)) {
-                    const {pairFile, sampleName} = findReadPair(file.name, payload.acceptFiles);
-                    if (pairFile) {
-                        samplesToProcess.push({sampleName, file1: file, file2: pairFile});
-                    } else {
-                        console.log(file.name + ": only one fastq found, skipping");
-                    }
-                }
-            } else {
-                const sampleName = file.name.replace(regExpForAnyFastx, '');
-                samplesToProcess.push({sampleName, file1: file, file2: null});
-            }
-        });
-
-        if (samplesToProcess.length === 0) {
+        if (indxlist.length === 0) {
             console.log("No valid samples found to process");
             return;
         }
@@ -315,10 +294,10 @@ export default {
                         console.log("Saving results for sample: " + sampleName);
                         commit("removeIdentifyingFile", sampleName);
                         commit("saveIDResults", {
-                            sampleName: sampleName,
+                            sampleName,
                             probs: messageData.data.probs,
                             names: messageData.data.names,
-                            metadata: messageData.data.metadata
+                            metadata: messageData.data.metadata,
                         });
                     } else {
                         console.log("Error found during processing");
@@ -328,15 +307,20 @@ export default {
         });
 
         // Distribute samples across the pool via round-robin
-        samplesToProcess.forEach((sample, index) => {
+        indxlist.forEach((sublist: number[], index: number) => {
+            const file1 = payload.acceptFiles[sublist[0]];
+            const file2 = sublist.length > 1 ? payload.acceptFiles[sublist[1]] : null;
+            const sampleName = sublist.length > 1
+                ? file1.name.replace(regExpWithTwoNumbers, "")
+                : file1.name.replace(regExpForAnyFastx, '');
             const worker = pool[index % pool.length];
-            console.log(`Queuing identification for sample: ${sample.sampleName} on worker ${index % pool.length}`);
-            commit("addIdentifyingFile", sample.sampleName);
+            console.log(`Queuing identification for sample: ${sampleName} on worker ${index % pool.length}`);
+            commit("addIdentifyingFile", sampleName);
             worker.postMessage({
                 identify: true,
-                file1: sample.file1,
-                file2: sample.file2,
-                sampleName: sample.sampleName,
+                file1,
+                file2,
+                sampleName,
                 proportion_reads: payload.proportion_reads,
                 min_count: payload.min_count,
                 min_qual: payload.min_qual,
@@ -365,8 +349,34 @@ export default {
     },
 
     // ORPHOS
-    async callGenes(context: ActionContext<RootState, RootState>, 
-        payload: { 
+    async initCallerWorkers(context: ActionContext<RootState, RootState>, numWorkers: number) {
+        const { commit, state } = context;
+        for (const worker of state.workerState.workers_orphos) {
+            worker.terminate();
+        }
+        const pool: Worker[] = [];
+        for (let i = 0; i < numWorkers; i++) {
+            pool.push(new WorkerCaller());
+        }
+        pool.forEach(worker => {
+            worker.onmessage = (msg) => {
+                if (msg.data?.output_file !== undefined) {
+                    commit("removeCallingGenesFile", msg.data.fileName);
+                    commit("saveGeneCallingResult", {
+                        fileName: msg.data.fileName,
+                        outputFile: msg.data.output_file,
+                        geneCount: msg.data.gene_count,
+                        sequenceCount: msg.data.sequence_count,
+                    });
+                }
+            };
+        });
+        console.log(`Spawned ${numWorkers} caller worker(s)`);
+        commit("SET_WORKERS_ORPHOS", pool);
+    },
+
+    async callGenes(context: ActionContext<RootState, RootState>,
+        payload: {
             acceptFiles: Array<File>,
             metag: boolean,
             closed_ends: boolean,
@@ -375,35 +385,28 @@ export default {
             non_sd: boolean
         }) {
         const { commit, state } = context;
-        console.log("Action callGenes: Uploaded file for gene calling")
-
-        if (state.workerState.worker_orphos) {
-            if (payload.acceptFiles.length == 1) {
-                console.log("File name: " + payload.acceptFiles[0].name);
-                commit("setCallingGenes");
-                state.workerState.worker_orphos.postMessage({
-                    call: true,
-                    input_file: payload.acceptFiles[0],
-                    metag: payload.metag,
-                    closed_ends: payload.closed_ends, 
-                    mask: payload.mask, 
-                    tt: payload.tt,
-                    non_sd: payload.non_sd,
-                });
-
-                state.workerState.worker_orphos.onmessage = (messageData) => {
-                    console.log(payload.acceptFiles[0].name + " genes have been called.");
-                    commit("saveGeneCallingResults",
-                        {name:          payload.acceptFiles[0].name,
-                        output_file:    messageData.data.output_file,
-                        gene_count:     messageData.data.gene_count,
-                        sequence_count: messageData.data.sequence_count,});
-                };
-            } else {
-                console.log("More than one file for gene calling uploaded. This case is not supported.");
-                commit("resetAllResults_orphos");
-            }
+        const pool = state.workerState.workers_orphos;
+        if (!pool.length) {
+            console.log("No caller workers available");
+            return;
         }
+        const indxlist = getFilesToProcess(payload.acceptFiles);
+        indxlist.forEach((sublist: number[], index: number) => {
+            const file = payload.acceptFiles[sublist[0]];
+            const fileName = file.name;
+            console.log(`Queuing gene calling for: ${fileName} on worker ${index % pool.length}`);
+            commit("addCallingGenesFile", fileName);
+            pool[index % pool.length].postMessage({
+                call: true,
+                fileName,
+                input_file: file,
+                metag: payload.metag,
+                closed_ends: payload.closed_ends,
+                mask: payload.mask,
+                tt: payload.tt,
+                non_sd: payload.non_sd,
+            });
+        });
     },
 
     async resetAllResults_orphos(context: ActionContext<RootState, RootState>) {

@@ -10,13 +10,18 @@
             <SidebarMenu>
               <SidebarMenuItem v-for="item in tabs"
                                :key="item.sidebar_label"
-                               :class="item.id === tabName ? 'bg-white rounded-sm shadow-sm' : ''"
-                               class="py-2 px-3 cursor-pointer">
-                <SidebarMenuButton @click="changeTab(item.id)" class="p-0 hover:bg-transparent cursor-pointer">
+                               :class="item.comingSoon
+                                 ? 'py-2 px-3 cursor-not-allowed'
+                                 : (item.id === tabName
+                                     ? 'py-2 px-3 cursor-pointer bg-white rounded-sm shadow-sm'
+                                     : 'py-2 px-3 cursor-pointer')">
+                <SidebarMenuButton
+                  @click="!item.comingSoon && changeTab(item.id)"
+                  :class="item.comingSoon
+                    ? 'p-0 pointer-events-none text-gray-400'
+                    : 'p-0 hover:bg-transparent cursor-pointer'">
                   <component :is="item.icon"/>
-                  <span class="text-md">
-                    {{ item.sidebar_label }}
-                  </span>
+                  <span class="text-md">{{ item.sidebar_label }}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -80,7 +85,7 @@
 import {defineComponent} from 'vue';
 import {useStore} from 'vuex';
 // eslint-disable-next-line
-import {Codesandbox, ScanFace, TextAlignCenter, TreePine, Dna, Funnel} from "lucide-vue-next";
+import {Codesandbox, ScanFace, TextAlignCenter, TreePine, Dna, Funnel, Pill} from "lucide-vue-next";
 
 import AssemblyPage from './components/pages/AssemblyPage.vue';
 import MappingAlignmentPage from './components/pages/MappingAlignmentPage.vue';
@@ -92,7 +97,6 @@ import ResultsDisplayAlignment from './components/ResultsDisplayAlignment.vue';
 import KmerHistogram from './components/KmerHistogram.vue';
 import WorkerAssembler from '@/workers/Assembler.worker';
 import WorkerMapper from '@/workers/Mapper.worker';
-import WorkerCaller from '@/workers/Caller.worker';
 import WorkerDepleter from '@/workers/Depleter.worker';
 import "@fontsource/ibm-plex-sans";
 import {
@@ -116,6 +120,7 @@ interface Tab {
   sidebar_label: string;
   label: string;
   icon: string;
+  comingSoon?: boolean;
 }
 
 export default defineComponent({
@@ -140,6 +145,7 @@ export default defineComponent({
     TextAlignCenter,
     TreePine,
     ScanFace,
+    Pill,
     AssemblyPage,
     MappingAlignmentPage,
     TaxonomicIDPage,
@@ -166,6 +172,7 @@ export default defineComponent({
         {id: 'TaxonomicID', sidebar_label: "Taxonomic ID", label: 'Taxonomic ID', icon: 'ScanFace'},
         {id: 'GeneCalling', sidebar_label: "Gene calling", label: 'Gene calling', icon: 'Dna'},
         {id: 'HostDepletion', sidebar_label: "Host depletion", label: 'Host depletion', icon: 'Funnel'},
+        {id: 'amrdetection', sidebar_label: "AMR detection (soon)", label: 'AMR detection (soon)', icon: 'Pill', comingSoon: true} as Tab,
       ] as Tab[]
     }
   },
@@ -173,7 +180,7 @@ export default defineComponent({
   mounted(): void {
     // Set initial tab from URL hash
     const hash = window.location.hash.slice(1); // Remove the '#'
-    const validTabs = this.tabs.map(t => t.id).concat(['faq']);
+    const validTabs = this.tabs.filter(t => !t.comingSoon).map(t => t.id).concat(['faq']);
     if (hash && validTabs.includes(hash)) {
       this.tabName = hash;
     } else {
@@ -212,8 +219,7 @@ export default defineComponent({
     import("@/pkg_orphos-bridge")
         .then(() => {
           if (window.Worker) {
-            const worker = new WorkerCaller();
-            this.store.commit('SET_WORKER_ORPHOS', worker);
+            this.store.dispatch('initCallerWorkers', 4);
           } else {
             throw new Error("WebWorkers are not supported by this web browser.");
           }

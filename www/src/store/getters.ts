@@ -87,10 +87,16 @@ export const getters: GetterTree<RootState, RootState> = {
     
     // ORPHOS
     genesCalled(state: RootState) {
-       return state.allResults_orphos.geneCount != null;
+        return Object.keys(state.allResults_orphos.results).length > 0;
     },
     callingGenes(state: RootState) {
-        return state.allResults_orphos.callingGenes;
+        return state.processingState.isCallingGenes;
+    },
+    orphosResults(state: RootState) {
+        return state.allResults_orphos.results;
+    },
+    callingGenesFiles(state: RootState): Set<string> {
+        return state.processingState.isCallingGenesFiles;
     },
 
     // DEACON

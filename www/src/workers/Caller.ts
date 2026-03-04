@@ -35,21 +35,20 @@ export class Caller {
         return this.wasm ? Promise.resolve(this.wasm) : this.wasmPromise;
     }
 
-    async callGenes(input_file: File, metag: boolean, closed_ends: boolean, mask: boolean, tt: number, non_sd: boolean): Promise<void> {
-        console.log("Starting gene calling...");
+    async callGenes(fileName: string, input_file: File, metag: boolean, closed_ends: boolean, mask: boolean, tt: number, non_sd: boolean): Promise<void> {
+        console.log("Starting gene calling for: " + fileName);
         await this.waitForWasm();
 
-        if (this.OrphosData === null) {
-            // TODO: output formats
-            this.OrphosData = await this.wasm.OrphosData.new(metag, "gff", closed_ends, mask, non_sd, tt);
-        }
+        // Always create fresh OrphosData to avoid gene count accumulation between files
+        this.OrphosData = await this.wasm.OrphosData.new(metag, "gff", closed_ends, mask, non_sd, tt);
 
         await this.OrphosData!.analyse_genome(input_file);
 
         const results: CallResult = JSON.parse(this.OrphosData!.get_results("gff"));
 
         this.worker.postMessage({
-            output_file: results.output_file, 
+            fileName,
+            output_file: results.output_file,
             gene_count: results.gene_count,
             sequence_count: results.sequence_count
         });

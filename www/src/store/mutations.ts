@@ -1,4 +1,5 @@
 import {RootState} from "@/store/state";
+import {GeneCallResult} from "@/types";
 
 export default {
     // Processing state mutations
@@ -44,6 +45,8 @@ export default {
             isIdentifying: false,
             isIdentifyingFiles: new Set<string>(),
             assemblyState: '',
+            isCallingGenes: false,
+            isCallingGenesFiles: new Set<string>(),
         };
     },
 
@@ -56,8 +59,8 @@ export default {
     SET_WORKERS_SKETCHLIB(state: RootState, workers: Worker[]) {
         state.workerState.workers_sketchlib = workers;
     },
-    SET_WORKER_ORPHOS(state: RootState, worker: Worker | null) {
-        state.workerState.worker_orphos = worker;
+    SET_WORKERS_ORPHOS(state: RootState, workers: Worker[]) {
+        state.workerState.workers_orphos = workers;
     },
     SET_WORKER_DEACON(state: RootState, worker: Worker | null) {
         state.workerState.worker_deacon = worker;
@@ -224,30 +227,27 @@ export default {
     },
 
     // ORPHOS
-   saveGeneCallingResults(state: RootState, input : {output_file : string, gene_count : number, sequence_count : number} ) {
-       console.log("Storing results in allResults_orphos");
-       state.allResults_orphos.outputFile = input.output_file;
-       state.allResults_orphos.geneCount = input.gene_count;
-       state.allResults_orphos.sequenceCount = input.sequence_count;
-       state.allResults_orphos.callingGenes = false;
-   },
-
-   setCallingGenes(state: RootState) {
-       state.allResults_orphos.callingGenes = true;
-   },
-
-   resetAllResults_orphos(state: RootState) {
-       state.allResults_orphos = {
-           outputFile: "",
-           geneCount: null,
-           sequenceCount: null,
-           callingGenes: false
-       };
-
-       if (state.workerState.worker_orphos) {
-           state.workerState.worker_orphos.postMessage({reset: true});
-       }
-   },
+    addCallingGenesFile(state: RootState, fileName: string) {
+        state.processingState.isCallingGenesFiles.add(fileName);
+        state.processingState.isCallingGenes = true;
+    },
+    removeCallingGenesFile(state: RootState, fileName: string) {
+        state.processingState.isCallingGenesFiles.delete(fileName);
+        if (state.processingState.isCallingGenesFiles.size === 0) {
+            state.processingState.isCallingGenes = false;
+        }
+    },
+    saveGeneCallingResult(state: RootState, input: GeneCallResult) {
+        state.allResults_orphos.results[input.fileName] = input;
+    },
+    resetAllResults_orphos(state: RootState) {
+        state.allResults_orphos = { results: {} };
+        state.processingState.isCallingGenes = false;
+        state.processingState.isCallingGenesFiles = new Set();
+        for (const worker of state.workerState.workers_orphos) {
+            worker.postMessage({ reset: true });
+        }
+    },
 
     // DEACON
     setLoadingDeaconIndex(state: RootState) {

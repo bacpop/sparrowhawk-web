@@ -2,6 +2,7 @@ import { Caller } from './Caller';
 
 interface CallMessage {
     call: boolean;
+    fileName: string;
     input_file: File;
     metag: boolean;
     closed_ends: boolean;
@@ -23,7 +24,7 @@ ctx.onmessage = (evt: MessageEvent<WorkerMessage>) => {
     if (evt.data instanceof Object) {
         if ('call' in evt.data && evt.data.call) {
             const data = evt.data as CallMessage;
-            caller.callGenes(data.input_file, data.metag, data.closed_ends, data.mask, data.tt, data.non_sd);
+            caller.callGenes(data.fileName, data.input_file, data.metag, data.closed_ends, data.mask, data.tt, data.non_sd);
         } else if ('reset' in evt.data && evt.data.reset) {
             caller.resetAll();
         } else {
