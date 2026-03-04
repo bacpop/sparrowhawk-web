@@ -18,6 +18,7 @@ export default {
         state.processingState.isMappingFiles.add(fileName);
     },
     removeMappingFile(state: RootState, fileName: string) {
+        console.log("Removing mapping file from list");
         state.processingState.isMappingFiles.delete(fileName);
         if (state.processingState.isMappingFiles.size === 0) {
             state.processingState.isMapping = false;

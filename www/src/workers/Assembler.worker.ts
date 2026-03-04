@@ -48,7 +48,6 @@ ctx.onmessage = (evt: MessageEvent<WorkerMessage>) => {
             );
         } else if ('assemble' in evt.data && evt.data.assemble) {
             console.log("Trying to assemble!");
-            const data = evt.data as AssembleMessage;
             assembler.assemble();
         } else if ('reset' in evt.data && evt.data.reset) {
             console.log("Trying to reset!");

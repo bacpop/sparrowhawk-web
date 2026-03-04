@@ -333,6 +333,7 @@ import AlignmentHelpCollapsible from "@/components/help/AlignmentHelpCollapsible
 import DownloadButtonSka from "@/components/SequenceViewer/DownloadButtonSka.vue";
 import DownloadButtonSkaAlignment from "@/components/SequenceViewer/DownloadButtonSkaAlignment.vue";
 import { MSAViewer } from "@/components/MSAViewer";
+import { fastxExtensionsWithDotAndCompressList } from "@/utils";
 
 interface UploadedFile {
   name: string;
@@ -451,7 +452,7 @@ export default defineComponent({
       ...restMapping
     } = useDropzone({
       onDrop: onDropMapping,
-      accept: [".fa", ".fasta", ".fna", ".gz", ".fastq", ".fq"]
+      accept: fastxExtensionsWithDotAndCompressList
     });
 
     const {
@@ -461,7 +462,7 @@ export default defineComponent({
       ...restQueryAlign
     } = useDropzone({
       onDrop: onDropQueryAlign,
-      accept: [".fa", ".fasta", ".fna", ".gz", ".fastq", ".fq"]
+      accept: fastxExtensionsWithDotAndCompressList
     });
 
     return {

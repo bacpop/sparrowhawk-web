@@ -96,6 +96,7 @@ import WorkerCaller from '@/workers/Caller.worker';
 import WorkerDepleter from '@/workers/Depleter.worker';
 import "@fontsource/ibm-plex-sans";
 import {
+  Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
@@ -121,6 +122,7 @@ export default defineComponent({
 
   components: {
     FaqPage,
+    Sidebar,
     SidebarFooter,
     SidebarHeader,
     SidebarMenuItem,

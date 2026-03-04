@@ -170,6 +170,7 @@ import VueSlider from 'vue-3-slider-component';
 import HostDepletionHelpCollapsible from "@/components/help/HostDepletionHelpCollapsible.vue";
 import DownloadButtonHostDepletion from "@/components/DownloadButtonHostDepletion.vue";
 import { Button } from "@/components/ui/button";
+import { fastqExtensionsWithDotAndCompressList } from "@/utils";
 
 export default defineComponent({
   name: "HostDepletionPage",
@@ -244,7 +245,7 @@ export default defineComponent({
       isDragActive: isDragActiveReads,
     } = useDropzone({
       onDrop: onDropReads,
-      accept: [".fastq", ".fq", ".fastq.gz", ".fq.gz"],
+      accept: fastqExtensionsWithDotAndCompressList,
       multiple: true,
     });
 

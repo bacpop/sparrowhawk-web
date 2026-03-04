@@ -67,10 +67,12 @@ export class Mapper {
 
         const results: MapResult = JSON.parse(this.SkaData.map(file, revReadFile, proportion_reads, min_count, min_qual, qual_filter));
 
+        const outname = (revReadFile != null) ? file.name.replace(/(?:_1)?\.(?:fa|fna|fasta|fq|fnq|fastq)(?:\.gz)?$/, "") : file.name;
+        
         this.worker.postMessage({
             nb_variants: results["Number of variants"],
             coverage: results["Coverage"],
-            name: file.name.replace(/(.fasta|.fasta.gz|.fna|.fna.gz|.fa|.fa.gz|.fq|.fq.gz|.fastq|.fastq.gz|_1.fq.gz|_1.fastq.gz)$/, ''),
+            name: outname,
             mapped_sequences: results["Mapped sequences"],
         });
     }

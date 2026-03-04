@@ -1,7 +1,7 @@
 import {ActionContext} from "vuex";
 import {RootState} from "@/store/state";
 import WorkerSketcher from '@/workers/Sketcher.worker';
-import {findReadPair, regExpWithTwoNumbers, regExpWithOneOnly, regExpForAnyFastx} from "@/utils";
+import {findReadPair, regExpWithTwoNumbers, regExpWithOneOnly, regExpForAnyFastx, getFilesToProcess} from "@/utils";
 
 export default {
     async processReads(context: ActionContext<RootState, RootState>, payload: {
@@ -169,7 +169,7 @@ export default {
                     commit("setIndexingRefState", false);
 
                     console.log(messageData.data.ref.name + " has been indexed");
-                    commit("addRef", {name: messageData.data.ref.name, sequences: messageData.data.sequences});
+                    commit("addRef", {name: messageData.data.ref.name.replace(regExpForAnyFastx, ""), sequences: messageData.data.sequences});
                 };
             }
         });
@@ -187,54 +187,39 @@ export default {
 
         // Set mapping state
         commit("setMappingState", true);
-        payload.acceptFiles.forEach((file: File) => {
-            let sendJob: boolean = false;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const indxlist = getFilesToProcess(payload.acceptFiles);
+
+        console.log(indxlist);
+
+        indxlist.forEach((sublist: Array<number>) => {
             const messageData: any = {
                 map: true,
-                file,
-                revReads: null,
-                sampleName: null,
+                file: payload.acceptFiles[sublist[0]],
+                revReads: (sublist.length > 1) ? payload.acceptFiles[sublist[1]] : null,
+                sampleName: (sublist.length > 1) ? payload.acceptFiles[sublist[0]].name.replace(regExpWithTwoNumbers, "") : payload.acceptFiles[sublist[0]].name,
                 proportion_reads: payload.proportion_reads,
                 min_count: payload.min_count,
                 min_qual: payload.min_qual,
                 qual_filter: payload.qual_filter
             };
-            if (regExpWithTwoNumbers.test(file.name)) {
-                const {pairFile, sampleName} = findReadPair(file.name, payload.acceptFiles);
-                messageData.sampleName = sampleName;
-                if (pairFile) {
-                    messageData.revReads = pairFile;
-                    sendJob = true;
-                } else {
-                    // Triggers on _2 input file too
-                    if (regExpWithOneOnly.test(file.name)) {
-                        console.log(file.name + ": only one fastq found")
-                    }
-                }
-            } else {
-                messageData.sampleName = file.name.replace(regExpForAnyFastx, '');
-                sendJob = true;
+            // Track this file as being mapped
+            commit("addMappingFile", messageData.sampleName);
+            commit("addQueryFileMap", messageData.sampleName);
+            if (state.workerState.worker_ska) {
+                state.workerState.worker_ska.postMessage(messageData);
+                state.workerState.worker_ska.onmessage = (message) => {
+                    console.log("Mapping variants: " + message.data.nb_variants);
+                    console.log("Mapping coverage: " + message.data.coverage);
+
+                    // Remove this file from mapping set
+                    commit("removeMappingFile", message.data.name);
+                    commit("setMapped", message.data);
+                };
             }
 
-            if (sendJob) {
-                // Track this file as being mapped
-                commit("addMappingFile", messageData.sampleName);
-                commit("addQueryFileMap", messageData.sampleName);
-                if (state.workerState.worker_ska) {
-                    state.workerState.worker_ska.postMessage(messageData);
-                    state.workerState.worker_ska.onmessage = (message) => {
-                        console.log("Mapping variants: " + message.data.nb_variants);
-                        console.log("Mapping coverage: " + message.data.coverage);
-
-                        // Remove this file from mapping set
-                        commit("removeMappingFile", message.data.name);
-
-                        commit("setMapped", message.data);
-                    };
-                }
-            }
         });
+
+
     },
 
     async processQueryAlign(context: ActionContext<RootState, RootState>, payload: {

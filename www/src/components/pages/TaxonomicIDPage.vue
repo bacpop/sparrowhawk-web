@@ -187,6 +187,7 @@ import TaxonomicIDHelpCollapsible from "@/components/help/TaxonomicIDHelpCollaps
 import DataTable from "@/components/pages/taxonomic-id/DataTable.vue";
 import { columns, TaxonomicIDRow } from "@/components/pages/taxonomic-id/columns";
 import { SampleIdentifyResult } from "@/types";
+import { fastxExtensionsWithDotAndCompressList } from "@/utils";
 
 export default defineComponent({
   name: "TaxonomicIDPage",
@@ -281,7 +282,7 @@ export default defineComponent({
       ...restSample
     } = useDropzone({
       onDrop: onDropSample,
-      accept: [".fa", ".fasta", ".fna", ".gz", ".fastq", ".fq"],
+      accept: fastxExtensionsWithDotAndCompressList,
       multiple: true
     });
 

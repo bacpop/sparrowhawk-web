@@ -176,6 +176,7 @@ import { Check, FileUp, Loader2, Info, Dna } from "lucide-vue-next";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import GeneCallingHelpCollapsible from "@/components/help/GeneCallingHelpCollapsible.vue";
 import DownloadButtonOrphos from "@/components/DownloadButtonOrphos.vue";
+import { fastaExtensionsWithDotAndCompressList } from "@/utils";
 
 export default defineComponent({
   name: "GeneCallingPage",
@@ -239,7 +240,7 @@ export default defineComponent({
       ...restGenome
     } = useDropzone({
       onDrop: onDropGenome,
-      accept: [".fa", ".fasta", "fa.gz", "fasta.gz"],
+      accept: fastaExtensionsWithDotAndCompressList,
       multiple: false
     });
 

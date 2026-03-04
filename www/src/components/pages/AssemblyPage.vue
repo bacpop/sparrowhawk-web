@@ -276,6 +276,7 @@ import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/compon
 import DownloadButton from "@/components/DownloadButton.vue";
 import AssemblyHelpCollapsible from "@/components/help/AssemblyHelpCollapsible.vue";
 import {Button} from "@/components/ui/button";
+import { fastqExtensionsWithDotAndCompressList } from "@/utils";
 
 export default defineComponent({
   name: "AssemblyPage",
@@ -360,7 +361,7 @@ export default defineComponent({
       ...restReads
     } = useDropzone({
       onDrop: onDropReads,
-      accept: ["fq.gz", "fastq.gz", ".fastq", ".fq"],
+      accept: fastqExtensionsWithDotAndCompressList,
       multiple: true
     });
 
