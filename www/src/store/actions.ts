@@ -2,7 +2,7 @@ import {ActionContext} from "vuex";
 import {RootState} from "@/store/state";
 import WorkerSketcher from '@/workers/Sketcher.worker';
 import WorkerCaller from '@/workers/Caller.worker';
-import {findReadPair, regExpWithTwoNumbers, regExpWithOneOnly, regExpForAnyFastx, getFilesToProcess} from "@/utils";
+import {regExpWithTwoNumbers, regExpForAnyFastx, getFilesToProcess} from "@/utils";
 
 export default {
     async processReads(context: ActionContext<RootState, RootState>, payload: {
@@ -429,61 +429,34 @@ export default {
         const { commit, state } = context;
         if (!state.workerState.worker_deacon) return;
         const workerDeacon = state.workerState.worker_deacon;
+        const { files, deplete, abs_threshold, rel_threshold } = payload;
 
-        // Check the input files we've got. Actually, this is here so that we can later parallelise if we want, similarly to tax. ID.
-        if (payload.files.length > 2) {
-            console.log("More than two read files have been uploaded. This case is not supported.");
-            commit("resetAllResults_deacon");
+        // Set handler once (safe to overwrite — idempotent)
+        workerDeacon.onmessage = (msg) => {
+            if (msg.data.filtered) {
+                commit("removeFilteringDeaconFile", msg.data.sampleName);
+                commit("saveDeaconFilterResult", {
+                    sampleName:   msg.data.sampleName,
+                    totalReads:   msg.data.total,
+                    keptReads:    msg.data.kept,
+                    removedReads: msg.data.removed,
+                    outputGzip:   msg.data.outputGzip,
+                    outputGzip2:  msg.data.outputGzip2 ?? null,
+                });
+            }
+        };
+
+        const indxlist = getFilesToProcess(files);
+        for (const sublist of indxlist) {
+            const file = files[sublist[0]];
+            const revReads = sublist.length > 1 ? files[sublist[1]] : null;
+            const sampleName = sublist.length > 1
+                ? file.name.replace(regExpWithTwoNumbers, '')
+                : file.name.replace(regExpForAnyFastx, '');
+
+            commit("addFilteringDeaconFile", sampleName);
+            workerDeacon.postMessage({ filter: true, file, revReads, deplete, abs_threshold, rel_threshold, sampleName });
         }
-
-        payload.files.forEach((file: File) => {
-            let sendJob: boolean = false;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const messageData: any = {
-                filter: true,
-                file: file,
-                revReads: null,
-                deplete: payload.deplete,
-                abs_threshold: payload.abs_threshold,
-                rel_threshold: payload.rel_threshold,
-            };
-
-            if (regExpWithTwoNumbers.test(file.name)) {
-                const {pairFile, sampleName} = findReadPair(file.name, payload.files);
-                messageData.sampleName = sampleName;
-                if (pairFile) {
-                    messageData.revReads = pairFile;
-                    sendJob = true;
-                } else {
-                    // Triggers on _2 input file too
-                    if (regExpWithOneOnly.test(file.name)) {
-                        console.log(file.name + ": only one fastq found")
-                    }
-                }
-            } else {
-                messageData.sampleName = file.name.replace(regExpForAnyFastx, '');
-                sendJob = true;
-            }
-
-            if (sendJob) {
-                commit("setFilteringDeacon", { fileName: messageData.sampleName, fileName2: messageData.revReads?.name ?? null });
-
-                workerDeacon.postMessage(messageData);
-
-                workerDeacon.onmessage = (msg) => {
-                    if (msg.data.filtered) {
-                        commit("saveDeaconFilterResults", {
-                            total:       msg.data.total,
-                            kept:        msg.data.kept,
-                            removed:     msg.data.removed,
-                            outputGzip:  msg.data.outputGzip,
-                            outputGzip2: msg.data.outputGzip2 ?? null,
-                        });
-                    }
-                };
-            }
-        });
-
     },
 
     async resetAllResults_deacon(context: ActionContext<RootState, RootState>) {

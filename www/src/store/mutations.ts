@@ -1,5 +1,5 @@
 import {RootState} from "@/store/state";
-import {GeneCallResult} from "@/types";
+import {GeneCallResult, DepletionResult} from "@/types";
 
 export default {
     // Processing state mutations
@@ -47,6 +47,8 @@ export default {
             assemblyState: '',
             isCallingGenes: false,
             isCallingGenesFiles: new Set<string>(),
+            isFilteringDeacon: false,
+            isFilteringDeaconFiles: new Set<string>(),
         };
     },
 
@@ -259,18 +261,18 @@ export default {
         state.allResults_deacon.indexFileName = input.fileName;
         state.allResults_deacon.indexInfo = input.info;
     },
-    setFilteringDeacon(state: RootState, input: { fileName: string; fileName2: string | null }) {
-        state.allResults_deacon.isFiltering = true;
-        state.allResults_deacon.readsFileName = input.fileName;
-        state.allResults_deacon.readsFileName2 = input.fileName2;
+    addFilteringDeaconFile(state: RootState, sampleName: string) {
+        state.processingState.isFilteringDeaconFiles.add(sampleName);
+        state.processingState.isFilteringDeacon = true;
     },
-    saveDeaconFilterResults(state: RootState, input: { total: number; kept: number; removed: number; outputGzip: Uint8Array; outputGzip2?: Uint8Array | null }) {
-        state.allResults_deacon.isFiltering = false;
-        state.allResults_deacon.totalReads = input.total;
-        state.allResults_deacon.keptReads = input.kept;
-        state.allResults_deacon.removedReads = input.removed;
-        state.allResults_deacon.outputGzip = input.outputGzip;
-        state.allResults_deacon.outputGzip2 = input.outputGzip2 ?? null;
+    removeFilteringDeaconFile(state: RootState, sampleName: string) {
+        state.processingState.isFilteringDeaconFiles.delete(sampleName);
+        if (state.processingState.isFilteringDeaconFiles.size === 0) {
+            state.processingState.isFilteringDeacon = false;
+        }
+    },
+    saveDeaconFilterResult(state: RootState, result: DepletionResult) {
+        state.allResults_deacon.results[result.sampleName] = result;
     },
     resetAllResults_deacon(state: RootState) {
         state.allResults_deacon = {
@@ -278,15 +280,10 @@ export default {
             indexInfo: null,
             indexLoaded: false,
             isLoadingIndex: false,
-            isFiltering: false,
-            readsFileName: null,
-            readsFileName2: null,
-            totalReads: null,
-            keptReads: null,
-            removedReads: null,
-            outputGzip: null,
-            outputGzip2: null,
+            results: {},
         };
+        state.processingState.isFilteringDeacon = false;
+        state.processingState.isFilteringDeaconFiles = new Set<string>();
         if (state.workerState.worker_deacon) {
             state.workerState.worker_deacon.postMessage({ reset: true });
         }

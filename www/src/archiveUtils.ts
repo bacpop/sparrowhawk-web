@@ -1,5 +1,42 @@
 import { zipSync, gzipSync, strToU8 } from 'fflate';
 
+export function buildZipBinary(files: Record<string, Uint8Array>): Uint8Array {
+    return zipSync(files);
+}
+
+export function buildTarGzBinary(files: Record<string, Uint8Array>): Uint8Array {
+    const blocks: Uint8Array[] = [];
+    for (const [name, data] of Object.entries(files)) {
+        const nameBytes = strToU8(name);
+        const header = new Uint8Array(512);
+        header.set(nameBytes.slice(0, 100), 0);
+        header.set(strToU8('0000644\0'), 100);
+        header.set(strToU8('0000000\0'), 108);
+        header.set(strToU8('0000000\0'), 116);
+        const sizeOctal = data.length.toString(8).padStart(11, '0') + '\0';
+        header.set(strToU8(sizeOctal), 124);
+        header.set(strToU8('00000000000\0'), 136);
+        header.fill(0x20, 148, 156);
+        header[156] = 0x30;
+        header.set(strToU8('ustar\0'), 257);
+        header.set(strToU8('00'), 263);
+        let checksum = 0;
+        for (let i = 0; i < 512; i++) checksum += header[i];
+        header.set(strToU8(checksum.toString(8).padStart(6, '0') + '\0 '), 148);
+        blocks.push(header);
+        const paddedSize = Math.ceil(data.length / 512) * 512;
+        const dataBlock = new Uint8Array(paddedSize);
+        dataBlock.set(data);
+        blocks.push(dataBlock);
+    }
+    blocks.push(new Uint8Array(1024));
+    const totalSize = blocks.reduce((sum, b) => sum + b.length, 0);
+    const tar = new Uint8Array(totalSize);
+    let offset = 0;
+    for (const block of blocks) { tar.set(block, offset); offset += block.length; }
+    return gzipSync(tar);
+}
+
 export function buildZip(files: Record<string, string>): Uint8Array {
     const zipInput: Record<string, Uint8Array> = {};
     for (const [name, content] of Object.entries(files)) {

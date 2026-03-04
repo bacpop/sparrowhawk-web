@@ -39,14 +39,7 @@ export const emptyState = (): RootState => ({
         indexInfo: null,
         indexLoaded: false,
         isLoadingIndex: false,
-        isFiltering: false,
-        readsFileName: null,
-        readsFileName2: null,
-        totalReads: null,
-        keptReads: null,
-        removedReads: null,
-        outputGzip: null,
-        outputGzip2: null,
+        results: {},
     },
 
     workerState: {
@@ -69,6 +62,8 @@ export const emptyState = (): RootState => ({
         assemblyState: '',
         isCallingGenes: false,
         isCallingGenesFiles: new Set<string>(),
+        isFilteringDeacon: false,
+        isFilteringDeaconFiles: new Set<string>(),
     },
 });
 

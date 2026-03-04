@@ -35,7 +35,7 @@ export class Depleter {
         this.worker.postMessage({ indexLoaded: true, fileName: file.name, info: this.index.info() });
     }
 
-    async filterReads(file: File, revFile: File | null, deplete: boolean, abs_threshold: number, rel_threshold: number): Promise<void> {
+    async filterReads(file: File, revFile: File | null, deplete: boolean, abs_threshold: number, rel_threshold: number, sampleName: string): Promise<void> {
         const isGz = (f: File) => f.name.endsWith('.gz');
 
         const runSession = async (f: File): Promise<{ out: Uint8Array; stats: FilterStats }> => {
@@ -68,7 +68,7 @@ export class Depleter {
         const removed = total - kept;
 
         this.worker.postMessage(
-            { filtered: true, total, kept, removed, outputGzip, outputGzip2 },
+            { filtered: true, sampleName, total, kept, removed, outputGzip, outputGzip2 },
             outputGzip2
                 ? [outputGzip.buffer, outputGzip2.buffer]
                 : [outputGzip.buffer]

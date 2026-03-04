@@ -116,38 +116,69 @@
         <!-- Phase 2: Reads upload (only when index is loaded) -->
         <template v-if="deaconIndexLoaded && !isLoadingDeaconIndex">
 
-          <div v-if="!isFilteringDeacon && !deaconFiltered"
-               v-bind="getRootPropsReads()"
+          <div v-bind="getRootPropsReads()"
                :class="[
                  'p-6 mx-6 bg-white border border-gray-200 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600',
                  'cursor-pointer hover:border-gray-400'
                ]">
             <input v-bind="getInputPropsReads()" />
             <FileUp />
-            <p v-if="isDragActiveReads">Drop file here ...</p>
-            <p v-else>Drop or click to upload your <b>reads file (.fastq)</b></p>
+            <p v-if="isDragActiveReads">Drop files here ...</p>
+            <p v-else>Drop or click to upload your <b>reads file(s) (.fastq)</b></p>
           </div>
 
-          <div v-else-if="isFilteringDeacon"
-               class="p-6 mx-6 bg-amber-50 border border-amber-400 rounded-md flex flex-col justify-center items-center gap-2 text-gray-600">
-            <Loader2 class="w-6 h-6 text-amber-500 animate-spin" />
-            <p class="text-sm text-gray-500">Filtering...</p>
+          <!-- Per-sample status list -->
+          <div v-if="uploadedSampleNames.length > 0" class="mx-6 mt-4">
+            <div v-for="sampleName in uploadedSampleNames" :key="sampleName"
+                 class="flex items-center gap-2 py-2 px-3 bg-gray-50 rounded-md mb-2">
+              <Check v-if="isFileDone(sampleName)" class="w-4 h-4 text-green-500"/>
+              <Loader2 v-else-if="isFileInFlight(sampleName)" class="w-4 h-4 text-amber-500 animate-spin"/>
+              <span class="flex-grow text-sm font-mono truncate">{{ sampleName }}</span>
+            </div>
           </div>
 
-          <template v-else-if="deaconFiltered">
-            <div class="flex items-center gap-2 py-2 px-3 mx-6 bg-gray-50 rounded-md mb-2">
-              <Check class="w-4 h-4 text-green-500" />
-              <span class="flex-grow text-sm font-mono truncate">{{ allResults_deacon.readsFileName }}</span>
-            </div>
-            <div class="mx-6 mt-2 text-sm text-gray-600 flex flex-col gap-1">
-              <span>{{ allResults_deacon.totalReads }} reads processed</span>
-              <span>{{ allResults_deacon.keptReads }} reads retained</span>
-              <span>{{ allResults_deacon.removedReads }} reads removed</span>
-            </div>
-            <div class="mx-6">
-              <DownloadButtonHostDepletion />
-            </div>
-          </template>
+          <!-- Bulk download (2+ results) -->
+          <div v-if="resultCount >= 2" class="mx-6 mt-4 flex gap-2">
+            <Button variant="outline" size="sm" @click="downloadZip">
+              <Download class="mr-2 h-4 w-4" /> Download all (.zip)
+            </Button>
+            <Button variant="outline" size="sm" @click="downloadTarGz">
+              <Download class="mr-2 h-4 w-4" /> Download all (.tar.gz)
+            </Button>
+          </div>
+
+          <!-- Results table -->
+          <div v-if="deaconFiltered" class="mx-6 mt-4 overflow-x-auto">
+            <table class="w-full text-sm border border-gray-200 rounded-md">
+              <thead>
+                <tr class="bg-gray-50 text-left">
+                  <th class="px-3 py-2 font-medium text-gray-700">Sample name</th>
+                  <th class="px-3 py-2 font-medium text-gray-700">Total reads</th>
+                  <th class="px-3 py-2 font-medium text-gray-700">Kept reads</th>
+                  <th class="px-3 py-2 font-medium text-gray-700">Removed reads</th>
+                  <th class="px-3 py-2 font-medium text-gray-700">Download</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(result, sampleName) in deaconResults" :key="sampleName"
+                    class="border-t border-gray-100">
+                  <td class="px-3 py-2 font-mono truncate max-w-[200px]">{{ result.sampleName }}</td>
+                  <td class="px-3 py-2">{{ result.totalReads }}</td>
+                  <td class="px-3 py-2">{{ result.keptReads }}</td>
+                  <td class="px-3 py-2">{{ result.removedReads }}</td>
+                  <td class="px-3 py-2 flex gap-1 flex-wrap">
+                    <Button variant="outline" size="sm" @click="downloadR1(result)">
+                      <Download class="mr-1 h-3 w-3" />
+                      {{ result.outputGzip2 ? 'R1' : 'filtered' }} (.fastq.gz)
+                    </Button>
+                    <Button v-if="result.outputGzip2" variant="outline" size="sm" @click="downloadR2(result)">
+                      <Download class="mr-1 h-3 w-3" /> R2 (.fastq.gz)
+                    </Button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
         </template>
 
@@ -162,17 +193,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, Ref } from "vue";
+import { defineComponent, ref, Ref, computed } from "vue";
 import { useStore } from "vuex";
 import { useDropzone } from "vue3-dropzone";
 import { useActions, useState } from "vuex-composition-helpers";
-import { Check, FileUp, Loader2, Funnel, Info } from "lucide-vue-next";
+import { Check, FileUp, Loader2, Funnel, Info, Download } from "lucide-vue-next";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import VueSlider from 'vue-3-slider-component';
 import HostDepletionHelpCollapsible from "@/components/help/HostDepletionHelpCollapsible.vue";
-import DownloadButtonHostDepletion from "@/components/DownloadButtonHostDepletion.vue";
 import { Button } from "@/components/ui/button";
-import { fastqExtensionsWithDotAndCompressList } from "@/utils";
+import { fastqExtensionsWithDotAndCompressList, getFilesToProcess, regExpWithTwoNumbers, regExpForAnyFastx } from "@/utils";
+import { buildZipBinary, buildTarGzBinary } from "@/archiveUtils";
+import { DepletionResult } from "@/types";
 
 export default defineComponent({
   name: "HostDepletionPage",
@@ -188,13 +220,13 @@ export default defineComponent({
     Loader2,
     Funnel,
     Info,
+    Download,
     VueSlider,
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
     HostDepletionHelpCollapsible,
-    DownloadButtonHostDepletion,
     Button,
   },
   setup() {
@@ -203,6 +235,7 @@ export default defineComponent({
     const deplete: Ref<boolean> = ref(true);
     const abs_threshold: Ref<number> = ref(1);
     const rel_threshold: Ref<number> = ref(0.05);
+    const uploadedSampleNames: Ref<string[]> = ref([]);
 
     const { loadDeaconIndex, filterDeaconReads, resetAllResults_deacon } = useActions([
       "loadDeaconIndex",
@@ -212,7 +245,11 @@ export default defineComponent({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { allResults_deacon } = useState(["allResults_deacon"]) as any;
 
+    const deaconResults = computed<Record<string, DepletionResult>>(() => store.getters.deaconResults);
+    const resultCount = computed<number>(() => Object.keys(deaconResults.value).length);
+
     function resetAll(): void {
+      uploadedSampleNames.value = [];
       resetAllResults_deacon();
     }
 
@@ -223,12 +260,74 @@ export default defineComponent({
 
     function onDropReads(acceptFiles: File[]): void {
       if (acceptFiles.length === 0) return;
+      // Accumulate sample names from this batch
+      const indxlist = getFilesToProcess(acceptFiles);
+      for (const sublist of indxlist) {
+        const file = acceptFiles[sublist[0]];
+        const sampleName = sublist.length > 1
+          ? file.name.replace(regExpWithTwoNumbers, '')
+          : file.name.replace(regExpForAnyFastx, '');
+        if (!uploadedSampleNames.value.includes(sampleName)) {
+          uploadedSampleNames.value.push(sampleName);
+        }
+      }
       filterDeaconReads({
         files: acceptFiles,
         deplete: deplete.value,
         abs_threshold: abs_threshold.value,
         rel_threshold: rel_threshold.value,
       });
+    }
+
+    function downloadR1(result: DepletionResult): void {
+      const name = result.sampleName + (result.outputGzip2 ? '_R1' : '') + '_filtered.fastq.gz';
+      const blob = new Blob([result.outputGzip.buffer as ArrayBuffer], { type: 'application/gzip' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = name; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadR2(result: DepletionResult): void {
+      if (!result.outputGzip2) return;
+      const name = result.sampleName + '_R2_filtered.fastq.gz';
+      const blob = new Blob([result.outputGzip2.buffer as ArrayBuffer], { type: 'application/gzip' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = name; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadZip(): void {
+      const files: Record<string, Uint8Array> = {};
+      for (const result of Object.values(deaconResults.value)) {
+        files[result.sampleName + (result.outputGzip2 ? '_R1' : '') + '_filtered.fastq.gz'] = result.outputGzip;
+        if (result.outputGzip2) {
+          files[result.sampleName + '_R2_filtered.fastq.gz'] = result.outputGzip2;
+        }
+      }
+      const bytes = buildZipBinary(files);
+      const blob = new Blob([bytes.buffer as ArrayBuffer], { type: 'application/zip' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'depleted.zip'; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadTarGz(): void {
+      const files: Record<string, Uint8Array> = {};
+      for (const result of Object.values(deaconResults.value)) {
+        files[result.sampleName + (result.outputGzip2 ? '_R1' : '') + '_filtered.fastq.gz'] = result.outputGzip;
+        if (result.outputGzip2) {
+          files[result.sampleName + '_R2_filtered.fastq.gz'] = result.outputGzip2;
+        }
+      }
+      const bytes = buildTarGzBinary(files);
+      const blob = new Blob([bytes.buffer as ArrayBuffer], { type: 'application/gzip' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'depleted.tar.gz'; a.click();
+      URL.revokeObjectURL(url);
     }
 
     const {
@@ -256,8 +355,15 @@ export default defineComponent({
       abs_threshold,
       rel_threshold,
       allResults_deacon,
+      uploadedSampleNames,
+      deaconResults,
+      resultCount,
       store,
       resetAll,
+      downloadR1,
+      downloadR2,
+      downloadZip,
+      downloadTarGz,
       getRootPropsIndex,
       getInputPropsIndex,
       isDragActiveIndex,
@@ -278,6 +384,17 @@ export default defineComponent({
     },
     deaconFiltered(): boolean {
       return this.store.getters.deaconFiltered;
+    },
+    filteringDeaconFilesSet(): Set<string> {
+      return this.store.getters.filteringDeaconFiles;
+    },
+  },
+  methods: {
+    isFileDone(sampleName: string): boolean {
+      return sampleName in (this.deaconResults || {});
+    },
+    isFileInFlight(sampleName: string): boolean {
+      return this.filteringDeaconFilesSet.has(sampleName);
     },
   },
 });

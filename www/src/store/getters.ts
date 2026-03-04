@@ -100,8 +100,10 @@ export const getters: GetterTree<RootState, RootState> = {
     },
 
     // DEACON
-    deaconIndexLoaded(state: RootState) { return state.allResults_deacon.indexLoaded; },
-    isFilteringDeacon(state: RootState)  { return state.allResults_deacon.isFiltering; },
-    deaconFiltered(state: RootState)     { return state.allResults_deacon.outputGzip !== null; },
+    deaconIndexLoaded(state: RootState)    { return state.allResults_deacon.indexLoaded; },
     isLoadingDeaconIndex(state: RootState) { return state.allResults_deacon.isLoadingIndex; },
+    isFilteringDeacon(state: RootState)    { return state.processingState.isFilteringDeacon; },
+    filteringDeaconFiles(state: RootState): Set<string> { return state.processingState.isFilteringDeaconFiles; },
+    deaconFiltered(state: RootState)       { return Object.keys(state.allResults_deacon.results).length > 0; },
+    deaconResults(state: RootState)        { return state.allResults_deacon.results; },
 }

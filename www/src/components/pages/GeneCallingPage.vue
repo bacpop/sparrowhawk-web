@@ -193,7 +193,6 @@
             <thead>
               <tr class="bg-gray-50 text-left">
                 <th class="px-3 py-2 font-medium text-gray-700">File name</th>
-                <th class="px-3 py-2 font-medium text-gray-700">Sequences</th>
                 <th class="px-3 py-2 font-medium text-gray-700">Genes called</th>
                 <th class="px-3 py-2 font-medium text-gray-700">Download</th>
               </tr>
@@ -202,7 +201,6 @@
               <tr v-for="(result, fileName) in orphosResults" :key="fileName"
                   class="border-t border-gray-100">
                 <td class="px-3 py-2 font-mono truncate max-w-[200px]">{{ result.fileName }}</td>
-                <td class="px-3 py-2">{{ result.sequenceCount }}</td>
                 <td class="px-3 py-2">{{ result.geneCount }}</td>
                 <td class="px-3 py-2">
                   <Button variant="outline" size="sm" @click="downloadGff(result)">

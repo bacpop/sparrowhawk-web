@@ -57,19 +57,21 @@ export interface AllResultsOrphos {
     results: Dict<GeneCallResult>;
 }
 
+export interface DepletionResult {
+    sampleName: string;
+    totalReads: number;
+    keptReads: number;
+    removedReads: number;
+    outputGzip: Uint8Array;
+    outputGzip2: Uint8Array | null;  // null if single-end
+}
+
 export interface AllResultsDeacon {
     indexFileName: string | null;
     indexInfo: string | null;
     indexLoaded: boolean;
     isLoadingIndex: boolean;
-    isFiltering: boolean;
-    readsFileName: string | null;
-    readsFileName2: string | null;
-    totalReads: number | null;
-    keptReads: number | null;
-    removedReads: number | null;
-    outputGzip: Uint8Array | null;
-    outputGzip2: Uint8Array | null;
+    results: Dict<DepletionResult>;
 }
 
 export interface ReadsPreprocessing {
@@ -90,4 +92,6 @@ export interface ProcessingState {
     assemblyState: string;  // Current state from Sparrowhawk assembly
     isCallingGenes: boolean;
     isCallingGenesFiles: Set<string>;
+    isFilteringDeacon: boolean;
+    isFilteringDeaconFiles: Set<string>;
 }
