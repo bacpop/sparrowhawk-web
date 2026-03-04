@@ -4,7 +4,12 @@
       <h1 class="text-2xl font-medium mb-4 flex items-center gap-2">
         <TextAlignCenter v-if="tabName === 'Mapping'" class="w-6 h-6" />
         <TreePine v-else-if="tabName === 'Alignment'" class="w-6 h-6" />
-        {{ tabName }}
+        <div v-if="tabName === 'Mapping'">
+            Mapping (within species)
+        </div>
+        <div v-if="tabName === 'Alignment'">
+            Alignment (within species)
+        </div>
       </h1>
 
       <MappingHelpCollapsible v-if="tabName === 'Mapping'" />

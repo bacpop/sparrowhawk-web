@@ -9,13 +9,13 @@
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem v-for="item in tabs"
-                               :key="item.label"
+                               :key="item.sidebar_label"
                                :class="item.id === tabName ? 'bg-white rounded-sm shadow-sm' : ''"
                                class="py-2 px-3 cursor-pointer">
                 <SidebarMenuButton @click="changeTab(item.id)" class="p-0 hover:bg-transparent cursor-pointer">
                   <component :is="item.icon"/>
                   <span class="text-md">
-                    {{ item.label }}
+                    {{ item.sidebar_label }}
                   </span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -113,6 +113,7 @@ import FaqPage from "@/components/pages/FaqPage.vue";
 
 interface Tab {
   id: string;
+  sidebar_label: string;
   label: string;
   icon: string;
 }
@@ -159,12 +160,12 @@ export default defineComponent({
     return {
       tabName: 'Assembly' as string,
       tabs: [
-        {id: 'Assembly', label: 'Assembly', icon: 'Codesandbox'},
-        {id: 'Mapping', label: 'Mapping', icon: 'TextAlignCenter'},
-        {id: 'Alignment', label: 'Alignment', icon: 'TreePine'},
-        {id: 'TaxonomicID', label: 'Taxonomic ID', icon: 'ScanFace'},
-        {id: 'GeneCalling', label: 'Gene calling', icon: 'Dna'},
-        {id: 'HostDepletion', label: 'Host depletion', icon: 'Funnel'},
+        {id: 'Assembly', sidebar_label: "Assembly", label: 'Assembly', icon: 'Codesandbox'},
+        {id: 'Mapping', sidebar_label: "Mapping", label: 'Mapping (within species)', icon: 'TextAlignCenter'},
+        {id: 'Alignment', sidebar_label: "Alignment", label: 'Alignment (within species)', icon: 'TreePine'},
+        {id: 'TaxonomicID', sidebar_label: "Taxonomic ID", label: 'Taxonomic ID', icon: 'ScanFace'},
+        {id: 'GeneCalling', sidebar_label: "Gene calling", label: 'Gene calling', icon: 'Dna'},
+        {id: 'HostDepletion', sidebar_label: "Host depletion", label: 'Host depletion', icon: 'Funnel'},
       ] as Tab[]
     }
   },
