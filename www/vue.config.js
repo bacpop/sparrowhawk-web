@@ -114,7 +114,8 @@ module.exports = defineConfig({
             .init(
                 (Plugin) =>
                     new Plugin({
-                        crateDirectory: path.resolve(__dirname, "../rust/deacon/deacon-web"),
+//                        crateDirectory: path.resolve(__dirname, "../rust/deacon/deacon-web"),
+                        crateDirectory: path.resolve(__dirname, "../rust/deacon-bridge"),
                         extraArgs: "--no-default-features",
                         outDir: path.resolve(__dirname, "./src/pkg_deacon"),
                         forceMode: "production",

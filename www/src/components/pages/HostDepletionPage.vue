@@ -139,8 +139,10 @@
               <Check class="w-4 h-4 text-green-500" />
               <span class="flex-grow text-sm font-mono truncate">{{ allResults_deacon.readsFileName }}</span>
             </div>
-            <div class="mx-6 mt-2 text-sm text-gray-600">
-              {{ allResults_deacon.totalReads }} reads processed
+            <div class="mx-6 mt-2 text-sm text-gray-600 flex flex-col gap-1">
+              <span>{{ allResults_deacon.totalReads }} reads processed</span>
+              <span>{{ allResults_deacon.keptReads }} reads retained</span>
+              <span>{{ allResults_deacon.removedReads }} reads removed</span>
             </div>
             <div class="mx-6">
               <DownloadButtonHostDepletion />

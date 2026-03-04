@@ -264,11 +264,11 @@ export default {
         state.allResults_deacon.readsFileName = input.fileName;
         state.allResults_deacon.readsFileName2 = input.fileName2;
     },
-    saveDeaconFilterResults(state: RootState, input: { total: number; outputGzip: Uint8Array; outputGzip2?: Uint8Array | null }) {
+    saveDeaconFilterResults(state: RootState, input: { total: number; kept: number; removed: number; outputGzip: Uint8Array; outputGzip2?: Uint8Array | null }) {
         state.allResults_deacon.isFiltering = false;
         state.allResults_deacon.totalReads = input.total;
-        state.allResults_deacon.keptReads = null;
-        state.allResults_deacon.removedReads = null;
+        state.allResults_deacon.keptReads = input.kept;
+        state.allResults_deacon.removedReads = input.removed;
         state.allResults_deacon.outputGzip = input.outputGzip;
         state.allResults_deacon.outputGzip2 = input.outputGzip2 ?? null;
     },

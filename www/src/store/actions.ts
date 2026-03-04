@@ -470,8 +470,10 @@ export default {
                 workerDeacon.onmessage = (msg) => {
                     if (msg.data.filtered) {
                         commit("saveDeaconFilterResults", {
-                            total: msg.data.total,
-                            outputGzip: msg.data.outputGzip,
+                            total:       msg.data.total,
+                            kept:        msg.data.kept,
+                            removed:     msg.data.removed,
+                            outputGzip:  msg.data.outputGzip,
                             outputGzip2: msg.data.outputGzip2 ?? null,
                         });
                     }

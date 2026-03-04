@@ -1,5 +1,23 @@
 import type { WasmIndex } from "@/pkg_deacon";
 
+interface FilterStats {
+    readsIn: number;
+    readsOut: number;
+    basesIn: number;
+    basesOut: number;
+}
+
+function concat(chunks: Uint8Array[]): Uint8Array {
+    const total = chunks.reduce((n, c) => n + c.length, 0);
+    const out = new Uint8Array(total);
+    let offset = 0;
+    for (const c of chunks) {
+        out.set(c, offset);
+        offset += c.length;
+    }
+    return out;
+}
+
 export class Depleter {
     worker: Worker;
     index: WasmIndex | null = null;
@@ -18,23 +36,43 @@ export class Depleter {
     }
 
     async filterReads(file: File, revFile: File | null, deplete: boolean, abs_threshold: number, rel_threshold: number): Promise<void> {
-        const buf = await file.arrayBuffer();
-        const inputBytes = new Uint8Array(buf);
-        const total = Math.floor(
-            new TextDecoder().decode(inputBytes).split('\n').filter(l => l.length > 0).length / 4
-        );
+        const isGz = (f: File) => f.name.endsWith('.gz');
+
+        const runSession = async (f: File): Promise<{ out: Uint8Array; stats: FilterStats }> => {
+            const buf = new Uint8Array(await f.arrayBuffer());
+            const session = new this.wasm!.WasmFilterSession(
+                this.index!, deplete, abs_threshold, rel_threshold, isGz(f), true
+            );
+            const chunks: Uint8Array[] = [];
+            const part = session.push_chunk(buf);
+            if (part.length > 0) chunks.push(part);
+            const tail = session.finish();
+            if (tail.length > 0) chunks.push(tail);
+            const stats: FilterStats = session.stats();
+            const out = concat(chunks);
+            return { out, stats };
+        };
+
+        const { out: outputGzip, stats: s1 } = await runSession(file);
+        let outputGzip2: Uint8Array | null = null;
+        let s2stats = { readsIn: 0, readsOut: 0 };
+
         if (revFile) {
-            // Paired filtering not yet implemented; no-op
-            return;
-        } else {
-            const outputGzip: Uint8Array = this.wasm!.filter(
-                this.index!, inputBytes, !deplete, abs_threshold, rel_threshold
-            );
-            this.worker.postMessage(
-                { filtered: true, total, outputGzip },
-                [outputGzip.buffer],
-            );
+            const { out, stats } = await runSession(revFile);
+            outputGzip2 = out;
+            s2stats = stats;
         }
+
+        const total   = s1.readsIn + s2stats.readsIn;
+        const kept    = s1.readsOut + s2stats.readsOut;
+        const removed = total - kept;
+
+        this.worker.postMessage(
+            { filtered: true, total, kept, removed, outputGzip, outputGzip2 },
+            outputGzip2
+                ? [outputGzip.buffer, outputGzip2.buffer]
+                : [outputGzip.buffer]
+        );
     }
 
     resetAll(): void {
