@@ -39,23 +39,27 @@ export class Sketcher {
         console.log("Starting identification for sample: " + sampleName);
         await this.waitForWasm();
 
-        if (this.SketchlibData === null) {
-            const response = await fetch('/inverted_k_17_ss_10.ski');
-            const invertedindex = await response.blob();
+        try {
+            if (this.SketchlibData === null) {
+                const response = await fetch('/inverted_k_17_ss_10.ski');
+                const invertedindex = await response.blob();
 
-            this.SketchlibData = await this.wasm.SketchlibData.new(invertedindex);
+                this.SketchlibData = await this.wasm.SketchlibData.new(invertedindex);
+            }
+
+            await this.SketchlibData!.query(file1, file2, proportion_reads, min_count, min_qual);
+
+            const results: IdentifyResult = JSON.parse(this.SketchlibData!.get_probs(3));
+
+            this.worker.postMessage({
+                sampleName: sampleName,
+                probs: results.probs,
+                names: results.names,
+                metadata: results.metadata
+            });
+        } catch {
+            this.worker.postMessage({ error: true, sampleName, message: 'memory' });
         }
-
-        await this.SketchlibData!.query(file1, file2, proportion_reads, min_count, min_qual);
-
-        const results: IdentifyResult = JSON.parse(this.SketchlibData!.get_probs(3));
-
-        this.worker.postMessage({
-            sampleName: sampleName,
-            probs: results.probs,
-            names: results.names,
-            metadata: results.metadata
-        });
     }
 
     resetAll(): void {

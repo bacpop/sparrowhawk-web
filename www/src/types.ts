@@ -34,6 +34,7 @@ export interface AllResultsSka {
     alignResults: Dict<Alignment>
     mapResults: Dict<IsolateMapping>
     ref: string[]
+    error: string | null
 }
 
 export interface SampleIdentifyResult {
@@ -44,6 +45,7 @@ export interface SampleIdentifyResult {
 
 export interface AllResultsSketchlib {
     results: Dict<SampleIdentifyResult>
+    error: string | null
 }
 
 export interface GeneCallResult {
@@ -55,6 +57,7 @@ export interface GeneCallResult {
 
 export interface AllResultsOrphos {
     results: Dict<GeneCallResult>;
+    error: string | null
 }
 
 export interface DepletionResult {
@@ -72,6 +75,7 @@ export interface AllResultsDeacon {
     indexLoaded: boolean;
     isLoadingIndex: boolean;
     results: Dict<DepletionResult>;
+    error: string | null
 }
 
 export interface ReadsPreprocessing {

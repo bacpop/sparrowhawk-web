@@ -65,33 +65,41 @@ export class Mapper {
             throw new Error("SkaRef::map - reference does not exist yet.");
         }
 
-        const results: MapResult = JSON.parse(this.SkaData.map(file, revReadFile, proportion_reads, min_count, min_qual, qual_filter));
+        try {
+            const results: MapResult = JSON.parse(this.SkaData.map(file, revReadFile, proportion_reads, min_count, min_qual, qual_filter));
 
-        const outname = (revReadFile != null) ? file.name.replace(/(?:_1)?\.(?:fa|fna|fasta|fq|fnq|fastq)(?:\.gz)?$/, "") : file.name;
-        
-        this.worker.postMessage({
-            nb_variants: results["Number of variants"],
-            coverage: results["Coverage"],
-            name: outname,
-            mapped_sequences: results["Mapped sequences"],
-        });
+            const outname = (revReadFile != null) ? file.name.replace(/(?:_1)?\.(?:fa|fna|fasta|fq|fnq|fastq)(?:\.gz)?$/, "") : file.name;
+
+            this.worker.postMessage({
+                nb_variants: results["Number of variants"],
+                coverage: results["Coverage"],
+                name: outname,
+                mapped_sequences: results["Mapped sequences"],
+            });
+        } catch {
+            this.worker.postMessage({ error: true, message: 'memory' });
+        }
     }
 
     align(files: File[], proportion_reads: number, rc: boolean, k: number, min_count: number, min_qual: number, qual_filter: number): void {
         console.log("Processing uploaded fastX files with proportion_reads: " + proportion_reads + " and k: " + k);
 
-        if (this.AlignData === null) {
-            this.AlignData = this.wasm.AlignData.new(k, rc);
+        try {
+            if (this.AlignData === null) {
+                this.AlignData = this.wasm.AlignData.new(k, rc);
+            }
+
+            const results: AlignResult = JSON.parse(this.AlignData!.align(files, proportion_reads, min_count, min_qual, qual_filter));
+
+            this.worker.postMessage({
+                aligned: true,
+                names: results.names,
+                newick: results.newick,
+                alignment: results.alignment
+            });
+        } catch {
+            this.worker.postMessage({ error: true, message: 'memory' });
         }
-
-        const results: AlignResult = JSON.parse(this.AlignData!.align(files, proportion_reads, min_count, min_qual, qual_filter));
-
-        this.worker.postMessage({
-            aligned: true,
-            names: results.names,
-            newick: results.newick,
-            alignment: results.alignment
-        });
     }
 
     resetAll(): void {

@@ -85,6 +85,20 @@
     </div>
 
     <div class="w-2/3 pt-12">
+
+      <div v-if="deaconError"
+           class="mx-6 mb-4 p-3 bg-red-50 border border-red-300 rounded-md text-sm text-red-800">
+        <template v-if="deaconError === 'memory'">
+          Error during processing — most likely a memory issue. Try with fewer or smaller files.
+        </template>
+        <template v-else-if="deaconError === 'index'">
+          Failed to load index file — the file may be corrupted or in the wrong format.
+        </template>
+        <template v-else>
+          An unexpected error occurred. Please reset and try again.
+        </template>
+      </div>
+
       <div v-if="tabName === 'HostDepletion'">
 
         <!-- Phase 1: Index upload -->
@@ -169,7 +183,7 @@
                   <td class="px-3 py-2 flex gap-1 flex-wrap">
                     <Button variant="outline" size="sm" @click="downloadR1(result)">
                       <Download class="mr-1 h-3 w-3" />
-                      {{ result.outputGzip2 ? 'R1' : 'filtered' }} (.fastq.gz)
+                      {{ result.outputGzip2 ? 'R1 ' : '' }}(.fastq.gz)
                     </Button>
                     <Button v-if="result.outputGzip2" variant="outline" size="sm" @click="downloadR2(result)">
                       <Download class="mr-1 h-3 w-3" /> R2 (.fastq.gz)
@@ -373,6 +387,9 @@ export default defineComponent({
     };
   },
   computed: {
+    deaconError(): string | null {
+      return this.store.getters.deaconError;
+    },
     deaconIndexLoaded(): boolean {
       return this.store.getters.deaconIndexLoaded;
     },

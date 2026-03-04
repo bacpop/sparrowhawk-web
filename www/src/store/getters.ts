@@ -99,6 +99,15 @@ export const getters: GetterTree<RootState, RootState> = {
         return state.processingState.isCallingGenesFiles;
     },
 
+    // SKA errors
+    skaError(state: RootState)       { return state.allResults_ska.error; },
+    // SKETCHLIB errors
+    sketchlibError(state: RootState) { return state.allResults_sketchlib.error; },
+    // ORPHOS errors
+    orphosError(state: RootState)    { return state.allResults_orphos.error; },
+    // DEACON errors
+    deaconError(state: RootState)    { return state.allResults_deacon.error; },
+
     // DEACON
     deaconIndexLoaded(state: RootState)    { return state.allResults_deacon.indexLoaded; },
     isLoadingDeaconIndex(state: RootState) { return state.allResults_deacon.isLoadingIndex; },

@@ -123,6 +123,17 @@
     </div>
 
     <div class="min-w-0 flex-1 overflow-hidden pt-12">
+
+      <div v-if="sketchlibError"
+           class="mx-6 mb-4 p-3 bg-red-50 border border-red-300 rounded-md text-sm text-red-800">
+        <template v-if="sketchlibError === 'memory'">
+          Error during processing — most likely a memory issue. Try with fewer or smaller files.
+        </template>
+        <template v-else>
+          An unexpected error occurred. Please reset and try again.
+        </template>
+      </div>
+
       <div v-if="tabName=='TaxonomicID'">
 
         <!-- Upload dropbox - always visible when not identifying -->
@@ -357,6 +368,9 @@ export default defineComponent({
     };
   },
   computed: {
+    sketchlibError(): string | null {
+      return this.store.getters.sketchlibError;
+    },
     sampleIdentified(): boolean {
       return this.store.getters.sampleIdentified;
     },

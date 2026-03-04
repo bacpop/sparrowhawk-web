@@ -185,12 +185,16 @@ export default {
         }
     },
 
+    setSkaMappingError(state: RootState, msg: string) { state.allResults_ska.error = msg; },
+    setSkaAlignError(state: RootState, msg: string)   { state.allResults_ska.error = msg; },
+
     resetAllResults_ska(state: RootState) {
         state.refSet = null;
         state.allResults_ska = {
             mapResults: {},
             alignResults: {},
             ref: [],
+            error: null,
         };
 
         if (state.workerState.worker_ska) {
@@ -218,9 +222,12 @@ export default {
         };
     },
 
+    setSketchlibError(state: RootState, msg: string) { state.allResults_sketchlib.error = msg; },
+
     resetAllResults_sketchlib(state: RootState) {
         state.allResults_sketchlib = {
             results: {},
+            error: null,
         };
 
         for (const worker of state.workerState.workers_sketchlib) {
@@ -242,8 +249,10 @@ export default {
     saveGeneCallingResult(state: RootState, input: GeneCallResult) {
         state.allResults_orphos.results[input.fileName] = input;
     },
+    setOrphosError(state: RootState, msg: string) { state.allResults_orphos.error = msg; },
+
     resetAllResults_orphos(state: RootState) {
-        state.allResults_orphos = { results: {} };
+        state.allResults_orphos = { results: {}, error: null };
         state.processingState.isCallingGenes = false;
         state.processingState.isCallingGenesFiles = new Set();
         for (const worker of state.workerState.workers_orphos) {
@@ -274,6 +283,8 @@ export default {
     saveDeaconFilterResult(state: RootState, result: DepletionResult) {
         state.allResults_deacon.results[result.sampleName] = result;
     },
+    setDeaconError(state: RootState, msg: string) { state.allResults_deacon.error = msg; },
+
     resetAllResults_deacon(state: RootState) {
         state.allResults_deacon = {
             indexFileName: null,
@@ -281,6 +292,7 @@ export default {
             indexLoaded: false,
             isLoadingIndex: false,
             results: {},
+            error: null,
         };
         state.processingState.isFilteringDeacon = false;
         state.processingState.isFilteringDeaconFiles = new Set<string>();

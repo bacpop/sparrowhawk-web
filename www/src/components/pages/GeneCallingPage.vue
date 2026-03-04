@@ -147,6 +147,17 @@
     </div>
 
     <div class="w-2/3 pt-12">
+
+      <div v-if="orphosError"
+           class="mx-6 mb-4 p-3 bg-red-50 border border-red-300 rounded-md text-sm text-red-800">
+        <template v-if="orphosError === 'memory'">
+          Error during processing — most likely a memory issue. Try with fewer or smaller files.
+        </template>
+        <template v-else>
+          An unexpected error occurred. Please reset and try again.
+        </template>
+      </div>
+
       <div v-if="tabName=='GeneCalling'">
 
         <!-- Upload dropzone - always visible -->
@@ -382,6 +393,9 @@ export default defineComponent({
     };
   },
   computed: {
+    orphosError(): string | null {
+      return this.store.getters.orphosError;
+    },
     genesCalled(): boolean {
       return this.store.getters.genesCalled;
     },

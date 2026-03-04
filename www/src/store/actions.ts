@@ -209,6 +209,11 @@ export default {
             if (state.workerState.worker_ska) {
                 state.workerState.worker_ska.postMessage(messageData);
                 state.workerState.worker_ska.onmessage = (message) => {
+                    if (message.data.error) {
+                        commit("setSkaMappingError", message.data.message ?? "generic");
+                        commit("removeMappingFile", messageData.sampleName);
+                        return;
+                    }
                     console.log("Mapping variants: " + message.data.nb_variants);
                     console.log("Mapping coverage: " + message.data.coverage);
 
@@ -258,6 +263,10 @@ export default {
                 // Clear aligning state
                 commit("setAligningState", false);
 
+                if (message.data.error) {
+                    commit("setSkaAlignError", message.data.message ?? "generic");
+                    return;
+                }
                 commit("setAligned", message.data);
             };
         }
@@ -289,7 +298,11 @@ export default {
         pool.forEach((worker) => {
             worker.onmessage = (messageData) => {
                 if (messageData.data instanceof Object) {
-                    if ("probs" in messageData.data && "sampleName" in messageData.data) {
+                    if (messageData.data.error) {
+                        const sampleName = messageData.data.sampleName;
+                        commit("setSketchlibError", messageData.data.message ?? "generic");
+                        if (sampleName) commit("removeIdentifyingFile", sampleName);
+                    } else if ("probs" in messageData.data && "sampleName" in messageData.data) {
                         const sampleName = messageData.data.sampleName;
                         console.log("Saving results for sample: " + sampleName);
                         commit("removeIdentifyingFile", sampleName);
@@ -360,7 +373,10 @@ export default {
         }
         pool.forEach(worker => {
             worker.onmessage = (msg) => {
-                if (msg.data?.output_file !== undefined) {
+                if (msg.data?.error) {
+                    commit("setOrphosError", msg.data.message ?? "generic");
+                    if (msg.data.fileName) commit("removeCallingGenesFile", msg.data.fileName);
+                } else if (msg.data?.output_file !== undefined) {
                     commit("removeCallingGenesFile", msg.data.fileName);
                     commit("saveGeneCallingResult", {
                         fileName: msg.data.fileName,
@@ -421,7 +437,12 @@ export default {
         commit("setLoadingDeaconIndex");
         state.workerState.worker_deacon.postMessage({ loadIndex: true, file: payload.file });
         state.workerState.worker_deacon.onmessage = (msg) => {
-            if (msg.data.indexLoaded) commit("setDeaconIndexLoaded", { fileName: msg.data.fileName, info: msg.data.info });
+            if (msg.data.error) {
+                state.allResults_deacon.isLoadingIndex = false;
+                commit("setDeaconError", msg.data.message ?? "index");
+            } else if (msg.data.indexLoaded) {
+                commit("setDeaconIndexLoaded", { fileName: msg.data.fileName, info: msg.data.info });
+            }
         };
     },
 
@@ -433,7 +454,10 @@ export default {
 
         // Set handler once (safe to overwrite — idempotent)
         workerDeacon.onmessage = (msg) => {
-            if (msg.data.filtered) {
+            if (msg.data.error) {
+                commit("setDeaconError", msg.data.message ?? "generic");
+                if (msg.data.sampleName) commit("removeFilteringDeaconFile", msg.data.sampleName);
+            } else if (msg.data.filtered) {
                 commit("removeFilteringDeaconFile", msg.data.sampleName);
                 commit("saveDeaconFilterResult", {
                     sampleName:   msg.data.sampleName,

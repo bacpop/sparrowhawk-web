@@ -24,14 +24,17 @@ export const emptyState = (): RootState => ({
         mapResults: {},
         alignResults: {},
         ref: [],
+        error: null,
     },
 
     allResults_sketchlib: {
         results: {},
+        error: null,
     },
 
     allResults_orphos: {
         results: {},
+        error: null,
     },
 
     allResults_deacon: {
@@ -40,6 +43,7 @@ export const emptyState = (): RootState => ({
         indexLoaded: false,
         isLoadingIndex: false,
         results: {},
+        error: null,
     },
 
     workerState: {

@@ -39,19 +39,23 @@ export class Caller {
         console.log("Starting gene calling for: " + fileName);
         await this.waitForWasm();
 
-        // Always create fresh OrphosData to avoid gene count accumulation between files
-        this.OrphosData = await this.wasm.OrphosData.new(metag, "gff", closed_ends, mask, non_sd, tt);
+        try {
+            // Always create fresh OrphosData to avoid gene count accumulation between files
+            this.OrphosData = await this.wasm.OrphosData.new(metag, "gff", closed_ends, mask, non_sd, tt);
 
-        await this.OrphosData!.analyse_genome(input_file);
+            await this.OrphosData!.analyse_genome(input_file);
 
-        const results: CallResult = JSON.parse(this.OrphosData!.get_results("gff"));
+            const results: CallResult = JSON.parse(this.OrphosData!.get_results("gff"));
 
-        this.worker.postMessage({
-            fileName,
-            output_file: results.output_file,
-            gene_count: results.gene_count,
-            sequence_count: results.sequence_count
-        });
+            this.worker.postMessage({
+                fileName,
+                output_file: results.output_file,
+                gene_count: results.gene_count,
+                sequence_count: results.sequence_count
+            });
+        } catch {
+            this.worker.postMessage({ error: true, fileName, message: 'memory' });
+        }
     }
 
     resetAll(): void {
