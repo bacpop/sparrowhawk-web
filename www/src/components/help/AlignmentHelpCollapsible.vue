@@ -23,7 +23,7 @@
             <p>
               Here you can align three or more sequences (reads or assemblies) between themselves. After "uploading" (loading
               into memory) them, and after they are processed, you will see a quick phylogenetic tree built from their
-              differences.
+              differences using <a href="https://github.com/theosanderson/taxonium" target="_blank" class="text-blue-600 hover:underline">Taxonium</a>. This tab uses <a href="https://github.com/bacpop/ska.rust" target="_blank" class="text-blue-600 hover:underline">ska.rust</a> under the hood.
             </p>
             <p>
               Take into account that the underlying software, ska.rust, is designed to work with small taxonomic
@@ -50,11 +50,23 @@
             <dl class="space-y-3">
               <div>
                 <dt class="font-medium text-gray-900">k</dt>
-                <dd class="ml-4">Controls the size of the subsequences (k-mers) used to process the reads or assemblies. Similar to that of mapping.</dd>
+                <dd class="ml-4">Controls the size of the subsequences (k-mers) used to process the reads or assemblies. Similar to that of the assembly, but in this case only up until 63.</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-gray-900">Minimum Illumina read quality</dt>
+                <dd class="ml-4">The quality of the input fastq files, it is an integer from zero to 33. By default, 20.</dd>
               </div>
               <div>
                 <dt class="font-medium text-gray-900">Proportion of reads</dt>
                 <dd class="ml-4">When using reads, this allows to subsample them (making thus the analysis faster). A real number between 0 and 1.</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-gray-900">Quality filter type</dt>
+                <dd class="ml-4">Allows to set the Illumina filter type for reads that the algorithm will do. By default, it will check all nucleotides in a k-mer. You can set it to check only the middle one, or noone.</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-gray-900">Use canonical k-mers</dt>
+                <dd class="ml-4">It allows to identify identically one k-mer and its reverse-complement. It is recommended when uploading reads.</dd>
               </div>
             </dl>
           </TabsContent>

@@ -23,7 +23,7 @@
             <p>
               Here you can perform genome assembly of short read sequencing data. You will need your sequencing read files (in
               FASTQ format, compressed or not), that can be single files or paired-end ones (keep in mind that these tools were
-              designed for bacterial genomes, so large reads files might not work!).
+              designed for bacterial genomes, so large reads files might not work!). This tab uses <a href="https://github.com/bacpop/sparrowhawk" target="_blank" class="text-blue-600 hover:underline">sparrowhawk</a> under the hood.
             </p>
 
             <p>
@@ -36,14 +36,14 @@
             <div>
               <p class="font-medium text-gray-900 mb-2">Example record and files</p>
               <p class="text-sm mb-1">
-                <a href="https://www.ebi.ac.uk/ena/browser/view/ERR8158023" target="_blank" class="text-blue-600 hover:underline">Mycobacterium tuberculosis reads from ENA</a>
+              <a href="https://www.ebi.ac.uk/ena/browser/view/ERR8158023" target="_blank" class="text-blue-600 hover:underline"><i>Mycobacterium tuberculosis</i> reads from ENA</a>
               </p>
               <ul class="list-disc list-inside space-y-1">
                 <li>
-                  <a href="ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR815/003/ERR8158023/ERR8158023_1.fastq.gz" class="text-blue-600 hover:underline">ERR8158023_1.fastq.gz</a>
+                  <a href="https://ftp.sra.ebi.ac.uk/vol1/fastq/ERR815/003/ERR8158023/ERR8158023_1.fastq.gz" class="text-blue-600 hover:underline">ERR8158023_1.fastq.gz</a>
                 </li>
                 <li>
-                  <a href="ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR815/003/ERR8158023/ERR8158023_2.fastq.gz" class="text-blue-600 hover:underline">ERR8158023_2.fastq.gz</a>
+                  <a href="https://ftp.sra.ebi.ac.uk/vol1/fastq/ERR815/003/ERR8158023/ERR8158023_2.fastq.gz" class="text-blue-600 hover:underline">ERR8158023_2.fastq.gz</a>
                 </li>
               </ul>
             </div>
@@ -68,16 +68,16 @@
                 <dd class="ml-4">This box does what it says, it automatically disables the slider for the minimum counts. Memory usage could increase.</dd>
               </div>
               <div>
-                <dt class="font-medium text-gray-900">Chunk processing size (set zero for no chunking)</dt>
-                <dd class="ml-4">A value to be put, by default 150000, anything inputted should be a positive integer (including zero).</dd>
-              </div>
-              <div>
                 <dt class="font-medium text-gray-900">Use Bloom filter for preprocessing</dt>
-                <dd class="ml-4">Recommended for non-small reads. This box disables chunking automatically, removing the previous text box.</dd>
+                <dd class="ml-4">Recommended for non-small read files. This box disables chunking automatically, removing the previous text box.</dd>
               </div>
               <div>
                 <dt class="font-medium text-gray-900">Keep dead-ends / Do not collapse bubbles</dt>
                 <dd class="ml-4">The last two options are booleans that modify two parameters from the algorithm. They do not affect the rest of the parameters.</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-gray-900">Chunk processing size (set zero for no chunking)</dt>
+                <dd class="ml-4">A value to be put, by default 150000, anything inputted should be a positive integer (including zero).</dd>
               </div>
             </dl>
           </TabsContent>

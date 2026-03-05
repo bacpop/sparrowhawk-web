@@ -3,7 +3,7 @@
     <CollapsibleTrigger class="flex items-center justify-between w-full p-3 hover:bg-gray-50 rounded-lg">
       <div class="flex items-center gap-2">
         <HelpCircle class="w-4 h-4 text-gray-500" />
-        <span class="font-medium text-sm">How to use Gene calling</span>
+        <span class="font-medium text-sm">How to use Host depletion</span>
       </div>
       <ChevronDown
         class="w-4 h-4 text-gray-500 transition-transform duration-200"
@@ -21,16 +21,14 @@
         <div class="mt-3 text-sm text-gray-600 max-h-64 overflow-y-auto">
           <TabsContent value="overview" class="space-y-4">
             <p>
-              BLABLABLABLA TOCHANGE Here you can identify the taxonomic classification at the level of species of bacterial genomic sequences (either
-              reads in FASTQ format, or any FASTA sequence). For that, you just need to "upload" (load into memory) your
-              sequence files, and you will obtain the three most closest results, with its probability, that the methodology
-              obtains for your sequences. You can check the documentation for more information on how this works.
+              Here you can either select or filter your reads (or in general, sequences) to, for example, remove host reads from your sequencing experiment data.
+              To do so, you will need an index, to be created with <a href="https://github.com/bede/deacon" target="_blank" class="text-blue-600 hover:underline">Deacon</a>. You have an example index below you can use. Afterwards, you can drag-and-drop, or select one or multiple FASTQ or FASTA files to process them. Afterwards, you can get back your filtered (or selected) reads (or sequences).
             </p>
 
             <div>
-              <p class="font-medium text-gray-900 mb-2">Example record and files</p>
+              <p class="font-medium text-gray-900 mb-2">Example index and reads</p>
               <p class="text-sm">
-                <a href="https://www.ebi.ac.uk/ena/browser/view/GCA_004138665.1" target="_blank" class="text-blue-600 hover:underline">Klebsiella pneumoniae assembly: GCA_004138665.1</a>
+                <a href="https://objectstorage.uk-london-1.oraclecloud.com/n/lrbvkel2wjot/b/human-genome-bucket/o/deacon/3/panhuman-1.k31w61.idx" target="_blank" class="text-blue-600 hover:underline">Human read index</a>
               </p>
               <ul class="list-disc list-inside mt-1">
                 <li>
@@ -43,12 +41,16 @@
           <TabsContent value="parameters">
             <dl class="space-y-3">
               <div>
-                <dt class="font-medium text-gray-900">k</dt>
-                <dd class="ml-4">Controls the size of the subsequences (k-mers) used to process the reads or assemblies. Similar to that of the assembly, but in this case only up until 63.</dd>
+                <dt class="font-medium text-gray-900">Deplete mode</dt>
+                <dd class="ml-4">Activated by default, this checkbox can be unticked to keep those reads that have matches with the index's, instead of removing them.</dd>
               </div>
               <div>
-                <dt class="font-medium text-gray-900">Proportion of reads</dt>
-                <dd class="ml-4">When using reads, this allows to subsample them (making thus the analysis faster). A real number between 0 and 1.</dd>
+                <dt class="font-medium text-gray-900">Absolute threshold</dt>
+                <dd class="ml-4">This is the minimum number of k-mers that must match between a read and an index to select a read (and filter/keep it, depending on whether depleted mode is activated or not). Both this and the relative threshold must be satisfied to select a read.</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-gray-900">Relative threshold</dt>
+                <dd class="ml-4">This is the percentage (set as a real number between 0 and 1) of k-mers that must match between a read and an index to select a read (and filter/keep it, depending on whether depleted mode is activated or not). Both this and the absolute threshold must be satisfied to select a read.</dd>
               </div>
             </dl>
           </TabsContent>

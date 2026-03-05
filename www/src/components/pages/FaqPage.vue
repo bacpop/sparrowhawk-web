@@ -33,7 +33,7 @@
       What can I do in the "Mapping" tab?
     </h3>
     <p class="text-sm">
-      Here you can map a sequence (reads or assemblies) or more to a reference one, normally a reference assembly. You
+      Here you can map a sequence (reads or assemblies) or more to a reference one, normally a reference assembly. This algorithm only works if the genomes are closely related (within-species distances). You
       will need first your reference sequence (in FASTA format, can be compressed), that you can "upload" (load in
       memory) and afterwards you will need to do the same with the sequence(s) you want to map. At the end you can
       download the mapping alignment as a FASTA file and also see it with a viewer below. You can check the
@@ -42,7 +42,7 @@
 
     <h3 class="mt-2 mb-2 font-medium">What can I do in the "Alignment" tab?</h3>
     <p class="text-sm">
-      Here you can align three or more sequences (reads or assemblies) between themselves. After "uploading" (loading
+      Here you can align three or more sequences (reads or assemblies) between themselves. This algorithm only works if the genomes are closely related (within-species distances). After "uploading" (loading
       into memory) them, and after they are processed, you will see a quick phylogenetic tree built from their
       differences. Take into account that the underlying software, ska.rust, is designed to work with small taxonomic
       distances (inside a species), so inputting sequences genomically very different might make the web show absurd
@@ -55,7 +55,21 @@
       Here you can identify the taxonomic classification at the level of species of bacterial genomic sequences (either
       reads in FASTQ format, or any FASTA sequence). For that, you just need to "upload" (load into memory) your
       sequence files, and you will obtain the three most closest results, with its probability, that the methodology
-      obtains for your sequences. You can check the documentation for more information on how this works.
+      obtains for your sequences. You can download the results in TSV format. For analysing several files, you can increase
+      the number of threads as multi-file processing is parallelised. You can check the documentation for more information on how this works.
+    </p>
+
+    <h3 class="mt-2 mb-2 font-medium">What can I do in the "Gene calling" tab?</h3>
+    <p class="text-sm">
+      Here you can call genes from any bacterial genomic sequences in FASTA format. For that, you just need to "upload" (load into memory) your sequence files, and you will obtain a GFF file to download. We have also included a genome viewer so that you 
+      will be able to see your recently called genes. You can analyse simultaneously multiple files, and download in bulk the results.
+      This algorithm is parallelised when you analyse more than one file, you can set the amount of parallel threads in the arguments. You can check the documentation for more information on how this works.
+    </p>
+
+    <h3 class="mt-2 mb-2 font-medium">What can I do in the "Host depletion" tab?</h3>
+    <p class="text-sm">
+      Here you can call either filter or select reads or sequences in general. This is particularly useful when dealing with human bacterial samples, that might be contaminated with host DNA, and you usually want to filter as much as you can that part, for data protection and privacy reasons.
+      To use this, first upload an index. There is one example provided in the "How to use Host depletion" block that is a compact human read index. You can create your own using Deacon. Afterwards, you can upload your reads (in pairs or individual files) by drag and drop or selecting them manually. You can process multiple sequentially (this is not parallelised). At the end, all the results will be available for download individually or in bulk as .zip or .tar.gz files. You can check the documentation for more information on how this works.
     </p>
 
     <h3 class="mt-2 mb-2 font-medium">Where can I find information on what parameters to use?</h3>
@@ -69,18 +83,38 @@
     </p>
     <ul class="">
       <li class="text-sm list-disc ml-5">
-        Underlying assembly code: <a target="_blank" href="https://github.com/bacpop/sparrowhawk" class="text-blue-500 underline">https://github.com/bacpop/sparrowhawk</a>
+        Underlying assembly code: sparrowhawk. <a target="_blank" href="https://github.com/bacpop/sparrowhawk" class="text-blue-500 underline">Link to repository</a>.
       </li>
       <li class="text-sm list-disc ml-5">
-        Underlying mapping and alignment code: <a target="_blank" href="https://github.com/bacpop/ska.rust"
-                                                  class="text-blue-500 underline">https://github.com/bacpop/ska.rust</a>
+        Underlying mapping and alignment code: ska.rust. <a target="_blank" href="https://github.com/bacpop/ska.rust" class="text-blue-500 underline">Link to repository</a>. 
+        <a target="_blank" href="https://genome.cshlp.org/content/34/10/1661.abstract" class="text-blue-500 underline">Link to paper</a>.
       </li>
       <li class="text-sm list-disc ml-5">
-        Underlying taxonomic identification code: <a target="_blank" href="https://github.com/bacpop/sketchlib.rust"
-                                                     class="text-blue-500 underline">https://github.com/bacpop/sketchlib.rust</a>
+        MSA viewer: MSEABOARD. <a target="_blank" href="https://github.com/lucanest/mseaboard"
+                                 class="text-blue-500 underline">Link to repository</a>.
       </li>
       <li class="text-sm list-disc ml-5">
-        Website code: <a target="_blank" href="https://github.com/bacpop/sparrowhawk-web" class="text-blue-500 underline">https://github.com/bacpop/sparrowhawk-web</a>
+        Phylogenetic tree viewer: Taxonium. <a target="_blank" href="https://github.com/theosanderson/taxonium"
+                                 class="text-blue-500 underline">Link to repository</a>. <a target="_blank" href="https://elifesciences.org/articles/82392" class="text-blue-500 underline">Link to paper</a>.
+      </li>
+      <li class="text-sm list-disc ml-5">
+        Underlying taxonomic identification code: sketchlib.rust. <a target="_blank" href="https://github.com/bacpop/sketchlib.rust"
+                                                     class="text-blue-500 underline">Link to repository</a>. <a target="_blank" href="https://doi.org/10.1098/rstb.2021.0237" class="text-blue-500 underline">Link to related paper where the methodology is detailed</a>.
+      </li>
+      <li class="text-sm list-disc ml-5">
+        Cluster information for taxonomic identification extracted with Gemsparcl. <a target="_blank" href="https://www.biorxiv.org/content/10.64898/2025.12.30.695181" class="text-blue-500 underline">Link to preprint</a>.
+      </li>
+      <li class="text-sm list-disc ml-5">
+        Data use to create reference index for taxonomic identification: All The Bacteria (AtB) dataset. <a target="_blank" href="https://allthebacteria.org/" class="text-blue-500 underline">Link to website</a>. <a target="_blank" href="https://github.com/AllTheBacteria/AllTheBacteria" class="text-blue-500 underline">Link to repository</a>. <a target="_blank" href="https://www.biorxiv.org/content/10.1101/2024.03.08.584059" class="text-blue-500 underline">Link to preprint</a>.
+      </li>
+      <li class="text-sm list-disc ml-5">
+        Underlying gene calling code: Orphos, a Prodigal Rust port. <a target="_blank" href="https://github.com/FullHuman/orphos" class="text-blue-500 underline">Link to repository</a>. <a target="_blank" href="https://github.com/hyattpd/Prodigal" class="text-blue-500 underline">Link to Prodigal's repository</a>. <a target="_blank" href="https://doi.org/10.1186/1471-2105-11-119" class="text-blue-500 underline">Link to Prodigal's paper</a>.
+      </li>
+      <li class="text-sm list-disc ml-5">
+        Underlying host depletion code: Deacon. <a target="_blank" href="https://github.com/bede/deacon" class="text-blue-500 underline">Link to repository</a>. <a target="_blank" href="https://doi.org/10.1101/2025.06.09.658732" class="text-blue-500 underline">Link to preprint</a>.
+      </li>
+      <li class="text-sm list-disc ml-5">
+        Website: <a target="_blank" href="https://github.com/bacpop/sparrowhawk-web" class="text-blue-500 underline">link to repository</a>.
       </li>
     </ul>
   </div>
