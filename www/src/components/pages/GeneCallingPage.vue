@@ -177,7 +177,7 @@
         </div>
 
         <!-- Per-file in-flight status list -->
-        <div v-if="uploadedFileNames.length > 0" class="mx-6 mt-4">
+        <div v-if="uploadedFileNames.length > 0" class="mx-6 mt-4 max-h-48 overflow-y-auto">
           <div v-for="fileName in uploadedFileNames" :key="fileName"
                class="flex items-center gap-2 py-2 px-3 bg-gray-50 rounded-md mb-2">
             <Check v-if="isFileDone(fileName)" class="w-4 h-4 text-green-500"/>

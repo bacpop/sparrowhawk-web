@@ -164,7 +164,7 @@
         </div>
 
         <!-- Show uploaded files with per-file status -->
-        <div v-if="uploadedFileNames.length > 0" class="mx-6 mr-0 mt-4">
+        <div v-if="uploadedFileNames.length > 0" class="mx-6 mr-0 mt-4 max-h-48 overflow-y-auto">
           <div v-for="fileName in uploadedFileNames" :key="fileName"
                class="flex items-center gap-2 py-2 px-3 bg-gray-50 rounded-md mb-2">
             <Check v-if="isFileIdentified(fileName)" class="w-4 h-4 text-green-500"/>
@@ -183,7 +183,7 @@
               Download TSV
             </Button>
           </div>
-          <div class="overflow-x-auto">
+          <div class="max-h-96 overflow-y-auto">
             <DataTable :columns="tableColumns" :data="tableData" />
           </div>
         </div>

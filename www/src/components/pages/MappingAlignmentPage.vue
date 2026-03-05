@@ -306,7 +306,7 @@
         </div>
 
         <!-- File list with status -->
-        <div v-if="uploadedAlignmentFiles.length > 0" class="mx-6 mr-0 mt-4">
+        <div v-if="uploadedAlignmentFiles.length > 0" class="mx-6 mr-0 mt-4 max-h-48 overflow-y-auto">
           <div v-for="fileName in uploadedAlignmentFiles" :key="fileName"
                class="flex items-center gap-2 py-2 px-3 bg-gray-50 rounded-md mb-2">
             <Loader2 v-if="isAligning" class="w-4 h-4 text-orange-500 animate-spin"/>
