@@ -3,12 +3,6 @@ name: Deploy to Cloudflare Pages
 on:
   push:
     branches: [deacon_integration]
-    paths:
-      - 'www/**'
-      - 'rust/sparrowhawk/**'
-      - 'rust/ska.rust/**'
-      - 'rust/sketchlib.rust/**'
-      - 'rust/deacon/**'
 
 jobs:
   deploy:
